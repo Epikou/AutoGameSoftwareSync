@@ -26,8 +26,6 @@ Si votre dossier partagé est Google Drive, passez-le en *Mettre en miroir les f
 
 Une version Linux (x86_64) est aussi disponible : SteamOS (Steam Deck, Legion Go S...), Bazzite et Ubuntu. Téléchargez `AutoGameSoftwareSync-v1.3.3-linux-x86_64.tar.gz` depuis la page [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), extrayez-la et lancez `install-linux.sh` (aucun droit administrateur nécessaire). Les sauvegardes sont entièrement compatibles avec la version Windows via le même dossier partagé. Guide d'installation : [docs/LINUX.md](docs/LINUX.md).
 
-**Pas encore testé sur un vrai SteamOS** (seulement sous Ubuntu pour l'instant) : les retours sont les bienvenus, ouvrez une [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues).
-
 ## Alerte Windows SmartScreen
 
 Le programme n'est pas encore signé. Au premier lancement, Windows peut afficher « Windows a protégé votre PC ». Cliquez sur **Informations complémentaires**, puis **Exécuter quand même**. Cette alerte s'estompe avec le nombre d'utilisateurs.

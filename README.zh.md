@@ -26,8 +26,6 @@
 
 同时提供 Linux 版本（x86_64）：SteamOS（Steam Deck、Legion Go S 等）、Bazzite 和 Ubuntu。请从 [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) 页面下载 `AutoGameSoftwareSync-v1.3.3-linux-x86_64.tar.gz`，解压后运行 `install-linux.sh`（无需管理员权限）。通过同一个共享文件夹，存档与 Windows 版完全兼容。安装指南（法语）：[docs/LINUX.md](docs/LINUX.md)。
 
-**尚未在真实的 SteamOS 上测试**（目前仅在 Ubuntu 上测试）：非常欢迎反馈，请提交 [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues)。
-
 ## Windows SmartScreen 提示
 
 程序目前尚未进行代码签名。首次运行时 Windows 可能显示“Windows 已保护你的电脑”。请点击**更多信息**，然后点击**仍要运行**。随着使用者增多，该提示会逐渐消失。

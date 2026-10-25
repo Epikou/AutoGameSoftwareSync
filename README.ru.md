@@ -26,8 +26,6 @@
 
 Доступна и сборка для Linux (x86_64): SteamOS (Steam Deck, Legion Go S...), Bazzite и Ubuntu. Скачайте `AutoGameSoftwareSync-v1.3.3-linux-x86_64.tar.gz` со страницы [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), распакуйте архив и запустите `install-linux.sh` (права администратора не нужны). Сохранения полностью совместимы с версией для Windows через ту же общую папку. Руководство по установке (на французском): [docs/LINUX.md](docs/LINUX.md).
 
-**Пока не проверено на настоящей SteamOS** (только на Ubuntu): отзывы очень приветствуются, создайте [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues).
-
 ## Предупреждение Windows SmartScreen
 
 Программа пока не имеет цифровой подписи. При первом запуске Windows может показать «Windows защитила ваш компьютер». Нажмите **Подробнее**, затем **Выполнить в любом случае**. Это предупреждение исчезает по мере роста числа пользователей.
