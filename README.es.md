@@ -123,7 +123,7 @@ El programa no puede recuperar una partida *antes* de que se inicie un juego lan
 
 ## Sobre este proyecto
 
-AutoGameSoftwareSync está hecho con **vibe coding**: vibro, luego programo. Apasionado de los juegos y la informática desde hace más de 40 años <3
+AutoGameSoftwareSync está hecho con **vibe coding**: vibro, luego programo. Trabajo como ingeniero de infraestructura de redes y me apasionan los juegos y la informática desde hace más de 40 años ❤️
 
 Está hecho con pasión y no por un gran equipo, así que espera alguna arista (y algún que otro bug que me hará llevarme las manos a la cabeza). Cualquier ayuda, sugerencia, informe de errores o idea es muy bienvenida: abre una [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). ¡Gracias por estar aquí!
 

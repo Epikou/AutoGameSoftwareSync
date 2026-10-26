@@ -123,7 +123,7 @@
 
 ## 关于这个项目
 
-AutoGameSoftwareSync 是用“氛围编程”（vibe coding）做出来的：我感受氛围，所以我写代码。对游戏和电脑的热爱已经超过 40 年 <3
+AutoGameSoftwareSync 是用“氛围编程”（vibe coding）做出来的：我感受氛围，所以我写代码。我是一名网络基础设施工程师，对游戏和电脑的热爱已经超过 40 年 ❤️
 
 它出自热情，而不是一个庞大的团队，所以难免有些粗糙的地方（偶尔还有让我扶额的 bug）。欢迎任何帮助、建议、错误报告或想法：请提交 [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues)。感谢你的到来！
 

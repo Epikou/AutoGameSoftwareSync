@@ -123,7 +123,7 @@ Le programme ne peut pas remettre une sauvegarde *avant* le démarrage d'un jeu 
 
 ## À propos de ce projet
 
-AutoGameSoftwareSync est **vibecodé** : je vibe donc je code. Passionné de jeux et d'informatique depuis plus de 40 ans <3
+AutoGameSoftwareSync est **vibecodé** : je vibe donc je code. J'exerce en tant qu'ingénieur infrastructure réseau et je suis passionné de jeux et d'informatique depuis plus de 40 ans ❤️
 
 Il est fait avec passion plutôt que par une grosse équipe : attends-toi à quelques aspérités (et à un bug de temps en temps qui me fait lever les yeux au ciel). Toute aide, suggestion, signalement de bug ou idée est la bienvenue : ouvre une [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). Merci d'être là !
 

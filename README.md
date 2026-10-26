@@ -123,7 +123,7 @@ The program cannot bring a save back *before* a game starts when it is launched 
 
 ## About this project
 
-AutoGameSoftwareSync is **vibe-coded**: I vibe, therefore I code. Passionate about games and computers for over 40 years <3
+AutoGameSoftwareSync is **vibe-coded**: I vibe, therefore I code. I work as a network infrastructure engineer and I've been passionate about games and computers for over 40 years ❤️
 
 It is built with passion rather than by a big team, so expect the occasional rough edge (and the occasional bug that makes me facepalm). Any help, suggestion, bug report or idea is warmly welcome: open an [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). Thank you for being here!
 
