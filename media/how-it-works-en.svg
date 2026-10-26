@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 560" width="1280" height="560" role="img" aria-labelledby="t" lang="en">
+  <title id="t">How it works: your PC and your handheld sync through your vault; every copy is a new version and nothing is ever overwritten.</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f1513"/>
+      <stop offset="1" stop-color="#16221d"/>
+    </linearGradient>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#3fd29f"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Noto Sans", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+    .h { font-size: 24px; font-weight: 700; fill: #f2f7f5; }
+    .s { font-size: 16px; fill: #93aaa1; }
+    .a { font-size: 15px; font-weight: 600; fill: #3fd29f; }
+    .row { font-size: 15px; fill: #d6ebe3; }
+    .rowd { font-size: 14px; fill: #93aaa1; }
+    .card { fill: #18231f; stroke: #2a3d35; stroke-width: 2; }
+    .ink { fill: none; stroke: #9fb8ae; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .dev { fill: #1d2a25; stroke: #9fb8ae; stroke-width: 3; }
+    .flow { fill: none; stroke: #3fd29f; stroke-width: 3; marker-end: url(#arr); }
+  </style>
+  <rect width="1280" height="560" rx="28" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="1277" height="557" rx="27" fill="none" stroke="#25362f" stroke-width="3"/>
+
+  <!-- PC fixe -->
+  <rect class="card" x="40" y="70" width="270" height="250" rx="20"/>
+  <rect class="dev" x="119" y="104" width="112" height="74" rx="8"/>
+  <rect x="127" y="112" width="96" height="58" rx="4" fill="#24352e"/>
+  <path class="ink" d="M175 178 V194 M153 196 H197"/>
+  <circle cx="134" cy="108" r="0" fill="none"/>
+  <text class="h" x="175" y="244" text-anchor="middle">Desktop PC</text>
+  <text class="s" x="175" y="272" text-anchor="middle">Your saves and settings</text>
+  <circle cx="175" cy="296" r="6" fill="#56b4e9"/>
+
+  <!-- Console portable -->
+  <rect class="card" x="970" y="70" width="270" height="250" rx="20"/>
+  <rect class="dev" x="1025" y="120" width="160" height="56" rx="28"/>
+  <rect x="1071" y="128" width="68" height="40" rx="4" fill="#24352e"/>
+  <circle cx="1049" cy="148" r="9" class="ink"/>
+  <circle cx="1161" cy="148" r="9" class="ink"/>
+  <text class="h" x="1105" y="244" text-anchor="middle">Handheld</text>
+  <text class="s" x="1105" y="272" text-anchor="middle">Same saves, same settings</text>
+  <circle cx="1105" cy="296" r="6" fill="#fa961e"/>
+
+  <!-- Coffre -->
+  <rect x="380" y="40" width="520" height="320" rx="22" fill="#14201b" stroke="#028463" stroke-width="3"/>
+  <rect x="404" y="62" width="56" height="56" rx="12" fill="#028463"/>
+  <circle cx="432" cy="90" r="15" fill="none" stroke="#e8fff6" stroke-width="3"/>
+  <circle cx="432" cy="90" r="3.5" fill="#e8fff6"/>
+  <text class="h" x="476" y="88">Your vault</text>
+  <text class="s" x="476" y="112">Google Drive · OneDrive · Dropbox · NAS · USB…</text>
+  <!-- versions : un nouveau dossier par copie -->
+  <g>
+    <rect x="404" y="138" width="472" height="44" rx="10" fill="#1b2b25" stroke="#3fd29f" stroke-width="2"/>
+    <path d="M422 152 h12 l4 4 h16 v16 h-32 z" fill="#3fd29f"/>
+    <text class="row" x="468" y="166">Today 19:36 · new version</text>
+    <circle cx="738" cy="160" r="6" fill="#56b4e9"/><text class="rowd" x="750" y="165">Desktop PC</text>
+  </g>
+  <g>
+    <rect x="404" y="190" width="472" height="44" rx="10" fill="#18231f" stroke="#2a3d35" stroke-width="2"/>
+    <path d="M422 204 h12 l4 4 h16 v16 h-32 z" fill="#5f7a70"/>
+    <text class="row" x="468" y="218">Yesterday 20:42</text>
+    <circle cx="738" cy="212" r="6" fill="#fa961e"/><text class="rowd" x="750" y="217">Handheld</text>
+  </g>
+  <g>
+    <rect x="404" y="242" width="472" height="44" rx="10" fill="#18231f" stroke="#2a3d35" stroke-width="2"/>
+    <path d="M422 256 h12 l4 4 h16 v16 h-32 z" fill="#5f7a70"/>
+    <text class="row" x="468" y="270">Saturday 17:48</text>
+    <circle cx="738" cy="264" r="6" fill="#56b4e9"/><text class="rowd" x="750" y="269">Desktop PC</text>
+  </g>
+  <g opacity="0.6">
+    <rect x="404" y="294" width="472" height="44" rx="10" fill="#18231f" stroke="#2a3d35" stroke-width="2"/>
+    <path d="M422 308 h12 l4 4 h16 v16 h-32 z" fill="#5f7a70"/>
+    <text class="row" x="468" y="322">Friday 22:06</text>
+    <circle cx="738" cy="316" r="6" fill="#fa961e"/><text class="rowd" x="750" y="321">Handheld</text>
+  </g>
+
+  <!-- Echanges -->
+  <path class="flow" d="M314 150 H372"/>
+  <path class="flow" d="M372 210 H314"/>
+  <text class="a" x="343" y="138" text-anchor="middle">copy</text>
+  <text class="a" x="343" y="236" text-anchor="middle">put back</text>
+  <path class="flow" d="M962 150 H904"/>
+  <path class="flow" d="M904 210 H962"/>
+  <text class="a" x="933" y="138" text-anchor="middle">copy</text>
+  <text class="a" x="933" y="236" text-anchor="middle">put back</text>
+
+  <!-- Remonter le temps -->
+  <rect class="card" x="40" y="388" width="1200" height="144" rx="20"/>
+  <circle cx="84" cy="428" r="15" fill="none" stroke="#3fd29f" stroke-width="3"/>
+  <path d="M84 420 V428 L90 432" fill="none" stroke="#3fd29f" stroke-width="3" stroke-linecap="round"/>
+  <text class="h" x="112" y="436">Go back in time</text>
+  <text class="s" x="112" y="462">Every version from every device, day by day. Put one back in a click, undo if you change your mind.</text>
+  <line x1="112" y1="506" x2="1000" y2="506" stroke="#2e463d" stroke-width="3"/>
+  <circle cx="160" cy="506" r="7" fill="#56b4e9"/>
+  <circle cx="280" cy="506" r="7" fill="#fa961e"/>
+  <circle cx="400" cy="506" r="7" fill="#56b4e9"/>
+  <circle cx="520" cy="506" r="7" fill="#fa961e"/>
+  <circle cx="640" cy="506" r="7" fill="#56b4e9"/>
+  <circle cx="760" cy="506" r="10" fill="#fa961e" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="880" cy="506" r="7" fill="#56b4e9"/>
+  <path d="M760 482 V494" stroke="#ffffff" stroke-width="2"/>
+  <circle cx="760" cy="478" r="5" fill="#ffffff"/>
+  <!-- Rien n'est ecrase -->
+  <rect x="1026" y="484" width="196" height="44" rx="22" fill="#028463"/>
+  <path d="M1046 506 l6 6 l11 -12" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="1072" y="512" style="font-size:15px;font-weight:700;fill:#ffffff">Never overwritten</text>
+</svg>

@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" width="1280" height="420" role="img" aria-labelledby="t" lang="fr">
+  <title id="t">AutoGameSoftwareSync: Ne perds plus jamais rien. Protégé, synchronisé, partout.</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f1513"/>
+      <stop offset="1" stop-color="#16221d"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#028463" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#028463" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="disk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#08a07a"/>
+      <stop offset="0.55" stop-color="#028463"/>
+      <stop offset="1" stop-color="#016048"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e6e9ef"/>
+      <stop offset="0.5" stop-color="#b9c0cc"/>
+      <stop offset="1" stop-color="#8f98a8"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3f4b"/>
+      <stop offset="1" stop-color="#16181d"/>
+    </linearGradient>
+  </defs>
+  <style>
+    text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Noto Sans", "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif; }
+    .title { font-size: 50px; font-weight: 700; fill: #f2f7f5; letter-spacing: -0.5px; }
+    .tag { font-size: 32px; font-weight: 500; fill: #d6ebe3; }
+    .sub { font-size: 23px; font-weight: 600; fill: #3fd29f; }
+    .lbl { font-size: 15px; font-weight: 500; fill: #93aaa1; }
+    .dev { fill: #1d2a25; stroke: #9fb8ae; stroke-width: 3; }
+    .ink { fill: none; stroke: #9fb8ae; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .link { fill: none; stroke: #2e463d; stroke-width: 3; stroke-dasharray: 2 9; stroke-linecap: round; }
+    .glow { fill: none; stroke: #3fd29f; stroke-width: 4; opacity: 0; }
+    .anim { animation-duration: 9s; animation-iteration-count: infinite; animation-timing-function: ease-in-out; }
+    #chip { opacity: 0; animation-name: chip; }
+    #g-pc { animation-name: gpc; }
+    #g-lap { animation-name: glap; }
+    #g-hand { animation-name: ghand; }
+    #g-vault { animation-name: gvault; }
+    #vault-body { animation-name: vpulse; transform-origin: 960px 222px; }
+    #subline, #vcheck { animation-name: sub; }
+    .link-on { fill: none; stroke: #3fd29f; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 260; stroke-dashoffset: 260; opacity: 0.85; }
+    #l1 { animation-name: l1; } #l2 { animation-name: l2; } #l3 { animation-name: l3; }
+    @keyframes chip {
+      0%   { transform: translate(800px, 126px) scale(0.5); opacity: 0; }
+      6%   { transform: translate(800px, 126px) scale(1); opacity: 1; }
+      16%  { transform: translate(960px, 222px) scale(1); opacity: 1; }
+      22%  { transform: translate(960px, 222px) scale(1); opacity: 1; }
+      32%  { transform: translate(1120px, 126px) scale(1); opacity: 1; }
+      38%  { transform: translate(1120px, 126px) scale(1); opacity: 1; }
+      48%  { transform: translate(960px, 222px) scale(1); opacity: 1; }
+      52%  { transform: translate(960px, 222px) scale(1); opacity: 1; }
+      62%  { transform: translate(960px, 350px) scale(1); opacity: 1; }
+      67%  { transform: translate(960px, 350px) scale(1); opacity: 1; }
+      72%  { transform: translate(960px, 350px) scale(0.5); opacity: 0; }
+      100% { transform: translate(960px, 350px) scale(0.5); opacity: 0; }
+    }
+    @keyframes gpc { 0%, 10% { opacity: 1; } 16%, 100% { opacity: 0; } }
+    @keyframes glap { 0%, 28% { opacity: 0; } 32%, 40% { opacity: 1; } 46%, 100% { opacity: 0; } }
+    @keyframes ghand { 0%, 58% { opacity: 0; } 62%, 92% { opacity: 1; } 98%, 100% { opacity: 0; } }
+    @keyframes gvault { 0%, 13% { opacity: 0; } 16%, 24% { opacity: 1; } 28%, 45% { opacity: 0; } 48%, 54% { opacity: 1; } 58%, 66% { opacity: 0; } 70%, 92% { opacity: 1; } 98%, 100% { opacity: 0; } }
+    @keyframes vpulse { 0%, 15% { transform: scale(1); } 18% { transform: scale(1.07); } 22%, 47% { transform: scale(1); } 50% { transform: scale(1.07); } 54%, 69% { transform: scale(1); } 73% { transform: scale(1.1); } 78%, 100% { transform: scale(1); } }
+    @keyframes l1 { 0%, 6% { stroke-dashoffset: 260; opacity: 0.85; } 16%, 90% { stroke-dashoffset: 0; opacity: 0.85; } 98%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+    @keyframes l2 { 0%, 22% { stroke-dashoffset: 260; opacity: 0.85; } 32%, 90% { stroke-dashoffset: 0; opacity: 0.85; } 98%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+    @keyframes l3 { 0%, 52% { stroke-dashoffset: 260; opacity: 0.85; } 62%, 90% { stroke-dashoffset: 0; opacity: 0.85; } 98%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+    @keyframes sub { 0%, 68% { opacity: 0; transform: translateY(8px); } 74%, 93% { opacity: 1; transform: translateY(0); } 99%, 100% { opacity: 0; transform: translateY(0); } }
+    @media (prefers-reduced-motion: reduce) {
+      .anim { animation: none !important; }
+      #chip { opacity: 0; }
+      #g-vault { opacity: 1; }
+      .link-on { stroke-dashoffset: 0; }
+    }
+  </style>
+
+  <rect width="1280" height="420" rx="28" fill="url(#bg)"/>
+  <rect x="1.5" y="1.5" width="1277" height="417" rx="27" fill="none" stroke="#25362f" stroke-width="3"/>
+
+  <!-- Logo -->
+  <g transform="translate(70 62) scale(0.24)">
+    <path d="M60 36 H392 L452 96 V420 Q452 452 420 452 H92 Q60 452 60 420 V68 Q60 36 92 36 Z" fill="url(#disk)" stroke="#013f30" stroke-width="8"/>
+    <rect x="140" y="36" width="210" height="130" rx="10" fill="url(#metal)" stroke="#5c6575" stroke-width="6"/>
+    <rect x="268" y="58" width="50" height="86" rx="6" fill="#016048"/>
+    <rect x="100" y="206" width="312" height="214" rx="14" fill="#f4f1e8" stroke="#c9c3b2" stroke-width="4"/>
+    <rect x="124" y="226" width="264" height="10" rx="5" fill="#d9d2bf"/>
+    <g transform="translate(26 118) scale(0.8)">
+      <path d="M150 268 H362 Q420 268 440 330 L466 420 Q480 476 436 482 Q408 486 386 452 L362 414 H150 L126 452 Q104 486 76 482 Q32 476 46 420 L72 330 Q92 268 150 268 Z" fill="url(#pad)" stroke="#0b0c0f" stroke-width="8" stroke-linejoin="round"/>
+      <g fill="#e6e9ef"><rect x="114" y="314" width="22" height="66" rx="5"/><rect x="92" y="336" width="66" height="22" rx="5"/></g>
+      <circle cx="380" cy="320" r="15" fill="#4ade80"/><circle cx="410" cy="349" r="15" fill="#f87171"/>
+      <circle cx="350" cy="349" r="15" fill="#fbbf24"/><circle cx="380" cy="378" r="15" fill="#facc15"/>
+    </g>
+    <circle cx="400" cy="396" r="90" fill="#ffffff" stroke="#016048" stroke-width="8"/>
+    <g fill="none" stroke="#028463" stroke-width="18" stroke-linecap="round"><path d="M351 382 A52 52 0 0 1 449 382"/><path d="M449 410 A52 52 0 0 1 351 410"/></g>
+    <g fill="#028463"><path d="M454 394 L474 366 L430 372 Z"/><path d="M346 398 L326 426 L370 420 Z"/></g>
+  </g>
+
+  <text class="title" x="70" y="250">AutoGameSoftwareSync</text>
+  <text class="tag" x="70" y="306">Ne perds plus jamais rien.</text>
+  <g id="subline" class="anim">
+    <circle cx="84" cy="353" r="14" fill="#028463"/>
+    <path d="M77 353 l5 5 l9 -10" fill="none" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text class="sub" x="108" y="361">Protégé, synchronisé, partout.</text>
+  </g>
+
+  <!-- Schema : appareils relies au coffre -->
+  <circle cx="960" cy="222" r="120" fill="url(#halo)"/>
+  <path class="link" d="M812 150 L926 202"/>
+  <path class="link" d="M1108 150 L994 202"/>
+  <path class="link" d="M960 270 L960 322"/>
+  <path id="l1" class="link-on anim" d="M812 150 L926 202"/>
+  <path id="l2" class="link-on anim" d="M994 202 L1108 150"/>
+  <path id="l3" class="link-on anim" d="M960 270 L960 322"/>
+
+  <!-- PC fixe -->
+  <g>
+    <rect class="dev" x="744" y="86" width="112" height="74" rx="8"/>
+    <rect x="752" y="94" width="96" height="58" rx="4" fill="#24352e"/>
+    <path class="ink" d="M800 160 V176 M778 178 H822"/>
+    <rect id="g-pc" class="glow anim" x="738" y="80" width="124" height="86" rx="12"/>
+    <text class="lbl" x="800" y="204" text-anchor="middle">PC fixe</text>
+  </g>
+  <!-- Portable -->
+  <g>
+    <rect class="dev" x="1070" y="92" width="100" height="66" rx="7"/>
+    <rect x="1077" y="99" width="86" height="52" rx="4" fill="#24352e"/>
+    <path class="dev" d="M1056 160 H1184 L1176 172 H1064 Z"/>
+    <rect id="g-lap" class="glow anim" x="1050" y="84" width="140" height="94" rx="12"/>
+    <text class="lbl" x="1120" y="204" text-anchor="middle">Portable</text>
+  </g>
+  <!-- Console portable -->
+  <g>
+    <rect class="dev" x="880" y="324" width="160" height="56" rx="28"/>
+    <rect x="926" y="332" width="68" height="40" rx="4" fill="#24352e"/>
+    <circle cx="904" cy="352" r="9" class="ink"/>
+    <circle cx="1016" cy="352" r="9" class="ink"/>
+    <rect id="g-hand" class="glow anim" x="872" y="316" width="176" height="72" rx="36"/>
+    <text class="lbl" x="960" y="408" text-anchor="middle">Console portable</text>
+  </g>
+  <!-- Coffre -->
+  <g id="vault-body" class="anim">
+    <rect x="914" y="176" width="92" height="92" rx="16" fill="#028463"/>
+    <rect x="914" y="176" width="92" height="92" rx="16" fill="none" stroke="#3fd29f" stroke-width="2" stroke-opacity="0.6"/>
+    <circle cx="960" cy="222" r="24" fill="none" stroke="#e8fff6" stroke-width="4"/>
+    <circle cx="960" cy="222" r="5" fill="#e8fff6"/>
+    <path d="M960 198 V206 M960 238 V246 M936 222 H944 M976 222 H984" stroke="#e8fff6" stroke-width="4" stroke-linecap="round"/>
+    <rect x="922" y="268" width="14" height="6" rx="2" fill="#016048"/>
+    <rect x="984" y="268" width="14" height="6" rx="2" fill="#016048"/>
+  </g>
+  <rect id="g-vault" class="glow anim" x="906" y="168" width="108" height="108" rx="22"/>
+  <text class="lbl" x="1024" y="270" text-anchor="start">Ton coffre</text>
+
+  <g id="vcheck" class="anim">
+    <circle cx="1004" cy="182" r="15" fill="#ffffff" stroke="#028463" stroke-width="3"/>
+    <path d="M997 182 l5 5 l9 -10" fill="none" stroke="#028463" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Sauvegarde qui circule -->
+  <g id="chip" class="anim">
+    <g transform="translate(-17 -17)">
+      <path d="M2 4 Q2 0 6 0 H26 L34 8 V30 Q34 34 30 34 H6 Q2 34 2 30 Z" fill="url(#disk)" stroke="#013f30" stroke-width="1.5"/>
+      <rect x="9" y="0" width="15" height="10" rx="1.5" fill="#dfe4ea"/>
+      <rect x="7" y="16" width="22" height="15" rx="2" fill="#f4f1e8"/>
+    </g>
+  </g>
+</svg>

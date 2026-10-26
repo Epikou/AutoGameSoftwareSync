@@ -1,34 +1,88 @@
-# AutoGameSoftwareSync (AGSS)
+<p align="center">
+  <img src="media/banner-en.svg" alt="AutoGameSoftwareSync: never lose anything again. A save travels from a desktop PC to your vault, then to a laptop and a handheld. Protected, synced, everywhere." width="100%">
+</p>
 
 **English** | [Français](README.fr.md) | [Русский](README.ru.md) | [Español](README.es.md) | [中文](README.zh.md)
 
-### Never lose anything again. Protected, synced, everywhere.
+<p align="center">
+  <img src="media/stair-en.gif" alt="Your program and its data, then we watch, then we sync, then safe!" width="720">
+</p>
 
 Your game saves and software settings, protected and synced between all your devices: desktop PC, laptop, handheld (Legion Go S, Steam Deck...). Pick up your game right where you left it, find your software setup wherever you are. Everything goes through **your vault**: any shared folder your devices can all see (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, a NAS, a USB drive...). Free for personal use, Windows and Linux.
 
 [**Download the latest version**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [Support the project on Ko-fi](https://ko-fi.com/autogamesoftwaresave)
 
-![Home screen](screenshots/en/home.png)
+## How it works
+
+<p align="center">
+  <img src="media/how-it-works-en.svg" alt="Diagram: the desktop PC and the handheld each copy to your vault and get the latest version back from it. The vault keeps every version, from every device, and nothing is ever overwritten. Go back in time picks any of them." width="100%">
+</p>
+
+1. The app runs on each of your devices and watches the games and software you protect.
+2. When you stop playing, a copy goes to **your vault**. Each copy is a **new version**: nothing is ever overwritten.
+3. On your other devices, the newest version is put back on its own, so you pick up right where you left off.
+4. Every version stays in the vault: **go back in time** whenever you want.
 
 ## Key features
 
-- **Everything at a glance**: one tile per game, software or folder, with its state ("Safe · 2 min ago", "Copying… 64 %", "Newer version from LEGION-GO") and where it is up to date across your devices.
-- **Go back in time**: a day-by-day timeline of every version from every device. Bring yesterday's version back in one click, and **undo** if you change your mind: a safety copy is always made first.
+### Everything at a glance
+
+One tile per game, software or folder, with its state ("Safe · 2 min ago", "Copying… 64 %", "New version from Handheld") and where it is up to date across your devices.
+
+<p align="center">
+  <img src="media/sync-en.gif" alt="Home screen: the Hades tile shows 'New version from Handheld', the copy is put back, and the tile turns to 'Up to date on 2 devices'." width="100%">
+</p>
+
+### Go back in time
+
+A day-by-day timeline of every version from every device. Bring yesterday's version back in one click, and **undo** if you change your mind: a safety copy is always made first.
+
+<p align="center">
+  <img src="media/time-travel-en.gif" alt="Go back in time: pick yesterday's version from the handheld on the timeline, put it back, and an Undo button appears." width="100%">
+</p>
+
+### It spots your games while you play
+
+Launch a game: the app recognizes it and offers to protect it. One click on **Sync it!** and it joins your home screen. Your command-line tools are never offered.
+
+<p align="center">
+  <img src="media/detect-en.gif" alt="A card appears: 'Hey! We spotted Stardew Valley'. A click on Sync it! adds its tile to the home screen." width="100%">
+</p>
+
+### A first launch that really sets things up
+
+6 short steps (language, vault, this device, scan, anything else, first copy), then everything happens on its own.
+
+<p align="center">
+  <img src="media/first-launch-en.gif" alt="First launch, sped up: language, vault, device name and color, scan, anything else, first copy: everything is safe." width="100%">
+</p>
+
+### New PC: bring everything back
+
+Pick your old device, check, recover. Works across user names and from Windows to Linux; a game not installed yet is recovered as soon as it appears.
+
+<p align="center">
+  <img src="media/new-pc-en.gif" alt="New PC, sped up: choose the old device, check the list, recover, then the summary of what is left to install." width="100%">
+</p>
+
+### And also
+
 - **Your vault is found on its own**: Google Drive, OneDrive, Dropbox, iCloud, MEGA, pCloud, Nextcloud, Syncthing, network and USB drives. A vault you already use (on another device, or from an older version) is offered first.
 - **PC scan**: your games (Steam, Epic, GOG, Xbox, Ubisoft, EA, itch, emulators), your software, your personal folders and Windows shortcuts. What is safe is ticked, the rest is suggested; development tools and system programs are never proposed.
-- **New PC: bring everything back**: pick your old device, check, recover. Works across user names and from Windows to Linux; a game not installed yet is recovered as soon as it appears.
-- **A first launch that really sets things up**: 6 short steps (language, vault, this device, scan, anything else, first copy), then everything happens on its own.
 - **Automatic, verified updates**: signed by the author, installed at a quiet moment, and the previous version comes back by itself if something goes wrong.
 - **Simple by default, expert when you want**: plain words and 6 settings cards; an expert mode keeps every technical option.
 - Never loses data: every copy is a new folder, older versions are kept, nothing is ever overwritten in your vault.
-- Detects your games when you play them (and never your command-line tools), full gamepad navigation, big-screen mode for handhelds, dark and light themes. Languages: English, Français, Русский, Español, 中文.
+- Full gamepad navigation, big-screen mode for handhelds, dark and light themes. Languages: English, Français, Русский, Español, 中文.
+
+## Screenshots
 
 | | |
 |---|---|
-| ![Go back in time](screenshots/en/time-travel.png) | ![First launch](screenshots/en/first-launch.png) |
-| ![Item page](screenshots/en/item.png) | ![Your vault](screenshots/en/vault.png) |
+| ![Home screen](screenshots/en/home.png) | ![Light theme](screenshots/en/home-light.png) |
+| ![Go back in time](screenshots/en/time-travel.png) | ![Item page](screenshots/en/item.png) |
+| ![Your vault](screenshots/en/vault.png) | ![First launch](screenshots/en/first-launch.png) |
 | ![New PC](screenshots/en/new-pc.png) | ![Settings](screenshots/en/settings.png) |
-| ![Big-screen mode](screenshots/en/big-screen.png) | ![Light theme](screenshots/en/home-light.png) |
+| ![Big-screen mode](screenshots/en/big-screen.png) | |
 
 ## How to use
 

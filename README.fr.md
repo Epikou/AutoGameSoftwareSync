@@ -1,34 +1,88 @@
-# AutoGameSoftwareSync (AGSS)
+<p align="center">
+  <img src="media/banner-fr.svg" alt="AutoGameSoftwareSync : ne perds plus jamais rien. Une sauvegarde va d'un PC fixe à ton coffre, puis vers un portable et une console portable. Protégé, synchronisé, partout." width="100%">
+</p>
 
 [English](README.md) | **Français** | [Русский](README.ru.md) | [Español](README.es.md) | [中文](README.zh.md)
 
-### Ne perds plus jamais rien. Protégé, synchronisé, partout.
+<p align="center">
+  <img src="media/stair-fr.gif" alt="Ton programme et ses données, puis on surveille, puis on synchronise, puis à l'abri !" width="720">
+</p>
 
 Tes sauvegardes et réglages de jeux et de logiciels, protégés et synchronisés entre tous tes appareils : PC fixe, portable, console portable (Legion Go S, Steam Deck...). Tu reprends ta partie là où tu l'as laissée, tu retrouves tes configurations logicielles où que tu sois. Tout passe par **ton coffre** : n'importe quel dossier partagé que tes appareils voient tous (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, un NAS, une clé USB...). Gratuit pour un usage personnel, Windows et Linux.
 
 [**Télécharger la dernière version**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [Soutenir le projet sur Ko-fi](https://ko-fi.com/autogamesoftwaresave)
 
-![Accueil](screenshots/fr/home.png)
+## Comment ça marche
+
+<p align="center">
+  <img src="media/how-it-works-fr.svg" alt="Schéma : le PC fixe et la console portable copient chacun dans ton coffre et en récupèrent la dernière version. Le coffre garde toutes les versions de tous les appareils, rien n'est jamais écrasé. Remonter le temps permet d'en remettre une." width="100%">
+</p>
+
+1. L'appli tourne sur chacun de tes appareils et surveille les jeux et logiciels que tu protèges.
+2. Quand tu arrêtes de jouer, une copie part dans **ton coffre**. Chaque copie est une **nouvelle version** : rien n'est jamais écrasé.
+3. Sur tes autres appareils, la version la plus récente est remise toute seule : tu reprends là où tu t'étais arrêté.
+4. Toutes les versions restent dans le coffre : **remonte le temps** quand tu veux.
 
 ## Fonctions clés
 
-- **Tout d'un coup d'œil** : une tuile par jeu, logiciel ou dossier, avec son état (« À l'abri · il y a 2 min », « Copie… 64 % », « Nouvelle version de LEGION-GO ») et où il est à jour parmi tes appareils.
-- **Remonter le temps** : une frise jour par jour de toutes les versions de tous tes appareils. Tu remets la version d'hier en un clic, et tu **annules** si tu changes d'avis : une copie de sécurité est toujours faite avant.
+### Tout d'un coup d'œil
+
+Une tuile par jeu, logiciel ou dossier, avec son état (« À l'abri · il y a 2 min », « Copie… 64 % », « Nouvelle version de Handheld ») et où il est à jour parmi tes appareils.
+
+<p align="center">
+  <img src="media/sync-fr.gif" alt="Accueil : la tuile Hades affiche « Nouvelle version de Handheld », la copie est remise, puis la tuile passe à « À jour sur 2 appareils »." width="100%">
+</p>
+
+### Remonter le temps
+
+Une frise jour par jour de toutes les versions de tous tes appareils. Tu remets la version d'hier en un clic, et tu **annules** si tu changes d'avis : une copie de sécurité est toujours faite avant.
+
+<p align="center">
+  <img src="media/time-travel-fr.gif" alt="Remonter le temps : choisir sur la frise la version d'hier de la console portable, la remettre, puis le bouton Annuler apparaît." width="100%">
+</p>
+
+### Il repère tes jeux quand tu joues
+
+Lance un jeu : l'appli le reconnaît et propose de le protéger. Un clic sur **Synchronise-le !** et il rejoint ton accueil. Tes outils en ligne de commande ne sont jamais proposés.
+
+<p align="center">
+  <img src="media/detect-fr.gif" alt="Une carte apparaît : « Hé ! On a repéré Stardew Valley ». Un clic sur Synchronise-le ! ajoute sa tuile à l'accueil." width="100%">
+</p>
+
+### Un premier lancement qui configure vraiment
+
+6 étapes courtes (langue, coffre, cet appareil, scan, autre chose, première copie), puis tout se fait tout seul.
+
+<p align="center">
+  <img src="media/first-launch-fr.gif" alt="Premier lancement en accéléré : langue, coffre, nom et couleur de l'appareil, scan, autre chose, première copie : tout est à l'abri." width="100%">
+</p>
+
+### Nouveau PC : tout récupérer
+
+Choisis ton ancien appareil, vérifie, récupère. Fonctionne avec un autre nom d'utilisateur et de Windows vers Linux ; un jeu pas encore installé est récupéré dès qu'il apparaît.
+
+<p align="center">
+  <img src="media/new-pc-fr.gif" alt="Nouveau PC en accéléré : choisir l'ancien appareil, vérifier la liste, récupérer, puis le bilan de ce qui reste à installer." width="100%">
+</p>
+
+### Et aussi
+
 - **Ton coffre est trouvé tout seul** : Google Drive, OneDrive, Dropbox, iCloud, MEGA, pCloud, Nextcloud, Syncthing, disques réseau et USB. Un coffre que tu utilises déjà (sur un autre appareil, ou avec une ancienne version) est proposé en premier.
 - **Scan du PC** : tes jeux (Steam, Epic, GOG, Xbox, Ubisoft, EA, itch, émulateurs), tes logiciels, tes dossiers perso et tes raccourcis Windows. Ce qui est sûr est coché, le reste est proposé ; les outils de développement et les programmes du système ne sont jamais proposés.
-- **Nouveau PC : tout récupérer** : choisis ton ancien appareil, vérifie, récupère. Fonctionne avec un autre nom d'utilisateur et de Windows vers Linux ; un jeu pas encore installé est récupéré dès qu'il apparaît.
-- **Un premier lancement qui configure vraiment** : 6 étapes courtes (langue, coffre, cet appareil, scan, autre chose, première copie), puis tout se fait tout seul.
 - **Mises à jour automatiques et vérifiées** : signées par l'auteur, installées au moment calme, et l'ancienne version revient toute seule si quelque chose se passe mal.
 - **Simple par défaut, expert si tu veux** : des mots simples et 6 cartes de réglages ; le mode expert garde toutes les options techniques.
 - Ne perd jamais de données : chaque copie est un nouveau dossier, les anciennes versions sont gardées, rien n'est jamais écrasé dans ton coffre.
-- Repère tes jeux quand tu y joues (et jamais tes outils en ligne de commande), navigation complète à la manette, grand format pour les consoles portables, thèmes sombre et clair. Langues : English, Français, Русский, Español, 中文.
+- Navigation complète à la manette, grand format pour les consoles portables, thèmes sombre et clair. Langues : English, Français, Русский, Español, 中文.
+
+## Captures d'écran
 
 | | |
 |---|---|
-| ![Remonter le temps](screenshots/fr/time-travel.png) | ![Premier lancement](screenshots/fr/first-launch.png) |
-| ![Fiche d'un élément](screenshots/fr/item.png) | ![Ton coffre](screenshots/fr/vault.png) |
+| ![Accueil](screenshots/fr/home.png) | ![Thème clair](screenshots/fr/home-light.png) |
+| ![Remonter le temps](screenshots/fr/time-travel.png) | ![Fiche d'un élément](screenshots/fr/item.png) |
+| ![Ton coffre](screenshots/fr/vault.png) | ![Premier lancement](screenshots/fr/first-launch.png) |
 | ![Nouveau PC](screenshots/fr/new-pc.png) | ![Réglages](screenshots/fr/settings.png) |
-| ![Grand format](screenshots/fr/big-screen.png) | ![Thème clair](screenshots/fr/home-light.png) |
+| ![Grand format](screenshots/fr/big-screen.png) | |
 
 ## Utilisation
 
