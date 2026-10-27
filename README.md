@@ -10,7 +10,7 @@
 
 Your game saves and software settings, protected and synced between all your devices: desktop PC, laptop, handheld (Legion Go S, Steam Deck...). Pick up your game right where you left it, find your software setup wherever you are. Everything goes through **your vault**: any shared folder your devices can all see (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, a NAS, a USB drive...). Free for personal use, Windows and Linux.
 
-[**Download the latest version**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [Support the project on Ko-fi](https://ko-fi.com/autogamesoftwaresave)
+[**Download the latest version**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [**Join the Discord**](https://discord.gg/W8YXUJAK4e) · [Support the project on Ko-fi](https://ko-fi.com/autogamesoftwaresave)
 
 ## How it works
 
@@ -137,4 +137,4 @@ It is built with passion rather than by a big team, so expect the occasional rou
 
 ## Support
 
-Bugs and ideas: open an [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). If you like the project, you can [buy us a coffee](https://ko-fi.com/autogamesoftwaresave).
+Questions, help and news: join the [Discord](https://discord.gg/W8YXUJAK4e). Bugs and ideas: open an [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). If you like the project, you can [buy us a coffee](https://ko-fi.com/autogamesoftwaresave).

@@ -10,7 +10,7 @@
 
 Tes sauvegardes et réglages de jeux et de logiciels, protégés et synchronisés entre tous tes appareils : PC fixe, portable, console portable (Legion Go S, Steam Deck...). Tu reprends ta partie là où tu l'as laissée, tu retrouves tes configurations logicielles où que tu sois. Tout passe par **ton coffre** : n'importe quel dossier partagé que tes appareils voient tous (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, un NAS, une clé USB...). Gratuit pour un usage personnel, Windows et Linux.
 
-[**Télécharger la dernière version**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [Soutenir le projet sur Ko-fi](https://ko-fi.com/autogamesoftwaresave)
+[**Télécharger la dernière version**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [**Rejoindre le Discord**](https://discord.gg/W8YXUJAK4e) · [Soutenir le projet sur Ko-fi](https://ko-fi.com/autogamesoftwaresave)
 
 ## Comment ça marche
 
@@ -137,4 +137,4 @@ Il est fait avec passion plutôt que par une grosse équipe : attends-toi à que
 
 ## Assistance
 
-Bugs et idées : ouvre une [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). Si le projet te plaît, tu peux [nous offrir un café](https://ko-fi.com/autogamesoftwaresave).
+Questions, aide et nouveautés : rejoins le [Discord](https://discord.gg/W8YXUJAK4e). Bugs et idées : ouvre une [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). Si le projet te plaît, tu peux [nous offrir un café](https://ko-fi.com/autogamesoftwaresave).

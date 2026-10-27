@@ -10,7 +10,7 @@
 
 Твои сохранения и настройки игр и программ — под защитой и синхронизированы между всеми твоими устройствами: ПК, ноутбук, портативная консоль (Legion Go S, Steam Deck...). Продолжай игру с того места, где остановился, и находи свои настройки программ, где бы ты ни был. Всё проходит через **твоё хранилище**: любую общую папку, которую видят все твои устройства (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, NAS, USB-накопитель...). Бесплатно для личного использования, Windows и Linux.
 
-[**Скачать последнюю версию**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [Поддержать проект на Ko-fi](https://ko-fi.com/autogamesoftwaresave)
+[**Скачать последнюю версию**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [**Присоединиться к Discord**](https://discord.gg/W8YXUJAK4e) · [Поддержать проект на Ko-fi](https://ko-fi.com/autogamesoftwaresave)
 
 ## Как это работает
 
@@ -137,6 +137,6 @@ AutoGameSoftwareSync создан в стиле **vibe-coding**: я вайблю
 
 ## Поддержка
 
-Ошибки и идеи: открой [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). Если проект тебе нравится, можно [угостить нас кофе](https://ko-fi.com/autogamesoftwaresave).
+Вопросы, помощь и новости: присоединяйся к [Discord](https://discord.gg/W8YXUJAK4e). Ошибки и идеи: открой [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues). Если проект тебе нравится, можно [угостить нас кофе](https://ko-fi.com/autogamesoftwaresave).
 
 *Перевод выполнен автоматически и может содержать неточности.*

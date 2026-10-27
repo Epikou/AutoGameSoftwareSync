@@ -10,7 +10,7 @@
 
 你的游戏和软件存档与设置，受到保护并在你的所有设备之间同步：台式机、笔记本、掌机（Legion Go S、Steam Deck 等）。从上次停下的地方继续游戏，无论身在何处都能找回你的软件配置。一切都通过**你的保险库**完成：任何一个你的设备都能访问的共享文件夹（Google Drive、OneDrive、Dropbox、Nextcloud、Syncthing、NAS、U 盘等）。个人使用免费，支持 Windows 和 Linux。
 
-[**下载最新版本**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [在 Ko-fi 上支持本项目](https://ko-fi.com/autogamesoftwaresave)
+[**下载最新版本**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [**加入 Discord**](https://discord.gg/W8YXUJAK4e) · [在 Ko-fi 上支持本项目](https://ko-fi.com/autogamesoftwaresave)
 
 ## 工作原理
 
@@ -137,6 +137,6 @@ AutoGameSoftwareSync 是用“氛围编程”（vibe coding）做出来的：我
 
 ## 支持
 
-问题与建议：请提交 [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues)。如果你喜欢这个项目，可以[请我们喝杯咖啡](https://ko-fi.com/autogamesoftwaresave)。
+提问、帮助与最新消息：加入 [Discord](https://discord.gg/W8YXUJAK4e)。问题与建议：请提交 [issue](https://github.com/Epikou/AutoGameSoftwareSync/issues)。如果你喜欢这个项目，可以[请我们喝杯咖啡](https://ko-fi.com/autogamesoftwaresave)。
 
 *本译文为自动翻译，可能存在错误。*
