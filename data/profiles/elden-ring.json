@@ -1,0 +1,36 @@
+{
+    "schema":  1,
+    "id":  "elden-ring",
+    "name":  "Elden Ring",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "eldenring.exe",
+                                   "start_protected_game.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\EldenRing"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Save data",
+                          "path":  "%APPDATA%\\EldenRing",
+                          "include":  [
+                                          "ER0000.sl2",
+                                          "ER0000.sl2.bak",
+                                          "ER0000.co2",
+                                          "GraphicsConfig.xml"
+                                      ]
+                      }
+                  ],
+    "warnings":  [
+                     "Never restore a save made with another Steam account. Using modified saves online can get an account banned."
+                 ],
+    "notes":  "Saves live in a folder named after your Steam ID.",
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

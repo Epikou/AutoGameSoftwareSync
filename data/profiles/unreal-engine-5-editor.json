@@ -1,0 +1,70 @@
+{
+    "schema":  1,
+    "id":  "unreal-engine-5-editor",
+    "name":  "Unreal Engine 5 editor settings",
+    "category":  "app",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "UnrealEditor.exe"
+                               ],
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\UnrealEngine"
+                                ]
+                  },
+    "variables":  [
+                      {
+                          "name":  "version",
+                          "label":  "Engine version (folder name)",
+                          "scan":  "%LOCALAPPDATA%\\UnrealEngine\\*"
+                      },
+                      {
+                          "name":  "project",
+                          "label":  "Project folder (optional)"
+                      }
+                  ],
+    "locations":  [
+                      {
+                          "label":  "Editor settings (per engine version)",
+                          "path":  "%LOCALAPPDATA%\\UnrealEngine\\\u003cversion\u003e\\Saved\\Config\\WindowsEditor",
+                          "include":  [
+                                          "*.ini"
+                                      ],
+                          "exclude":  [
+                                          "DerivedDataCache",
+                                          "Intermediate",
+                                          "Binaries",
+                                          "Autosaves",
+                                          "Logs",
+                                          "Crashes",
+                                          "*.log"
+                                      ]
+                      },
+                      {
+                          "label":  "Project config (optional)",
+                          "path":  "\u003cproject\u003e\\Config",
+                          "include":  [
+                                          "*.ini"
+                                      ],
+                          "exclude":  [
+                                          "DerivedDataCache",
+                                          "Intermediate",
+                                          "Binaries",
+                                          "Saved",
+                                          "Logs",
+                                          "Crashes",
+                                          "Autosaves"
+                                      ],
+                          "default_enabled":  false,
+                          "note":  "Pick the project folder first."
+                      }
+                  ],
+    "warnings":  [
+                     "Editor .ini files can contain local paths (recent projects). Caches, intermediate files, binaries, logs, crashes and autosaves are never synced."
+                 ],
+    "notes":  "Path layout checked against Epic documentation and forum reports; verify the folder exists on your PC (medium confidence).",
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

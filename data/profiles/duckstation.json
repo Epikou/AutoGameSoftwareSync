@@ -1,0 +1,38 @@
+{
+    "schema":  1,
+    "id":  "duckstation",
+    "name":  "DuckStation memory cards",
+    "category":  "emulator",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "duckstation-qt-x64-ReleaseLTCG.exe",
+                                   "duckstation-nogui-x64-ReleaseLTCG.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\DuckStation"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Memory cards",
+                          "path":  "%DOCUMENTS%\\DuckStation\\memcards",
+                          "include":  [
+                                          "*.mcd"
+                                      ]
+                      },
+                      {
+                          "label":  "Save states",
+                          "path":  "%DOCUMENTS%\\DuckStation\\savestates",
+                          "default_enabled":  false,
+                          "note":  "Can be large: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "A memory card is one file: do not play on two PCs at the same time."
+                 ],
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

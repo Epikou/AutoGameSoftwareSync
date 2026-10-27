@@ -1,0 +1,11 @@
+{
+  "files": {
+    ".reglages-caches": "option=1\n",
+    "Profil 1/Sauvegarde été.sav": "progression 80 h — écrit sous windows",
+    "sub/deep/a/b/c.txt": "profond\r\nfin de ligne Windows conservée",
+    "vide.bin": "",
+    "日本語/セーブ.dat": "データ"
+  },
+  "os": "windows",
+  "save_path_tpl": "%APPDATA%/AGSS-fixture-CrossJeu/Saves"
+}

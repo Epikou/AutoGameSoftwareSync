@@ -1,0 +1,32 @@
+{
+    "schema":  1,
+    "id":  "rimworld",
+    "name":  "RimWorld",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "RimWorldWin64.exe"
+                               ],
+                      "paths":  [
+                                    "%LOCALLOW%\\Ludeon Studios\\RimWorld by Ludeon Studios"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%LOCALLOW%\\Ludeon Studios\\RimWorld by Ludeon Studios\\Saves"
+                      },
+                      {
+                          "label":  "Config",
+                          "path":  "%LOCALLOW%\\Ludeon Studios\\RimWorld by Ludeon Studios\\Config",
+                          "include":  [
+                                          "*.xml"
+                                      ]
+                      }
+                  ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

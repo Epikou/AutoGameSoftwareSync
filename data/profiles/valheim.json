@@ -1,0 +1,29 @@
+{
+    "schema":  1,
+    "id":  "valheim",
+    "name":  "Valheim",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "valheim.exe"
+                               ],
+                      "paths":  [
+                                    "%LOCALLOW%\\IronGate\\Valheim"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Characters",
+                          "path":  "%LOCALLOW%\\IronGate\\Valheim\\characters_local"
+                      },
+                      {
+                          "label":  "Worlds",
+                          "path":  "%LOCALLOW%\\IronGate\\Valheim\\worlds_local"
+                      }
+                  ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

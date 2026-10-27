@@ -1,0 +1,37 @@
+{
+    "schema":  1,
+    "id":  "kerbal-space-program",
+    "name":  "Kerbal Space Program",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "KSP_x64.exe"
+                               ],
+                      "paths":  [
+
+                                ]
+                  },
+    "variables":  [
+                      {
+                          "name":  "install",
+                          "label":  "Kerbal Space Program install folder"
+                      }
+                  ],
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "\u003cinstall\u003e\\saves",
+                          "exclude":  [
+                                          "*.log"
+                                      ]
+                      }
+                  ],
+    "warnings":  [
+                     "Saves live in the game folder, not in a user folder."
+                 ],
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

@@ -1,0 +1,28 @@
+{
+    "schema":  1,
+    "id":  "hollow-knight",
+    "name":  "Hollow Knight",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "hollow_knight.exe"
+                               ],
+                      "paths":  [
+                                    "%LOCALLOW%\\Team Cherry\\Hollow Knight"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%LOCALLOW%\\Team Cherry\\Hollow Knight",
+                          "include":  [
+                                          "user*.dat"
+                                      ]
+                      }
+                  ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

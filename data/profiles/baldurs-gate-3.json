@@ -1,0 +1,35 @@
+{
+    "schema":  1,
+    "id":  "baldurs-gate-3",
+    "name":  "Baldur\u0027s Gate 3",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "bg3.exe",
+                                   "bg3_dx11.exe"
+                               ],
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\Larian Studios\\Baldur\u0027s Gate 3"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%LOCALAPPDATA%\\Larian Studios\\Baldur\u0027s Gate 3\\PlayerProfiles\\Public\\Savegames"
+                      },
+                      {
+                          "label":  "Mods",
+                          "path":  "%LOCALAPPDATA%\\Larian Studios\\Baldur\u0027s Gate 3\\Mods",
+                          "default_enabled":  false,
+                          "note":  "Can be large: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "Modded saves need the same mods on both PCs."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

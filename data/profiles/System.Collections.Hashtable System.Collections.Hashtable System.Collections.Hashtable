@@ -1,0 +1,20 @@
+[
+    {
+        "path":  "H:\\Google Drive",
+        "work":  false,
+        "streaming":  false,
+        "kind":  "GoogleDrive"
+    },
+    {
+        "path":  "D:\\Dropbox",
+        "work":  false,
+        "streaming":  null,
+        "kind":  "Dropbox"
+    },
+    {
+        "path":  "C:\\Users\\Player\\OneDrive",
+        "work":  false,
+        "streaming":  null,
+        "kind":  "OneDrive"
+    }
+]

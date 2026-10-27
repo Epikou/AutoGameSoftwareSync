@@ -1,0 +1,42 @@
+{
+    "schema":  1,
+    "id":  "notepad-plus-plus",
+    "name":  "Notepad++ settings",
+    "category":  "app",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "notepad++.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\Notepad++"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Settings",
+                          "path":  "%APPDATA%\\Notepad++",
+                          "include":  [
+                                          "config.xml",
+                                          "stylers.xml",
+                                          "shortcuts.xml",
+                                          "langs.xml",
+                                          "contextMenu.xml",
+                                          "userDefineLang*.xml",
+                                          "toolbarIcons.xml"
+                                      ],
+                          "exclude":  [
+                                          "backup",
+                                          "plugins",
+                                          "session.xml"
+                                      ]
+                      }
+                  ],
+    "warnings":  [
+                     "Settings may contain local paths (recent files, plugin folders). Plugins, backups and the session file are excluded."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

@@ -1,0 +1,35 @@
+{
+    "schema":  1,
+    "id":  "windows-terminal",
+    "name":  "Windows Terminal settings",
+    "category":  "config",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "WindowsTerminal.exe"
+                               ],
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "settings.json (Store version)",
+                          "path":  "%LOCALAPPDATA%\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json",
+                          "is_file":  true
+                      },
+                      {
+                          "label":  "settings.json (unpackaged version)",
+                          "path":  "%LOCALAPPDATA%\\Microsoft\\Windows Terminal\\settings.json",
+                          "is_file":  true,
+                          "default_enabled":  false
+                      }
+                  ],
+    "warnings":  [
+                     "The file lists your shell profiles (commands and paths). Shell paths may differ between PCs."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

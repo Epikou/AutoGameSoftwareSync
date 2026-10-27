@@ -1,0 +1,25 @@
+{
+    "schema":  1,
+    "id":  "cities-skylines",
+    "name":  "Cities: Skylines",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "Cities.exe"
+                               ],
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\Colossal Order\\Cities_Skylines"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%LOCALAPPDATA%\\Colossal Order\\Cities_Skylines\\Saves"
+                      }
+                  ],
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

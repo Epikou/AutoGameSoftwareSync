@@ -1,0 +1,35 @@
+{
+    "schema":  1,
+    "id":  "powershell-profile",
+    "name":  "PowerShell profile script",
+    "category":  "config",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "pwsh.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\PowerShell"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Microsoft.PowerShell_profile.ps1",
+                          "path":  "%DOCUMENTS%\\PowerShell\\Microsoft.PowerShell_profile.ps1",
+                          "is_file":  true
+                      },
+                      {
+                          "label":  "Windows PowerShell 5 profile",
+                          "path":  "%DOCUMENTS%\\WindowsPowerShell\\Microsoft.PowerShell_profile.ps1",
+                          "is_file":  true,
+                          "default_enabled":  false
+                      }
+                  ],
+    "warnings":  [
+                     "A profile script is executed every time PowerShell starts: only sync scripts you trust, and never put secrets in it."
+                 ],
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

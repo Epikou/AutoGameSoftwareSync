@@ -1,0 +1,29 @@
+{
+    "schema":  1,
+    "id":  "terraria",
+    "name":  "Terraria",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "Terraria.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\My Games\\Terraria"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Players",
+                          "path":  "%DOCUMENTS%\\My Games\\Terraria\\Players"
+                      },
+                      {
+                          "label":  "Worlds",
+                          "path":  "%DOCUMENTS%\\My Games\\Terraria\\Worlds"
+                      }
+                  ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

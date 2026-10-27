@@ -8,7 +8,7 @@
   <img src="media/stair-en.gif" alt="你的程序和它的数据，然后我们监视，然后我们同步，最后安全无忧！" width="720">
 </p>
 
-你的游戏和软件存档与设置，受到保护并在你的所有设备之间同步：台式机、笔记本、掌机（Legion Go S、Steam Deck 等）。从上次停下的地方继续游戏，无论身在何处都能找回你的软件配置。一切都通过**你的保险库**完成：任何一个你的设备都能访问的共享文件夹（Google Drive、OneDrive、Dropbox、Nextcloud、Syncthing、NAS、U 盘等）。个人使用免费，支持 Windows 和 Linux。
+你的游戏和软件存档与设置，受到保护并在你的所有设备之间同步：台式机、笔记本、掌机（Legion Go S、Steam Deck 等）。从上次停下的地方继续游戏，无论身在何处都能找回你的软件配置。一切都通过**你的保险库**完成：任何一个你的设备都能访问的共享文件夹（Google Drive、OneDrive、Dropbox、Nextcloud、Syncthing、NAS、U 盘等）。免费开源（GPL-3.0），支持 Windows 和 Linux。
 
 [**下载最新版本**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [**加入 Discord**](https://discord.gg/W8YXUJAK4e) · [在 Ko-fi 上支持本项目](https://ko-fi.com/autogamesoftwaresave)
 

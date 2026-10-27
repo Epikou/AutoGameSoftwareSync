@@ -1,0 +1,39 @@
+{
+    "schema":  1,
+    "id":  "pcsx2",
+    "name":  "PCSX2 memory cards",
+    "category":  "emulator",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "pcsx2-qt.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\PCSX2"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Memory cards",
+                          "path":  "%DOCUMENTS%\\PCSX2\\memcards",
+                          "include":  [
+                                          "*.ps2",
+                                          "*.mcd"
+                                      ]
+                      },
+                      {
+                          "label":  "Save states",
+                          "path":  "%DOCUMENTS%\\PCSX2\\sstates",
+                          "default_enabled":  false,
+                          "note":  "Can be large: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "A memory card is one large file: do not play on two PCs at the same time."
+                 ],
+    "notes":  "Portable installs keep their folders next to the exe: pick the right location in More.",
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

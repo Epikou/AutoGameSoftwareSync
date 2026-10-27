@@ -1,0 +1,31 @@
+{
+    "schema":  1,
+    "id":  "project-zomboid",
+    "name":  "Project Zomboid",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "ProjectZomboid64.exe"
+                               ],
+                      "paths":  [
+                                    "%USERPROFILE%\\Zomboid"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%USERPROFILE%\\Zomboid\\Saves"
+                      },
+                      {
+                          "label":  "Mods",
+                          "path":  "%USERPROFILE%\\Zomboid\\mods",
+                          "default_enabled":  false,
+                          "note":  "Can be large: unticked by default."
+                      }
+                  ],
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

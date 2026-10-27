@@ -1,0 +1,40 @@
+{
+    "schema":  1,
+    "id":  "retroarch",
+    "name":  "RetroArch saves",
+    "category":  "emulator",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "retroarch.exe"
+                               ],
+                      "paths":  [
+
+                                ]
+                  },
+    "variables":  [
+                      {
+                          "name":  "install",
+                          "label":  "RetroArch folder"
+                      }
+                  ],
+    "locations":  [
+                      {
+                          "label":  "Saves (SRAM, memory cards)",
+                          "path":  "\u003cinstall\u003e\\saves"
+                      },
+                      {
+                          "label":  "Save states",
+                          "path":  "\u003cinstall\u003e\\states",
+                          "default_enabled":  false,
+                          "note":  "Can be large: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "retroarch.cfg (it can hold account tokens) is never synced."
+                 ],
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

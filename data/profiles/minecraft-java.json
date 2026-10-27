@@ -1,0 +1,44 @@
+{
+    "schema":  1,
+    "id":  "minecraft-java",
+    "name":  "Minecraft (Java Edition)",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "javaw.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\.minecraft"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Worlds (saves)",
+                          "path":  "%APPDATA%\\.minecraft\\saves",
+                          "exclude":  [
+                                          "*.lock",
+                                          "session.lock"
+                                      ]
+                      },
+                      {
+                          "label":  "Options",
+                          "path":  "%APPDATA%\\.minecraft\\options.txt",
+                          "is_file":  true
+                      },
+                      {
+                          "label":  "Server list",
+                          "path":  "%APPDATA%\\.minecraft\\servers.dat",
+                          "is_file":  true,
+                          "default_enabled":  false,
+                          "note":  "Server addresses only."
+                      }
+                  ],
+    "warnings":  [
+                     "Worlds can be large. Do not sync while the game is running (the app waits for the game to close)."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

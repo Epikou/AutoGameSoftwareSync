@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="disk" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3b6fd8"/>
+      <stop offset="1" stop-color="#1e3d8f"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#e6e9ef"/>
+      <stop offset="0.5" stop-color="#b9c0cc"/>
+      <stop offset="1" stop-color="#8f98a8"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3f4b"/>
+      <stop offset="1" stop-color="#16181d"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Disquette -->
+  <g filter="url(#shadow)">
+    <path d="M60 36 H392 L452 96 V420 Q452 452 420 452 H92 Q60 452 60 420 V68 Q60 36 92 36 Z"
+          fill="url(#disk)" stroke="#142a63" stroke-width="8"/>
+  </g>
+  <!-- Volet métal -->
+  <rect x="140" y="36" width="210" height="130" rx="10" fill="url(#metal)" stroke="#5c6575" stroke-width="6"/>
+  <rect x="268" y="58" width="50" height="86" rx="6" fill="#1e3d8f"/>
+  <!-- Étiquette -->
+  <rect x="100" y="230" width="312" height="190" rx="14" fill="#f4f1e8" stroke="#c9c3b2" stroke-width="4"/>
+  <rect x="124" y="252" width="264" height="10" rx="5" fill="#d9d2bf"/>
+
+  <!-- Manette -->
+  <g filter="url(#shadow)">
+    <path d="M150 268
+             H362
+             Q420 268 440 330
+             L466 420
+             Q480 476 436 482
+             Q408 486 386 452
+             L362 414
+             H150
+             L126 452
+             Q104 486 76 482
+             Q32 476 46 420
+             L72 330
+             Q92 268 150 268 Z"
+          fill="url(#pad)" stroke="#0b0c0f" stroke-width="8" stroke-linejoin="round"/>
+  </g>
+  <!-- Croix directionnelle -->
+  <g fill="#e6e9ef">
+    <rect x="114" y="314" width="22" height="66" rx="5"/>
+    <rect x="92" y="336" width="66" height="22" rx="5"/>
+  </g>
+  <!-- Boutons -->
+  <circle cx="380" cy="320" r="15" fill="#4ade80"/>
+  <circle cx="410" cy="349" r="15" fill="#f87171"/>
+  <circle cx="350" cy="349" r="15" fill="#60a5fa"/>
+  <circle cx="380" cy="378" r="15" fill="#facc15"/>
+  <!-- Select / Start -->
+  <rect x="216" y="326" width="30" height="12" rx="6" fill="#8f98a8"/>
+  <rect x="266" y="326" width="30" height="12" rx="6" fill="#8f98a8"/>
+</svg>

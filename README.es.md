@@ -8,7 +8,7 @@
   <img src="media/stair-en.gif" alt="Tu programa y sus datos, luego vigilamos, luego sincronizamos, luego ¡a salvo!" width="720">
 </p>
 
-Tus partidas guardadas y ajustes de juegos y programas, protegidos y sincronizados entre todos tus dispositivos: PC de sobremesa, portátil, consola portátil (Legion Go S, Steam Deck...). Retoma tu partida justo donde la dejaste y recupera la configuración de tus programas estés donde estés. Todo pasa por **tu cofre**: cualquier carpeta compartida que vean todos tus dispositivos (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, un NAS, una memoria USB...). Gratis para uso personal, Windows y Linux.
+Tus partidas guardadas y ajustes de juegos y programas, protegidos y sincronizados entre todos tus dispositivos: PC de sobremesa, portátil, consola portátil (Legion Go S, Steam Deck...). Retoma tu partida justo donde la dejaste y recupera la configuración de tus programas estés donde estés. Todo pasa por **tu cofre**: cualquier carpeta compartida que vean todos tus dispositivos (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, un NAS, una memoria USB...). Gratis y de código abierto (GPL-3.0), Windows y Linux.
 
 [**Descargar la última versión**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [**Únete al Discord**](https://discord.gg/W8YXUJAK4e) · [Apoya el proyecto en Ko-fi](https://ko-fi.com/autogamesoftwaresave)
 

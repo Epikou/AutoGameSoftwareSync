@@ -8,7 +8,7 @@
   <img src="media/stair-fr.gif" alt="Ton programme et ses données, puis on surveille, puis on synchronise, puis à l'abri !" width="720">
 </p>
 
-Tes sauvegardes et réglages de jeux et de logiciels, protégés et synchronisés entre tous tes appareils : PC fixe, portable, console portable (Legion Go S, Steam Deck...). Tu reprends ta partie là où tu l'as laissée, tu retrouves tes configurations logicielles où que tu sois. Tout passe par **ton coffre** : n'importe quel dossier partagé que tes appareils voient tous (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, un NAS, une clé USB...). Gratuit pour un usage personnel, Windows et Linux.
+Tes sauvegardes et réglages de jeux et de logiciels, protégés et synchronisés entre tous tes appareils : PC fixe, portable, console portable (Legion Go S, Steam Deck...). Tu reprends ta partie là où tu l'as laissée, tu retrouves tes configurations logicielles où que tu sois. Tout passe par **ton coffre** : n'importe quel dossier partagé que tes appareils voient tous (Google Drive, OneDrive, Dropbox, Nextcloud, Syncthing, un NAS, une clé USB...). Gratuit et open source (GPL-3.0), Windows et Linux.
 
 [**Télécharger la dernière version**](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) · [**Rejoindre le Discord**](https://discord.gg/W8YXUJAK4e) · [Soutenir le projet sur Ko-fi](https://ko-fi.com/autogamesoftwaresave)
 

@@ -1,0 +1,48 @@
+{
+    "schema":  1,
+    "id":  "vscode",
+    "name":  "Visual Studio Code settings",
+    "category":  "app",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "Code.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\Code"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "User settings and keybindings",
+                          "path":  "%APPDATA%\\Code\\User",
+                          "include":  [
+                                          "settings.json",
+                                          "keybindings.json",
+                                          "tasks.json"
+                                      ],
+                          "exclude":  [
+                                          "globalStorage",
+                                          "workspaceStorage",
+                                          "History",
+                                          "CachedData",
+                                          "Cache"
+                                      ]
+                      },
+                      {
+                          "label":  "Snippets",
+                          "path":  "%APPDATA%\\Code\\User\\snippets",
+                          "include":  [
+                                          "*.json",
+                                          "*.code-snippets"
+                                      ]
+                      }
+                  ],
+    "warnings":  [
+                     "settings.json may contain local paths or, depending on extensions, API keys: review it. Extensions, sign-in data and caches are never synced."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

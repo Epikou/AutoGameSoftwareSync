@@ -1,0 +1,43 @@
+{
+    "schema":  1,
+    "id":  "blender-preferences",
+    "name":  "Blender preferences",
+    "category":  "app",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "blender.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\Blender Foundation\\Blender"
+                                ]
+                  },
+    "variables":  [
+                      {
+                          "name":  "version",
+                          "label":  "Blender version (folder name)",
+                          "scan":  "%APPDATA%\\Blender Foundation\\Blender\\*"
+                      }
+                  ],
+    "locations":  [
+                      {
+                          "label":  "User preferences and startup file",
+                          "path":  "%APPDATA%\\Blender Foundation\\Blender\\\u003cversion\u003e\\config",
+                          "include":  [
+                                          "userpref.blend",
+                                          "startup.blend",
+                                          "bookmarks.txt"
+                                      ],
+                          "exclude":  [
+                                          "*.blend1"
+                                      ]
+                      }
+                  ],
+    "warnings":  [
+                     "userpref.blend can store add-on preferences (possibly API keys) and local paths: review before syncing."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

@@ -1,0 +1,17 @@
+AutoGameSoftwareSync
+Copyright (C) Epikou
+
+The source code of this project is licensed under the GNU General Public
+License, version 3 (see the LICENSE file).
+
+Third-party data
+----------------
+The file data/gamedb.bin is derived from game save location data published by
+the PCGamingWiki community (https://www.pcgamingwiki.com/), under the
+Creative Commons Attribution-NonCommercial-ShareAlike 3.0 license
+(https://creativecommons.org/licenses/by-nc-sa/3.0/), as compiled in the
+community manifest maintained by the Ludusavi project
+(https://github.com/mtkennerly/ludusavi-manifest).
+
+This data file is not covered by the GPL: it remains under its own license
+terms, which include attribution, non-commercial use and share-alike.

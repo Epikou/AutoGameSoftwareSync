@@ -1,0 +1,28 @@
+{
+    "schema":  1,
+    "id":  "satisfactory",
+    "name":  "Satisfactory",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "FactoryGame-Win64-Shipping.exe"
+                               ],
+                      "paths":  [
+                                    "%LOCALAPPDATA%\\FactoryGame"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%LOCALAPPDATA%\\FactoryGame\\Saved\\SaveGames",
+                          "exclude":  [
+                                          "*.log"
+                                      ]
+                      }
+                  ],
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

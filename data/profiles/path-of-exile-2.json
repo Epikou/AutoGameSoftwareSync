@@ -1,0 +1,36 @@
+{
+    "schema":  1,
+    "id":  "path-of-exile-2",
+    "name":  "Path of Exile 2 (filters and settings)",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "PathOfExile.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\My Games\\Path of Exile 2"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Loot filters and config",
+                          "path":  "%DOCUMENTS%\\My Games\\Path of Exile 2",
+                          "include":  [
+                                          "*.filter",
+                                          "poe2_production_Config.ini"
+                                      ],
+                          "exclude":  [
+                                          "logs",
+                                          "*.log"
+                                      ]
+                      }
+                  ],
+    "warnings":  [
+                     "Characters are stored on the game servers: only filters and local settings are synced."
+                 ],
+    "confidence":  "medium",
+    "verified":  "2026-10-25"
+}

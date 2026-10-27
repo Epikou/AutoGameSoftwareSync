@@ -1,0 +1,52 @@
+{
+    "schema":  1,
+    "id":  "skyrim-se",
+    "name":  "The Elder Scrolls V: Skyrim Special Edition",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "SkyrimSE.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\My Games\\Skyrim Special Edition"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%DOCUMENTS%\\My Games\\Skyrim Special Edition\\Saves",
+                          "exclude":  [
+                                          "*.tmp"
+                                      ]
+                      },
+                      {
+                          "label":  "plugins.txt",
+                          "path":  "%LOCALAPPDATA%\\Skyrim Special Edition\\plugins.txt",
+                          "is_file":  true
+                      },
+                      {
+                          "label":  "loadorder.txt",
+                          "path":  "%LOCALAPPDATA%\\Skyrim Special Edition\\loadorder.txt",
+                          "is_file":  true
+                      },
+                      {
+                          "label":  "INI files",
+                          "path":  "%DOCUMENTS%\\My Games\\Skyrim Special Edition",
+                          "include":  [
+                                          "Skyrim.ini",
+                                          "SkyrimPrefs.ini",
+                                          "SkyrimCustom.ini"
+                                      ],
+                          "default_enabled":  false
+                      }
+                  ],
+    "warnings":  [
+                     "Mods must be identical on both PCs: the load order only makes sense with the same plugins installed."
+                 ],
+    "notes":  "GOG and Epic versions use different folder names.",
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

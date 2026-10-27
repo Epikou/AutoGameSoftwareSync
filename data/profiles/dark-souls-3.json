@@ -1,0 +1,33 @@
+{
+    "schema":  1,
+    "id":  "dark-souls-3",
+    "name":  "Dark Souls III",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "DarkSoulsIII.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\DarkSoulsIII"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Save data",
+                          "path":  "%APPDATA%\\DarkSoulsIII",
+                          "include":  [
+                                          "DS30000.sl2",
+                                          "DS30000.sl2.bak"
+                                      ]
+                      }
+                  ],
+    "warnings":  [
+                     "Never restore a save made with another Steam account. Using modified saves online can get an account banned."
+                 ],
+    "notes":  "Saves live in a folder named after your Steam ID.",
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

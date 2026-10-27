@@ -1,0 +1,25 @@
+{
+    "schema":  1,
+    "id":  "the-witcher-3",
+    "name":  "The Witcher 3: Wild Hunt",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "witcher3.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\The Witcher 3"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%DOCUMENTS%\\The Witcher 3\\gamesaves"
+                      }
+                  ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

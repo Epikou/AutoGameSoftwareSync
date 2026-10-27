@@ -1,0 +1,48 @@
+{
+  "game": "CrossJeu",
+  "machine": "STEAMDECK",
+  "created_ms": 1792968246626,
+  "created_at": "20261025-224406-626",
+  "latest_mtime_ms": 1792968246620,
+  "global_hash": "71c3a169877c41939033641c08ac856f99dced3e9c2cafee4510e3a6b568596f",
+  "files": [
+    {
+      "path": ".reglages-caches",
+      "size": 9,
+      "hash": "5653513b5dd8bbaf7bdf4d14e2ac8469b0b72dd171ac5876d8037ba8e39c9688"
+    },
+    {
+      "path": "Profil 1/Sauvegarde été.sav",
+      "size": 38,
+      "hash": "6ddb669d8836ac2d3ac475c0d483e99597e9742270fb94daca8d1d5f6ac33d54"
+    },
+    {
+      "path": "sub/deep/a/b/c.txt",
+      "size": 40,
+      "hash": "2966bf8c139483e8e8bae90d5aa2be1f15ff5eaa547d7b49dfed88b5a489b3f5"
+    },
+    {
+      "path": "vide.bin",
+      "size": 0,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "日本語/セーブ.dat",
+      "size": 9,
+      "hash": "16773842656e5304f2b4d9e8109ab8e981a87db72320700cd0be25219157cca8"
+    }
+  ],
+  "note": null,
+  "id": "1c47626d82c6c8b839d12410b8cae959",
+  "parent_id": null,
+  "merged_parents": [],
+  "lineage": [],
+  "saved_at_ms": 1792968246626,
+  "saved_at": "20261025-224406-626",
+  "saved_at_local": "2026-10-25T23:44:06+01:00",
+  "clock_offset_ms": 0,
+  "format": 2,
+  "exe": "crossjeu.exe",
+  "game_name": "CrossJeu",
+  "save_path_tpl": "%APPDATA%/AGSS-fixture-CrossJeu/Saves"
+}

@@ -1,0 +1,47 @@
+{
+    "schema":  1,
+    "id":  "factorio",
+    "name":  "Factorio",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "factorio.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\Factorio"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%APPDATA%\\Factorio\\saves",
+                          "exclude":  [
+                                          "*.tmp"
+                                      ]
+                      },
+                      {
+                          "label":  "Config",
+                          "path":  "%APPDATA%\\Factorio\\config",
+                          "include":  [
+                                          "config.ini"
+                                      ]
+                      },
+                      {
+                          "label":  "Mods",
+                          "path":  "%APPDATA%\\Factorio\\mods",
+                          "exclude":  [
+                                          "*.log"
+                                      ],
+                          "default_enabled":  false,
+                          "note":  "Can be large: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "player-data.json (it holds your Factorio service token) is never synced."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

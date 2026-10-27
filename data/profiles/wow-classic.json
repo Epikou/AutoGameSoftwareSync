@@ -1,0 +1,58 @@
+{
+    "schema":  1,
+    "id":  "wow-classic",
+    "name":  "World of Warcraft (Classic)",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "WowClassic.exe"
+                               ],
+                      "paths":  [
+                                    "%PROGRAMFILES(X86)%\\World of Warcraft\\_classic_",
+                                    "%PROGRAMFILES%\\World of Warcraft\\_classic_"
+                                ]
+                  },
+    "variables":  [
+                      {
+                          "name":  "install",
+                          "label":  "World of Warcraft install folder",
+                          "candidates":  [
+                                             "%PROGRAMFILES(X86)%\\World of Warcraft",
+                                             "%PROGRAMFILES%\\World of Warcraft"
+                                         ]
+                      }
+                  ],
+    "locations":  [
+                      {
+                          "label":  "WTF (settings and add-on data)",
+                          "path":  "\u003cinstall\u003e\\_classic_\\WTF",
+                          "exclude":  [
+                                          "Cache",
+                                          "Logs",
+                                          "Errors",
+                                          "*.log",
+                                          "*.bak",
+                                          "*.old"
+                                      ]
+                      },
+                      {
+                          "label":  "Add-ons",
+                          "path":  "\u003cinstall\u003e\\_classic_\\Interface\\AddOns",
+                          "exclude":  [
+                                          "*.log",
+                                          "Cache"
+                                      ],
+                          "default_enabled":  false,
+                          "note":  "Can be large: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "WTF holds your UI settings and add-on data (SavedVariables). The game stores no password there, but third-party add-ons may keep account names. Caches, logs and error dumps are excluded."
+                 ],
+    "notes":  "Pick the World of Warcraft install folder (it contains the _classic_ folder).",
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

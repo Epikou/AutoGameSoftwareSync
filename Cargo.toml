@@ -1,0 +1,99 @@
+[package]
+name = "autogamesoftwaresync"
+version = "2.0.2"
+edition = "2021"
+description = "AutoGameSoftwareSync : synchronisation de sauvegardes et reglages de jeux et de logiciels entre PC via un dossier partage (NAS, Google Drive, Dropbox, etc.)"
+license = "GPL-3.0-only"
+repository = "https://github.com/Epikou/AutoGameSoftwareSync"
+
+[lib]
+name = "agss"
+path = "src/lib.rs"
+
+[[bin]]
+name = "AutoGameSoftwareSync"
+path = "src/main.rs"
+
+[features]
+default = []
+# Icone dans la zone de notification. Windows : toujours presente. Linux : StatusNotifier via GTK / libayatana-appindicator
+# (sans cette fonction, l'application tourne normalement, sans icone).
+tray = ["dep:tray-icon", "dep:gtk"]
+
+[dependencies]
+postcard = { version = "1", default-features = false, features = ["use-std"] }
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+sha2 = "0.10"
+# Mise a jour automatique : signature Ed25519 du manifeste (Rust pur), extraction des archives zip et tar.gz.
+ed25519-dalek = { version = "2", default-features = false, features = ["std"] }
+zip = { version = "2", default-features = false, features = ["deflate"] }
+tar = { version = "0.4", default-features = false }
+ureq = "2"
+# Identifiant d installation aleatoire (UUID v4) des donnees d usage.
+getrandom = "0.2"
+walkdir = "2"
+dirs = "5"
+ctrlc = "3"
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow"] }
+
+
+[target.'cfg(windows)'.dependencies]
+tray-icon = "0.19"
+rfd = "0.15"
+# Lecture HID directe (DualSense / DualShock 4). Backend Windows natif en Rust pur : aucun outil C/cmake.
+hidapi = { version = "2", default-features = false, features = ["windows-native"] }
+windows-sys = { version = "0.59", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Console",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_IO",
+    "Win32_System_Com",
+    "Win32_System_Registry",
+    "Win32_System_RemoteDesktop",
+    "Win32_System_Time",
+    "Win32_System_Threading",
+    "Win32_UI_Input",
+    "Win32_UI_Input_XboxController",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+# Boites de dialogue via le portail XDG (aucune dependance GTK a l edition de liens).
+rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "async-std"] }
+# Fenetre : X11 et Wayland (WSLg, SteamOS). Notifications : D-Bus en Rust pur.
+eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow", "x11", "wayland"] }
+notify-rust = "4"
+# Icones des programmes (theme du bureau : PNG ; vignettes de la bibliotheque Steam : JPEG). Rust pur.
+png = "0.17"
+zune-jpeg = "0.5"
+zune-core = "0.5"
+tray-icon = { version = "0.19", optional = true }
+gtk = { version = "0.18", optional = true }
+
+[dev-dependencies]
+tempfile = "3"
+# Outil de generation de l'icone (examples/make_icon.rs) : rendu SVG -> PNG, aucun outil externe.
+resvg = { version = "0.45", default-features = false }
+# Outil des medias du README (examples/make_gif.rs) : GIF animes a partir des captures de l'appli.
+gif = "0.13"
+color_quant = "1"
+
+[target.'cfg(windows)'.build-dependencies]
+# Integre l'icone et les metadonnees (nom du produit, description, version) a AutoGameSoftwareSync.exe.
+winresource = "0.1"
+
+# Profil release : petit exe, difficile a decompiler (symboles retires, LTO, 1 unite de codegen).
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

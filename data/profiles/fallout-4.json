@@ -1,0 +1,46 @@
+{
+    "schema":  1,
+    "id":  "fallout-4",
+    "name":  "Fallout 4",
+    "category":  "game",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "Fallout4.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\My Games\\Fallout4"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Saves",
+                          "path":  "%DOCUMENTS%\\My Games\\Fallout4\\Saves",
+                          "exclude":  [
+                                          "*.tmp"
+                                      ]
+                      },
+                      {
+                          "label":  "plugins.txt",
+                          "path":  "%LOCALAPPDATA%\\Fallout4\\plugins.txt",
+                          "is_file":  true
+                      },
+                      {
+                          "label":  "INI files",
+                          "path":  "%DOCUMENTS%\\My Games\\Fallout4",
+                          "include":  [
+                                          "Fallout4.ini",
+                                          "Fallout4Prefs.ini",
+                                          "Fallout4Custom.ini"
+                                      ],
+                          "default_enabled":  false
+                      }
+                  ],
+    "warnings":  [
+                     "Mods must be identical on both PCs: the load order only makes sense with the same plugins installed."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

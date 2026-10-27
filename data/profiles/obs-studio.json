@@ -1,0 +1,41 @@
+{
+    "schema":  1,
+    "id":  "obs-studio",
+    "name":  "OBS Studio profiles and scenes",
+    "category":  "app",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "obs64.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\obs-studio"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Profiles",
+                          "path":  "%APPDATA%\\obs-studio\\basic\\profiles",
+                          "exclude":  [
+                                          "service.json",
+                                          "*.log",
+                                          "*.bak"
+                                      ]
+                      },
+                      {
+                          "label":  "Scene collections",
+                          "path":  "%APPDATA%\\obs-studio\\basic\\scenes",
+                          "exclude":  [
+                                          "*.bak",
+                                          "*.log"
+                                      ]
+                      }
+                  ],
+    "warnings":  [
+                     "The stream key (service.json) is excluded. Scenes may still contain URLs of browser sources: review them before sharing between PCs."
+                 ],
+    "confidence":  "high",
+    "verified":  "2026-10-25"
+}

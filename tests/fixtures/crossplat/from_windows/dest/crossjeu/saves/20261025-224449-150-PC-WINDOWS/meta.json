@@ -1,0 +1,48 @@
+{
+  "game": "CrossJeu",
+  "machine": "PC-WINDOWS",
+  "created_ms": 1792968289150,
+  "created_at": "20261025-224449-150",
+  "latest_mtime_ms": 1792968289138,
+  "global_hash": "243c5c88f22d429d95ca2cda943c8718ad6054b3993721a9fb3f93f298a5a6a0",
+  "files": [
+    {
+      "path": ".reglages-caches",
+      "size": 9,
+      "hash": "5653513b5dd8bbaf7bdf4d14e2ac8469b0b72dd171ac5876d8037ba8e39c9688"
+    },
+    {
+      "path": "Profil 1/Sauvegarde été.sav",
+      "size": 40,
+      "hash": "05cf840d2abf1beb1053520ce7f7786fb56242142a4bb0ab4cde1b9d62d7aa4d"
+    },
+    {
+      "path": "sub/deep/a/b/c.txt",
+      "size": 40,
+      "hash": "2966bf8c139483e8e8bae90d5aa2be1f15ff5eaa547d7b49dfed88b5a489b3f5"
+    },
+    {
+      "path": "vide.bin",
+      "size": 0,
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "日本語/セーブ.dat",
+      "size": 9,
+      "hash": "16773842656e5304f2b4d9e8109ab8e981a87db72320700cd0be25219157cca8"
+    }
+  ],
+  "note": null,
+  "id": "ec21983ba6d4c5762f92a571f76d41c4",
+  "parent_id": null,
+  "merged_parents": [],
+  "lineage": [],
+  "saved_at_ms": 1792968289150,
+  "saved_at": "20261025-224449-150",
+  "saved_at_local": "2026-10-25T23:44:49+01:00",
+  "clock_offset_ms": 0,
+  "format": 2,
+  "exe": "crossjeu.exe",
+  "game_name": "CrossJeu",
+  "save_path_tpl": "%APPDATA%/AGSS-fixture-CrossJeu/Saves"
+}
