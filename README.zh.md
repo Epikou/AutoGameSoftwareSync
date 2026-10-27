@@ -96,6 +96,14 @@
 
 2.0.0 是第一个支持自动更新的版本，因此请**手动安装一次**：关闭旧版本，在同一个文件夹中用新的 `AutoGameSoftwareSync.exe` 替换旧文件。你的设置、项目和保险库都会原样保留；首次启动会显示“2.0 新功能”，只询问新增的内容。升级前手动备份一下保险库总是个好主意。之后更新会自动安装（设置 > 更新：自动 / 询问我 / 从不）。
 
+## Playnite 扩展
+
+使用 Playnite？这个免费扩展会在每个游戏页面上显示其保护状态、上次同步的时间以及来源设备（以该设备的颜色显示）。它支持全屏模式下最常用的主题（Solaris、ReskinPS5、PS5ish……）。它只读取信息，从不触碰你的存档。
+
+<p align="center"><img src="https://raw.githubusercontent.com/Epikou/AutoGameSoftwareSync-Playnite/main/screenshots/solaris-badge.png" width="720" alt="Solaris 主题中的 AutoGameSoftwareSync 徽章"></p>
+
+**[下载 Playnite 扩展](https://github.com/Epikou/AutoGameSoftwareSync-Playnite/releases/latest)** · [了解更多](https://github.com/Epikou/AutoGameSoftwareSync-Playnite)
+
 ## Linux / SteamOS
 
 同时提供 Linux 版本（x86_64）：SteamOS（Steam Deck、Legion Go S 等）、Bazzite 和 Ubuntu。请从 [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) 页面下载 `AutoGameSoftwareSync-v2.0.0-linux-x86_64.tar.gz`，解压后运行 `install-linux.sh`（无需管理员权限）。通过同一个保险库，副本与 Windows 版完全兼容，包括通过 Proton 运行的 Windows 游戏。安装指南（法语）：[docs/LINUX.md](docs/LINUX.md)。
@@ -119,7 +127,7 @@
 
 ## 已知限制
 
-如果游戏不是通过集成启动器启动，程序无法在游戏启动*之前*恢复存档。计划为此提供 Playnite 扩展。
+如果游戏不是通过集成启动器启动，程序无法在游戏启动*之前*恢复存档。
 
 ## 关于这个项目
 

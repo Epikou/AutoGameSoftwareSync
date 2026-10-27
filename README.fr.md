@@ -96,6 +96,14 @@ Si ton coffre est sur Google Drive, passe Drive en *Mettre en miroir les fichier
 
 La 2.0.0 est la première version avec la mise à jour automatique : **installe-la à la main une fois**. Ferme l'ancienne version et remplace `AutoGameSoftwareSync.exe` par le nouveau, dans le même dossier. Tes réglages, tes éléments et ton coffre sont gardés tels quels ; le premier lancement montre « Quoi de neuf en 2.0 » et ne te demande que ce qui est nouveau. Une copie manuelle de ton coffre avant la mise à jour est toujours une bonne idée. Ensuite, les mises à jour se font toutes seules (Réglages > Mises à jour : Automatique / Me demander / Jamais).
 
+## Extension Playnite
+
+Tu utilises Playnite ? L'extension gratuite affiche sur la fiche de chaque jeu son état de protection, la date de la dernière synchro et l'appareil d'où elle vient, avec sa couleur. Elle marche en plein écran avec les thèmes les plus utilisés (Solaris, ReskinPS5, PS5ish…). Elle ne fait que lire : elle ne touche jamais à tes sauvegardes.
+
+<p align="center"><img src="https://raw.githubusercontent.com/Epikou/AutoGameSoftwareSync-Playnite/main/screenshots/solaris-badge.png" width="720" alt="Badge AutoGameSoftwareSync dans le thème Solaris"></p>
+
+**[Télécharger l'extension Playnite](https://github.com/Epikou/AutoGameSoftwareSync-Playnite/releases/latest)** · [En savoir plus](https://github.com/Epikou/AutoGameSoftwareSync-Playnite)
+
 ## Linux / SteamOS
 
 Une version Linux (x86_64) est aussi disponible : SteamOS (Steam Deck, Legion Go S...), Bazzite et Ubuntu. Télécharge `AutoGameSoftwareSync-v2.0.0-linux-x86_64.tar.gz` depuis la page [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), extrais-la et lance `install-linux.sh` (aucun droit administrateur nécessaire). Les copies sont entièrement compatibles avec la version Windows grâce au même coffre, y compris les jeux Windows lancés avec Proton. Guide d'installation : [docs/LINUX.md](docs/LINUX.md).
@@ -119,7 +127,7 @@ Fais une copie manuelle de tes sauvegardes avant la première utilisation. Le pr
 
 ## Limite connue
 
-Le programme ne peut pas remettre une sauvegarde *avant* le démarrage d'un jeu lancé hors d'un lanceur intégré. Une extension Playnite est prévue pour cela.
+Le programme ne peut pas remettre une sauvegarde *avant* le démarrage d'un jeu lancé hors d'un lanceur intégré.
 
 ## À propos de ce projet
 

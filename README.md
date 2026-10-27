@@ -96,6 +96,14 @@ If your vault is on Google Drive, set Drive to *Mirror files* (or make the folde
 
 Version 2.0.0 is the first version with automatic updates, so **install it by hand once**: close the old version and replace `AutoGameSoftwareSync.exe` with the new one, in the same folder. Your settings, your items and your vault are kept as they are; the first launch shows "What's new in 2.0" and only asks what is new. Making a manual copy of your vault before upgrading is always a good idea. From then on, updates install themselves (Settings > Updates: Automatic / Ask me / Never).
 
+## Playnite extension
+
+Using Playnite? The free extension shows on each game page its protection state, the date of the last sync and the device it comes from, in its own colour. It works in fullscreen mode with the most popular themes (Solaris, ReskinPS5, PS5ish...). It only reads: it never touches your saves.
+
+<p align="center"><img src="https://raw.githubusercontent.com/Epikou/AutoGameSoftwareSync-Playnite/main/screenshots/solaris-badge.png" width="720" alt="AutoGameSoftwareSync badge in the Solaris theme"></p>
+
+**[Download the Playnite extension](https://github.com/Epikou/AutoGameSoftwareSync-Playnite/releases/latest)** · [More about it](https://github.com/Epikou/AutoGameSoftwareSync-Playnite)
+
 ## Linux / SteamOS
 
 A Linux build (x86_64) is available too: SteamOS (Steam Deck, Legion Go S...), Bazzite and Ubuntu. Download `AutoGameSoftwareSync-v2.0.0-linux-x86_64.tar.gz` from the [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) page, extract it and run `install-linux.sh` (no administrator rights needed). Copies are fully compatible with the Windows version through the same vault, including Windows games run with Proton. Installation guide (in French): [docs/LINUX.md](docs/LINUX.md).
@@ -119,7 +127,7 @@ Make a manual copy of your saves before your first use. The program is provided 
 
 ## Known limitation
 
-The program cannot bring a save back *before* a game starts when it is launched outside a launcher integration. A Playnite extension is planned for that.
+The program cannot bring a save back *before* a game starts when it is launched outside a launcher integration.
 
 ## About this project
 
