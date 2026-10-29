@@ -109,7 +109,7 @@ fn head_hash(dest: &Path, g: &Game) -> String {
 fn restaurer_puis_annuler_etat_identique_octet_par_octet_et_coffre_d_avant() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("coffre");
-    let m = machine(t.path(), "PC-DESKTOP");
+    let m = machine(t.path(), "EPIKOU");
     // V1 : save.dat + sous-dossier ; V2 : save.dat change, sous-dossier retire, nouveau fichier.
     write(&m.game.path, "save.dat", &bytes(1, 5000));
     write(&m.game.path, "sub/deep/old.bin", &bytes(2, 3000));
@@ -165,7 +165,7 @@ fn restaurer_puis_annuler_etat_identique_octet_par_octet_et_coffre_d_avant() {
 fn annuler_avec_des_modifications_non_copiees_rend_l_etat_de_synchro_d_avant() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("coffre");
-    let m = machine(t.path(), "PC-DESKTOP");
+    let m = machine(t.path(), "EPIKOU");
     write(&m.game.path, "save.dat", &bytes(10, 900));
     backup::backup(&m.ctx, &m.game, &dest).unwrap();
     pause();
@@ -193,20 +193,20 @@ fn annuler_avec_des_modifications_non_copiees_rend_l_etat_de_synchro_d_avant() {
 fn annuler_quand_un_autre_appareil_avait_plus_recent() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("coffre");
-    let a = machine(t.path(), "PC-DESKTOP");
-    let b = machine(t.path(), "ALLY");
+    let a = machine(t.path(), "EPIKOU");
+    let b = machine(t.path(), "EPIGOS");
     write(&a.game.path, "save.dat", b"partie 1");
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
     pause();
     write(&a.game.path, "save.dat", b"partie 2");
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
     pause();
-    // ALLY recupere puis joue plus loin.
+    // EPIGOS recupere puis joue plus loin.
     backup::restore(&b.ctx, &b.game, &dest).unwrap();
-    write(&b.game.path, "save.dat", b"partie 3 sur ALLY");
+    write(&b.game.path, "save.dat", b"partie 3 sur EPIGOS");
     backup::backup(&b.ctx, &b.game, &dest).unwrap();
     pause();
-    assert_eq!(backup::plan(&a.ctx, &a.game, &dest).unwrap(), Plan::Restore, "PC-DESKTOP est en retard");
+    assert_eq!(backup::plan(&a.ctx, &a.game, &dest).unwrap(), Plan::Restore, "EPIKOU est en retard");
     let before = tree(&a.game.path);
     let st_before = state_of(&a);
     let head_before = head_hash(&dest, &a.game);
@@ -215,9 +215,9 @@ fn annuler_quand_un_autre_appareil_avait_plus_recent() {
     backup::undo_restore(&a.ctx, &a.game, Some(&dest), &ticket).unwrap();
     assert_eq!(tree(&a.game.path), before);
     assert_eq!(state_of(&a), st_before);
-    assert_eq!(head_hash(&dest, &a.game), head_before, "la version plus recente d'ALLY reste la version active");
-    assert_eq!(backup::plan(&a.ctx, &a.game, &dest).unwrap(), Plan::Restore, "comme avant : la version d'ALLY arrivera");
-    // ALLY n'est pas renvoye en arriere.
+    assert_eq!(head_hash(&dest, &a.game), head_before, "la version plus recente d'EPIGOS reste la version active");
+    assert_eq!(backup::plan(&a.ctx, &a.game, &dest).unwrap(), Plan::Restore, "comme avant : la version d'EPIGOS arrivera");
+    // EPIGOS n'est pas renvoye en arriere.
     assert_eq!(backup::plan(&b.ctx, &b.game, &dest).unwrap(), Plan::InSync);
 }
 
@@ -225,7 +225,7 @@ fn annuler_quand_un_autre_appareil_avait_plus_recent() {
 fn jamais_pendant_que_le_programme_tourne() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("coffre");
-    let m = machine(t.path(), "PC-DESKTOP");
+    let m = machine(t.path(), "EPIKOU");
     write(&m.game.path, "save.dat", b"v1");
     backup::backup(&m.ctx, &m.game, &dest).unwrap();
     pause();
@@ -251,7 +251,7 @@ fn jamais_pendant_que_le_programme_tourne() {
     backup::undo_restore(&m.ctx, &m.game, Some(&dest), &ticket).unwrap();
     assert_eq!(tree(&m.game.path), before);
     // Garde de l'interface.
-    let p = tt::Point { key: PointKey::Version(v1), ms: 0, day: 0, hour: 0, minute: 0, device: "PC-DESKTOP".into(), kind: PointKind::Version, current: false, active: false, files: 1, bytes: 2, legacy: false, note: None };
+    let p = tt::Point { key: PointKey::Version(v1), ms: 0, day: 0, hour: 0, minute: 0, device: "EPIKOU".into(), kind: PointKind::Version, current: false, active: false, files: 1, bytes: 2, legacy: false, note: None };
     assert_eq!(tt::restore_block(&p, &GameStatus::Running, false, true), Some(Block::ProgramOpen));
     assert_eq!(tt::restore_block(&p, &GameStatus::UpToDate, true, true), Some(Block::Busy));
     assert_eq!(tt::restore_block(&p, &GameStatus::UpToDate, false, false), Some(Block::NoVault));
@@ -266,7 +266,7 @@ fn jamais_pendant_que_le_programme_tourne() {
 fn fichier_ajoute_puis_modifie_garde_et_copie_abimee_refusee() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("coffre");
-    let m = machine(t.path(), "PC-DESKTOP");
+    let m = machine(t.path(), "EPIKOU");
     write(&m.game.path, "save.dat", b"v1");
     write(&m.game.path, "extra.dat", b"extra v1");
     backup::backup(&m.ctx, &m.game, &dest).unwrap();
@@ -304,7 +304,7 @@ fn fichier_ajoute_puis_modifie_garde_et_copie_abimee_refusee() {
 fn remettre_une_copie_de_securite_puis_annuler() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("coffre");
-    let m = machine(t.path(), "PC-DESKTOP");
+    let m = machine(t.path(), "EPIKOU");
     write(&m.game.path, "save.dat", &bytes(20, 4000));
     backup::backup(&m.ctx, &m.game, &dest).unwrap();
     pause();
@@ -352,12 +352,12 @@ fn frise_regroupee_par_jour_couleurs_et_branches() {
     let today_ms = agss::util::ms_from_civil(2026, 10, 21, 14, 0, 0, 0) as u64;
     let tz = FixedTz(7200);
     let mut rows = vec![
-        row("a", "ALLY", today_ms - 9 * D),
-        row("b", "PC-DESKTOP", today_ms - 3 * D),
-        row("c", "PC-DESKTOP", today_ms - D - 2 * H),
-        row("d", "ALLY", today_ms - D),
-        row("e", "PC-DESKTOP", today_ms - 3 * H),
-        row("f", "pc-desktop", today_ms - H),
+        row("a", "EPIGOS", today_ms - 9 * D),
+        row("b", "EPIKOU", today_ms - 3 * D),
+        row("c", "EPIKOU", today_ms - D - 2 * H),
+        row("d", "EPIGOS", today_ms - D),
+        row("e", "EPIKOU", today_ms - 3 * H),
+        row("f", "epikou", today_ms - H),
     ];
     rows[3].note = Some("branche locale en conflit (les deux versions sont conservees)".into());
     rows[5].active = true;
@@ -366,7 +366,7 @@ fn frise_regroupee_par_jour_couleurs_et_branches() {
     rows.reverse(); // l'historique est du plus recent au plus ancien
     let mut h = History { rows, conflict_heads: vec!["e".into(), "f".into()], ..Default::default() };
     let safety = vec![SafetyCopy { dir: PathBuf::from("safety/Celeste/x"), ms: today_ms - 2 * H, files: 2, bytes: 100, hash: "s".into(), note: None }];
-    let pts = tt::points(&h, &safety, "PC-DESKTOP", &tz);
+    let pts = tt::points(&h, &safety, "EPIKOU", &tz);
     assert_eq!(pts.len(), 7);
     assert!(pts.windows(2).all(|w| w[0].ms <= w[1].ms), "du plus ancien au plus recent");
     // jours en heure locale
@@ -389,19 +389,19 @@ fn frise_regroupee_par_jour_couleurs_et_branches() {
     assert_eq!(kind("d"), PointKind::BranchKept);
     assert_eq!(kind("a"), PointKind::Version);
     let s = pts.iter().find(|p| p.kind == PointKind::Safety).unwrap();
-    assert_eq!(s.device, "PC-DESKTOP");
+    assert_eq!(s.device, "EPIKOU");
     assert_eq!(tt::explain(s), Explain::Safety);
     // couleurs : une par appareil (casse ignoree)
-    let cols = tt::colors(&pts, &|d| if d.eq_ignore_ascii_case("PC-DESKTOP") { [0x1f, 0xb5, 0xc9] } else { [0x9b, 0x6a, 0xd6] });
+    let cols = tt::colors(&pts, &|d| if d.eq_ignore_ascii_case("EPIKOU") { [0x1f, 0xb5, 0xc9] } else { [0x9b, 0x6a, 0xd6] });
     for (p, c) in pts.iter().zip(&cols) {
-        assert_eq!(*c, if p.device.eq_ignore_ascii_case("pc-desktop") { [0x1f, 0xb5, 0xc9] } else { [0x9b, 0x6a, 0xd6] });
+        assert_eq!(*c, if p.device.eq_ignore_ascii_case("epikou") { [0x1f, 0xb5, 0xc9] } else { [0x9b, 0x6a, 0xd6] });
     }
     // selection par defaut : ce que tu as en ce moment
     let sel = tt::default_selected(&pts);
     assert_eq!(pts[sel].key, PointKey::Version("f".into()));
     assert_eq!(tt::explain(&pts[sel]), Explain::ConflictOpen, "un conflit en cours s'explique d'abord");
     h.conflict_heads.clear();
-    let pts = tt::points(&h, &[], "PC-DESKTOP", &tz);
+    let pts = tt::points(&h, &[], "EPIKOU", &tz);
     let sel = tt::default_selected(&pts);
     assert_eq!(tt::explain(&pts[sel]), Explain::Current);
     assert_eq!(tt::explain(&pts[0]), Explain::Older);
@@ -413,9 +413,9 @@ fn frise_regroupee_par_jour_couleurs_et_branches() {
 
 #[test]
 fn version_la_plus_recente_pas_encore_ici() {
-    let mut h = History { rows: vec![row("x", "ALLY", 2 * D), row("y", "PC-DESKTOP", D)], ..Default::default() };
+    let mut h = History { rows: vec![row("x", "EPIGOS", 2 * D), row("y", "EPIKOU", D)], ..Default::default() };
     h.rows[0].active = true;
-    let pts = tt::points(&h, &[], "PC-DESKTOP", &FixedTz(0));
+    let pts = tt::points(&h, &[], "EPIKOU", &FixedTz(0));
     let sel = tt::default_selected(&pts);
     assert_eq!(pts[sel].key, PointKey::Version("x".into()), "rien d'identique ici : la version active");
     assert_eq!(tt::explain(&pts[sel]), Explain::NewestNotHere);
@@ -465,35 +465,35 @@ fn facts(status: GameStatus, head: Option<(&str, &str, &str)>, writers: &[(&str,
 
 #[test]
 fn synchro_par_appareil_dans_l_en_tete() {
-    let w = [("PC-DESKTOP", "v1", "h1", 5), ("ALLY", "v2", "h2", 9)];
+    let w = [("EPIKOU", "v1", "h1", 5), ("EPIGOS", "v2", "h2", 9)];
     // a jour partout
-    let f = facts(GameStatus::UpToDate, Some(("ALLY", "v2", "h2")), &w, &[("PC-DESKTOP", "v2")]);
-    let r = tt::device_rows(&f, "PC-DESKTOP", true, &[]);
-    assert_eq!(r.iter().map(|d| (d.name.as_str(), d.here, d.state)).collect::<Vec<_>>(), vec![("PC-DESKTOP", true, DevState::UpToDate), ("ALLY", false, DevState::UpToDate)]);
+    let f = facts(GameStatus::UpToDate, Some(("EPIGOS", "v2", "h2")), &w, &[("EPIKOU", "v2")]);
+    let r = tt::device_rows(&f, "EPIKOU", true, &[]);
+    assert_eq!(r.iter().map(|d| (d.name.as_str(), d.here, d.state)).collect::<Vec<_>>(), vec![("EPIKOU", true, DevState::UpToDate), ("EPIGOS", false, DevState::UpToDate)]);
     assert_eq!(r[0].last_ms, Some(50));
     assert_eq!(r[1].last_ms, Some(9));
-    // en retard ici : ALLY a plus recent
-    let f = facts(GameStatus::CloudNewer, Some(("ALLY", "v2", "h2")), &w, &[]);
-    let r = tt::device_rows(&f, "PC-DESKTOP", true, &[]);
+    // en retard ici : EPIGOS a plus recent
+    let f = facts(GameStatus::CloudNewer, Some(("EPIGOS", "v2", "h2")), &w, &[]);
+    let r = tt::device_rows(&f, "EPIKOU", true, &[]);
     assert_eq!((r[0].state, r[1].state), (DevState::Behind, DevState::Newer));
-    // plus recent ici : ALLY reste a jour avec le coffre
-    let f = facts(GameStatus::LocalChanged, Some(("ALLY", "v2", "h2")), &w, &[]);
-    let r = tt::device_rows(&f, "PC-DESKTOP", true, &[]);
+    // plus recent ici : EPIGOS reste a jour avec le coffre
+    let f = facts(GameStatus::LocalChanged, Some(("EPIGOS", "v2", "h2")), &w, &[]);
+    let r = tt::device_rows(&f, "EPIKOU", true, &[]);
     assert_eq!((r[0].state, r[1].state), (DevState::Newer, DevState::UpToDate));
-    // ALLY n'a pas la derniere version d'PC-DESKTOP
-    let f = facts(GameStatus::UpToDate, Some(("PC-DESKTOP", "v3", "h3")), &[("PC-DESKTOP", "v3", "h3", 12), ("ALLY", "v2", "h2", 9)], &[("ALLY", "v2")]);
-    let r = tt::device_rows(&f, "PC-DESKTOP", true, &[]);
+    // EPIGOS n'a pas la derniere version d'EPIKOU
+    let f = facts(GameStatus::UpToDate, Some(("EPIKOU", "v3", "h3")), &[("EPIKOU", "v3", "h3", 12), ("EPIGOS", "v2", "h2", 9)], &[("EPIGOS", "v2")]);
+    let r = tt::device_rows(&f, "EPIKOU", true, &[]);
     assert_eq!((r[0].state, r[1].state), (DevState::UpToDate, DevState::Behind));
     // conflit
-    let f = facts(GameStatus::Conflict, Some(("ALLY", "v2", "h2")), &w, &[]);
-    let r = tt::device_rows(&f, "PC-DESKTOP", true, &["ALLY".into()]);
+    let f = facts(GameStatus::Conflict, Some(("EPIGOS", "v2", "h2")), &w, &[]);
+    let r = tt::device_rows(&f, "EPIKOU", true, &["EPIGOS".into()]);
     assert_eq!((r[0].state, r[1].state), (DevState::Conflict, DevState::Conflict));
     // coffre injoignable : rien d'affirme
-    let r = tt::device_rows(&f, "PC-DESKTOP", false, &[]);
+    let r = tt::device_rows(&f, "EPIKOU", false, &[]);
     assert!(r.iter().all(|d| d.state == DevState::Unknown));
     // jamais copie, seul appareil
     let f = facts(GameStatus::Never, None, &[], &[]);
-    let r = tt::device_rows(&f, "PC-DESKTOP", true, &[]);
+    let r = tt::device_rows(&f, "EPIKOU", true, &[]);
     assert_eq!(r.len(), 1);
     assert_eq!(r[0].state, DevState::NotCopied);
 }

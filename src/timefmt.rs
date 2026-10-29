@@ -72,7 +72,7 @@ pub fn iso_local(utc_ms: u64, tz: &dyn TzProvider) -> String {
     format!("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}{}{:02}:{:02}", y, mo, d, h, mi, s, sign, a / 3600, (a % 3600) / 60)
 }
 
-/// Libelle lisible d'un nom de version (`20261023-001136-166-PC-DESKTOP`, `versions/20261022-...`,
+/// Libelle lisible d'un nom de version (`20261023-001136-166-EPIKOU`, `versions/20261022-...`,
 /// `current`) : date locale si le nom commence par un horodatage, sinon le nom tel quel.
 pub fn version_label(name: &str, lang: Lang, tz: &dyn TzProvider) -> String {
     let base = name.rsplit('/').next().unwrap_or(name);

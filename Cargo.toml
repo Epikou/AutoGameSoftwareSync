@@ -1,10 +1,8 @@
 [package]
 name = "autogamesoftwaresync"
-version = "2.0.2"
+version = "2.0.3"
 edition = "2021"
 description = "AutoGameSoftwareSync : synchronisation de sauvegardes et reglages de jeux et de logiciels entre PC via un dossier partage (NAS, Google Drive, Dropbox, etc.)"
-license = "GPL-3.0-only"
-repository = "https://github.com/Epikou/AutoGameSoftwareSync"
 
 [lib]
 name = "agss"
@@ -38,6 +36,8 @@ walkdir = "2"
 dirs = "5"
 ctrlc = "3"
 eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow"] }
+# Icones de l'interface (2.0.3) : police Phosphor embarquee (MIT), aucune ressource reseau.
+egui-phosphor = { version = "0.9", default-features = false, features = ["regular"] }
 
 
 [target.'cfg(windows)'.dependencies]

@@ -80,8 +80,91 @@ fn closed(p: &egui::Painter, pts: Vec<Pos2>, s: Stroke) {
     p.add(egui::Shape::closed_line(pts, s));
 }
 
-/// Dessine l'icone `g` dans `r` avec la couleur `c` (traits proportionnels a la taille).
+// ------------------------------------------------------------------ 2.0.3 : jeu d'icones Phosphor (police embarquee, MIT)
+
+/// Famille de police des icones de l'interface (Phosphor « Regular » : une seule famille, un seul trait).
+pub const ICON_FAMILY: &str = "agss-icons";
+
+static ICON_FONT: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Ajoute la police des icones aux polices de l'interface (a appeler pour TOUTE definition de polices passee a egui).
+pub fn install_icon_font(fonts: &mut egui::FontDefinitions) {
+    fonts.font_data.insert(ICON_FAMILY.into(), std::sync::Arc::new(egui_phosphor::Variant::Regular.font_data()));
+    fonts.families.insert(egui::FontFamily::Name(ICON_FAMILY.into()), vec![ICON_FAMILY.into()]);
+    ICON_FONT.store(true, std::sync::atomic::Ordering::SeqCst);
+}
+
+/// Polices de l'interface : celles d'egui + les icones.
+pub fn fonts_with_icons() -> egui::FontDefinitions {
+    let mut f = egui::FontDefinitions::default();
+    install_icon_font(&mut f);
+    f
+}
+
+/// Caractere Phosphor d'une icone.
+pub fn glyph_char(g: Glyph) -> &'static str {
+    use egui_phosphor::regular as ph;
+    match g {
+        Glyph::Home => ph::HOUSE,
+        Glyph::Plus => ph::PLUS,
+        Glyph::Pc => ph::DESKTOP,
+        Glyph::Gear => ph::GEAR_SIX,
+        Glyph::Folder => ph::FOLDER,
+        Glyph::Pad => ph::GAME_CONTROLLER,
+        Glyph::Window => ph::APP_WINDOW,
+        Glyph::Code => ph::CODE,
+        Glyph::Star => ph::STAR,
+        Glyph::Shield => ph::SHIELD_CHECK,
+        Glyph::Drive => ph::HARD_DRIVE,
+        Glyph::Cloud => ph::CLOUD,
+        Glyph::Box => ph::PACKAGE,
+        Glyph::Nas => ph::HARD_DRIVES,
+        Glyph::Usb => ph::USB,
+        Glyph::Disk => ph::FLOPPY_DISK,
+        Glyph::Eye => ph::MAGNIFYING_GLASS,
+        Glyph::Clock => ph::CLOCK_COUNTER_CLOCKWISE,
+        Glyph::Check => ph::CHECK,
+        Glyph::Cross => ph::X,
+        Glyph::Alert => ph::WARNING,
+        Glyph::ArrowDown => ph::ARROW_DOWN,
+        Glyph::More => ph::DOTS_THREE,
+        Glyph::ChevronRight => ph::CARET_RIGHT,
+        Glyph::ChevronDown => ph::CARET_DOWN,
+        Glyph::ChevronLeft => ph::CARET_LEFT,
+    }
+}
+
+/// Dessine un caractere Phosphor centre dans `r` (taille = cote), tourne de `angle` radians autour du centre. Faux si la
+/// police n'est pas installee (l'appelant dessine alors au pinceau).
+pub fn paint_char(p: &egui::Painter, r: Rect, ch: &str, c: Color32, angle: f32) -> bool {
+    if !icon_font_ready() {
+        return false;
+    }
+    let s = r.width().min(r.height());
+    let gal = p.layout_no_wrap(ch.to_string(), egui::FontId::new(s, egui::FontFamily::Name(ICON_FAMILY.into())), c);
+    let half = gal.size() / 2.0;
+    let rot = egui::emath::Rot2::from_angle(angle);
+    let pos = r.center() - rot * half;
+    p.add(egui::epaint::TextShape::new(pos, gal, c).with_angle(angle));
+    true
+}
+
+/// La police des icones est-elle installee (sinon : dessin au pinceau, ex. contextes egui des tests) ?
+pub fn icon_font_ready() -> bool {
+    ICON_FONT.load(std::sync::atomic::Ordering::SeqCst)
+}
+
+/// Dessine l'icone `g` dans `r` avec la couleur `c`.
 pub fn paint_glyph(p: &egui::Painter, r: Rect, g: Glyph, c: Color32) {
+    // 2.0.3 : la manette (jugee mal dessinee) vient du jeu d'icones Phosphor ; les autres icones gardent leur dessin.
+    if g == Glyph::Pad && paint_char(p, r.expand(r.width() * 0.08), glyph_char(g), c, 0.0) {
+        return;
+    }
+    paint_glyph_drawn(p, r, g, c);
+}
+
+/// Ancien dessin au pinceau (repli).
+fn paint_glyph_drawn(p: &egui::Painter, r: Rect, g: Glyph, c: Color32) {
     let gr = Grid::new(r);
     let s = Stroke::new((2.0 * gr.k).max(1.2), c);
     match g {

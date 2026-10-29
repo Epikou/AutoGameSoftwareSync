@@ -71,6 +71,144 @@ pub fn deliver(n: &dyn Notifier, data_dir: &Path, lang: Lang, ev: &WatchEvent) -
     true
 }
 
+// ------------------------------------------------------------------ moins de notifications (2.0.3)
+
+/// Ce que devient un evenement de la surveillance.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Route {
+    /// Notification tout de suite.
+    Now,
+    /// Un programme suivi ou detecte tourne : gardee, puis regroupee en UNE notification a sa fermeture.
+    Hold,
+    /// Aucune notification (la tuile de l'accueil suffit).
+    Silent,
+}
+
+/// Politique des notifications. `has_program` : l'element a un programme (sa copie suit la fermeture du programme) ;
+/// `busy` : un programme suivi ou detecte tourne en ce moment. Pure.
+///
+/// - copie faite : notifiee seulement pour un element a programme, a sa fermeture (c'est LA notification de fin
+///   d'utilisation) ; si un AUTRE programme suivi tourne encore, elle est gardee et regroupee (« A jour : ... ») ; les
+///   copies de dossiers, de reglages ou planifiees sont silencieuses ;
+/// - version recue, conflit, conflit regle, probleme : jamais pendant l'utilisation (gardes puis regroupes).
+pub fn route(kind: EventKind, has_program: bool, busy: bool) -> Route {
+    match kind {
+        EventKind::BackedUp if !has_program => Route::Silent,
+        _ if busy => Route::Hold,
+        _ => Route::Now,
+    }
+}
+
+/// File des notifications gardees et problemes deja signales (un meme probleme n'est notifie qu'une fois par session).
+#[derive(Default, Debug)]
+pub struct Gate {
+    held: Vec<WatchEvent>,
+    errors: std::collections::HashSet<String>,
+}
+
+impl Gate {
+    /// Evenement a notifier tout de suite (None : garde, silencieux ou deja signale).
+    pub fn offer(&mut self, ev: &WatchEvent, has_program: bool, busy: bool) -> Option<WatchEvent> {
+        if ev.kind == EventKind::Error && !self.errors.insert(format!("{}\u{1}{}", ev.game, ev.detail)) {
+            return None;
+        }
+        match route(ev.kind, has_program, busy) {
+            Route::Now => Some(ev.clone()),
+            Route::Silent => None,
+            Route::Hold => {
+                // « Conflit regle » remplace « version recue » du meme element (meme fait, un seul message).
+                if ev.kind == EventKind::ConflictResolved {
+                    self.held.retain(|h| !(h.game == ev.game && h.kind == EventKind::Restored));
+                }
+                let dup = self.held.iter().any(|h| h.game == ev.game && (h.kind == ev.kind || ev.kind == EventKind::Restored && h.kind == EventKind::ConflictResolved));
+                if !dup {
+                    self.held.push(ev.clone());
+                }
+                None
+            }
+        }
+    }
+
+    /// Plus rien ne tourne : les evenements gardes, a regrouper en une seule notification.
+    pub fn flush(&mut self, busy: bool) -> Vec<WatchEvent> {
+        if busy {
+            return vec![];
+        }
+        std::mem::take(&mut self.held)
+    }
+
+    pub fn held(&self) -> usize {
+        self.held.len()
+    }
+}
+
+/// Texte de LA notification qui regroupe les evenements gardes : un seul evenement = son texte habituel ; sinon un titre et
+/// une ligne par sorte (mis a jour, a verifier, probleme), noms affiches separes par des virgules (3 au plus, puis « +N »).
+pub fn grouped_text(held: &[WatchEvent], lang: Lang) -> Option<(String, String)> {
+    if held.is_empty() {
+        return None;
+    }
+    if held.len() == 1 {
+        return Some(notification_text(&held[0], lang));
+    }
+    let names = |f: &dyn Fn(EventKind) -> bool| -> Option<String> {
+        let v: Vec<&str> = held.iter().filter(|e| f(e.kind)).map(|e| e.game.as_str()).collect();
+        if v.is_empty() {
+            return None;
+        }
+        let mut s = v.iter().take(3).copied().collect::<Vec<_>>().join(", ");
+        if v.len() > 3 {
+            s.push_str(&format!(" +{}", v.len() - 3));
+        }
+        Some(s)
+    };
+    let mut lines: Vec<String> = Vec::new();
+    if let Some(s) = names(&|k| matches!(k, EventKind::Restored | EventKind::ConflictResolved | EventKind::BackedUp)) {
+        lines.push(tr(lang, K::VNotifHeldUpdated).replace("{}", &s));
+    }
+    if let Some(s) = names(&|k| k == EventKind::Conflict) {
+        lines.push(tr(lang, K::VNotifHeldConflict).replace("{}", &s));
+    }
+    if let Some(s) = names(&|k| k == EventKind::Error) {
+        lines.push(tr(lang, K::VNotifHeldError).replace("{}", &s));
+    }
+    Some((tr(lang, K::VNotifHeldTitle).to_string(), lines.join("\n")))
+}
+
+/// Envoi avec la politique 2.0.3 : reglages relus (global + par element), nom affiche, puis `Gate`. Vrai si une
+/// notification est partie tout de suite.
+pub fn deliver_gated(n: &dyn Notifier, data_dir: &Path, lang: Lang, ev: &WatchEvent, busy: bool, gate: &mut Gate) -> bool {
+    let s = crate::settings::Settings::load_from(data_dir).unwrap_or_default();
+    let allowed = if ev.kind == EventKind::ConflictResolved { s.notify_conflict_resolved } else { s.notify_for(&ev.game) };
+    if !allowed {
+        return false;
+    }
+    let cfg = crate::config::Config::load(&crate::Ctx::new(data_dir.to_path_buf())).ok();
+    let g = cfg.as_ref().and_then(|c| c.find(&ev.game));
+    let has_program = g.map(|g| !g.exe.as_deref().map(str::trim).unwrap_or("").is_empty()).unwrap_or(false);
+    let shown = WatchEvent { game: g.map(|g| g.shown().to_string()).unwrap_or_else(|| ev.game.clone()), kind: ev.kind, detail: ev.detail.clone() };
+    match gate.offer(&shown, has_program, busy) {
+        Some(e) => {
+            let (title, body) = notification_text(&e, lang);
+            n.notify(&title, &body);
+            true
+        }
+        None => false,
+    }
+}
+
+/// Fin d'utilisation : UNE notification pour tout ce qui a ete garde. Vrai si elle est partie.
+pub fn flush_gated(n: &dyn Notifier, lang: Lang, busy: bool, gate: &mut Gate) -> bool {
+    let held = gate.flush(busy);
+    match grouped_text(&held, lang) {
+        Some((t, b)) => {
+            n.notify(&t, &b);
+            true
+        }
+        None => false,
+    }
+}
+
 #[cfg(windows)]
 mod imp {
 use super::*;

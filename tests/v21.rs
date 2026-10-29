@@ -56,12 +56,12 @@ fn assert_a_jour(ctx: &Ctx, g: &Game, dest: &Path) {
 fn premier_contact_local_22_cloud_11_converge_et_journalise() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
-    let (b, gb) = machine(t.path(), "ALLY");
+    let (b, gb) = machine(t.path(), "EPIGOS");
     for i in 0..11 {
         w(&gb.path, &format!("slot{}.dat", i), &format!("B-{}", i));
     }
     backup::backup(&b, &gb, &dest).unwrap();
-    let (a, ga) = machine(t.path(), "PC-DESKTOP");
+    let (a, ga) = machine(t.path(), "EPIKOU");
     for i in 0..11 {
         w(&ga.path, &format!("slot{}.dat", i), &if i < 6 { format!("B-{}", i) } else { format!("A-{}", i) });
         w(&ga.path, &format!("extra{}.dat", i), "extra");
@@ -74,9 +74,9 @@ fn premier_contact_local_22_cloud_11_converge_et_journalise() {
     assert_eq!(count(&ga.path), 22, "aucun fichier local supprime");
     // La version locale d'origine (slot6..10 = A-i) reste retrouvable dans l'historique.
     let hist = backup::history(&a, &ga, &dest);
-    assert!(hist.rows.iter().any(|r| r.files == 22 && r.machine == "PC-DESKTOP"));
+    assert!(hist.rows.iter().any(|r| r.files == 22 && r.machine == "EPIKOU"));
     let log = log_of(&a);
-    assert!(log.contains("premiere synchro : versions differentes (local 22 fichiers / cloud 11 fichiers de ALLY) = conflit"), "{}", log);
+    assert!(log.contains("premiere synchro : versions differentes (local 22 fichiers / cloud 11 fichiers de EPIGOS) = conflit"), "{}", log);
     assert!(log.contains("conflit : version locale gardee en branche, version du cloud appliquee (mode cloud automatique)"), "{}", log);
     // B converge a son tour.
     round(&b, &gb, &dest, true, 5_000_000);
@@ -90,13 +90,13 @@ fn local_ancetre_exact_plus_fichiers_ne_boucle_plus() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
     std::fs::create_dir_all(&dest).unwrap(); // 2.0 : la surveillance ne cree jamais le coffre lui-meme
-    let (a, ga) = machine(t.path(), "PC-DESKTOP");
+    let (a, ga) = machine(t.path(), "EPIKOU");
     for i in 0..11 {
         w(&ga.path, &format!("slot{}.dat", i), &format!("S-{}", i));
         w(&ga.path, &format!("extra{}.dat", i), "extra");
     }
     round(&a, &ga, &dest, true, 0); // V1 = 22 fichiers
-    let (b, gb) = machine(t.path(), "ALLY");
+    let (b, gb) = machine(t.path(), "EPIGOS");
     round(&b, &gb, &dest, true, 1_000_000);
     for i in 0..11 {
         std::fs::remove_file(gb.path.join(format!("extra{}.dat", i))).unwrap();
@@ -126,7 +126,7 @@ fn local_ancetre_exact_plus_fichiers_ne_boucle_plus() {
 fn sauvegarde_identique_tete_ignoree_ancetre_ecrit() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
-    let (a, ga) = machine(t.path(), "PC-DESKTOP");
+    let (a, ga) = machine(t.path(), "EPIKOU");
     w(&ga.path, "s.dat", "1");
     assert!(matches!(backup::backup(&a, &ga, &dest).unwrap(), backup::BackupOutcome::Backed { .. }));
     assert!(matches!(backup::backup(&a, &ga, &dest).unwrap(), backup::BackupOutcome::UpToDate));

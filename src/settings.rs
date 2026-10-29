@@ -200,7 +200,24 @@ pub struct Settings {
     /// Moment (ms) ou le rappel a ete programme (il ne s'affiche pas dans la meme session, sauf apres 24 h).
     #[serde(default)]
     pub usage_late_ms: u64,
+    /// Tri de l'accueil (2.0.3) : menu a gauche des filtres. Par defaut : etat (problemes d'abord), comme avant.
+    #[serde(default)]
+    pub home_sort: crate::home::SortKey,
+    /// 2.0.3 : a la fermeture d'un programme pas encore protege, l'appli passe en plein ecran avec la proposition (sinon :
+    /// notification seulement). Active par defaut.
+    #[serde(default = "yes")]
+    pub close_fullscreen: bool,
+    /// Ancien masquage par nombre de la carte « jeux Playnite pas encore proteges » (2.0.3 initiale) : lu pour
+    /// compatibilite, plus utilise.
+    #[serde(default)]
+    pub playnite_card_hidden: usize,
+    /// Carte « jeux Playnite pas encore proteges » masquee jusqu'a cette date (ms UTC ; 30 jours apres « Masquer »).
+    #[serde(default)]
+    pub playnite_card_hidden_until_ms: u64,
 }
+
+/// Duree du masquage de la carte Playnite de l'accueil apres « Masquer ».
+pub const PLAYNITE_CARD_HIDE_MS: u64 = 30 * 86_400_000;
 
 /// Valeurs par defaut de la PREMIERE installation (aucun settings.json) : English, sombre, vert #028463.
 pub const DEFAULT_ACCENT: [u8; 3] = [2, 132, 99];
@@ -265,6 +282,10 @@ impl Default for Settings {
             heavy_notified: Vec::new(),
             usage_late: 0,
             usage_late_ms: 0,
+            home_sort: Default::default(),
+            close_fullscreen: true,
+            playnite_card_hidden: 0,
+            playnite_card_hidden_until_ms: 0,
         }
     }
 }

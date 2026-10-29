@@ -22,6 +22,9 @@ impl Shared {
             let mut learners: super::knowledge_ui::Learners = HashMap::new();
             let mut learn_list = crate::knowledge::store::LearnList::load(&me.data_dir);
             let mut learn_at = Instant::now();
+            // 2.0.3 : programmes inconnus observes pendant leur utilisation, et fermeture a proposer (carte en attente).
+            let mut unk = gamedetect::UnknownWatch::default();
+            let mut close_cand: Option<gamedetect::Candidate> = None;
             loop {
                 std::thread::sleep(Duration::from_secs(1));
                 if me.quitting.load(Ordering::SeqCst) {
@@ -35,28 +38,77 @@ impl Shared {
                     was_enabled = false;
                     me.det_running.store(false, Ordering::SeqCst);
                     learners.clear();
+                    // Detection coupee en cours de session : plus aucun programme « detecte » ne tourne (sinon toute copie
+                    // resterait silencieuse et les notifications gardees sans fin).
+                    det = gamedetect::Detector::default();
+                    unk = gamedetect::UnknownWatch::default();
+                    close_cand = None;
+                    show = gamedetect::ShowOnClose::default();
+                }
+                // Notifications gardees pendant l'utilisation : UNE seule, a la fermeture. Fait a chaque passage, detection
+                // activee ou non (sinon les evenements gardes seraient perdus quand elle est coupee).
+                let busy_games = me.games_running.load(Ordering::SeqCst) || det.running_count() > 0;
+                me.det_games.store(busy_games, Ordering::SeqCst);
+                if !busy_games {
+                    let held = me.notif_gate.lock().map(|g| g.held()).unwrap_or(0);
+                    if held > 0 {
+                        if let Ok(mut g) = me.notif_gate.lock() {
+                            crate::notify::flush_gated(&crate::notify::WinNotifier, s.lang, false, &mut g);
+                        }
+                        lg.log(&format!("[Notifications] {} evenement(s) garde(s) pendant l'utilisation : une notification groupee", held));
+                    }
+                }
+                if !s.detect_enabled {
                     continue;
                 }
-                // Fermeture d un jeu detecte : afficher l appli (une fois, jamais pendant un jeu).
+                // Fermeture d'un programme pas encore protege : ecran de proposition (une fois, jamais pendant un jeu suivi,
+                // detecte ou inconnu encore ouvert, ni pendant un plein ecran : reporte, au plus 10 min). Plein ecran active :
+                // l'appli est montree et restauree ; si Windows refuse le premier plan, ou si l'option est coupee : UNE
+                // notification cliquable qui ouvre ce meme ecran.
                 {
                     let ctx = gamedetect::ShowCtx {
                         enabled: true, // toujours actif quand la detection est activee (interrupteur principal)
                         cards_pending: me.proposals.lock().map(|p| !p.queue.is_empty()).unwrap_or(false),
-                        other_game_running: me.games_running.load(Ordering::SeqCst) || det.running_count() > 0,
+                        other_game_running: busy_games || unk.running_count() > 0,
                         fullscreen_active: winutil::foreground_is_fullscreen(),
                         tutorial: me.ui_busy.load(Ordering::SeqCst),
                         confirm_open: false,
                         already_foreground: winutil::own_window_is_foreground(),
                     };
-                    match show.tick(&ctx, crate::util::now_ms(), &mut || winutil::bring_to_front(APP_TITLE)) {
-                        gamedetect::ShowAction::BringToFront => lg.log("[Detection] fin d'utilisation : appli passee au premier plan (cartes en attente)"),
+                    let full = s.close_fullscreen;
+                    let act = show.tick(&ctx, crate::util::now_ms(), &mut || full && winutil::bring_to_front(APP_TITLE));
+                    let cand = if matches!(act, gamedetect::ShowAction::None | gamedetect::ShowAction::Expired) { None } else { close_cand.take() };
+                    if let Some(c) = &cand {
+                        if let Ok(mut r) = me.close_req.lock() {
+                            *r = Some((c.key.clone(), full, crate::util::now_ms()));
+                        }
+                        if let Some(cx) = me.ui_ctx.lock().ok().and_then(|g| g.clone()) {
+                            cx.request_repaint();
+                        }
+                    }
+                    match act {
+                        gamedetect::ShowAction::BringToFront | gamedetect::ShowAction::AlreadyFront => lg.log("[Detection] fin d'utilisation : appli au premier plan, ecran de proposition"),
+                        gamedetect::ShowAction::Expired => {
+                            close_cand = None;
+                            lg.log("[Detection] fin d'utilisation : ecran de proposition abandonne (10 min sans pouvoir s'afficher), la carte reste sur l'accueil");
+                        }
                         gamedetect::ShowAction::FlashTaskbar => {
-                            lg.log(if cfg!(windows) {
-                                "[Detection] fin d'utilisation : premier plan refuse par Windows, bouton de la barre des taches clignotant"
+                            lg.log(if !full {
+                                "[Detection] fin d'utilisation : plein ecran desactive, notification seulement"
+                            } else if cfg!(windows) {
+                                "[Detection] fin d'utilisation : premier plan refuse par Windows, notification cliquable + bouton de la barre des taches clignotant"
                             } else {
-                                "[Detection] fin d'utilisation : premier plan refuse par le gestionnaire de fenetres, demande d'attention envoyee"
+                                "[Detection] fin d'utilisation : premier plan refuse par le gestionnaire de fenetres, notification + demande d'attention"
                             });
-                            winutil::flash_taskbar(APP_TITLE);
+                            if full {
+                                winutil::flash_taskbar(APP_TITLE);
+                            }
+                            if let Some(c) = &cand {
+                                if s.notify_global {
+                                    let title = tr(s.lang, K::VCloseNotifTitle).replace("{}", &c.name);
+                                    crate::notify::Notifier::notify(&crate::notify::WinNotifier, &title, tr(s.lang, K::VCloseNotifBody));
+                                }
+                            }
                         }
                         gamedetect::ShowAction::None => {}
                     }
@@ -67,10 +119,12 @@ impl Shared {
                 last_scan = Instant::now();
                 if !was_enabled {
                     det = gamedetect::Detector::default(); // nouvelle reference : les jeux deja ouverts ne sont jamais proposes
+                    unk = gamedetect::UnknownWatch::default();
                     was_enabled = true;
                     roots_at = Instant::now() - Duration::from_secs(3600); // recharge aussi les profils (extra)
                 }
                 det.scope = s.detect_scope;
+                unk.scope = s.detect_scope;
                 if let Ok(mut q) = me.proposals.lock() {
                     if q.retain_scope(s.detect_scope) > 0 {
                         let _ = q.save(&me.data_dir);
@@ -118,7 +172,11 @@ impl Shared {
                 // Indices d'execution (fichier, parent, age, bibliotheques) : seulement pour les processus qui ressemblent a quelque chose.
                 let wanted: Vec<&crate::process::ProcInfo> = procs.iter().filter(|p| gamedetect::assess(p, &env, &gamedetect::Facts::default()).is_some() || prof_exes.contains(&p.exe) || facts.under_manifest(p)).collect();
                 det.facts = wanted.into_iter().map(|p| ((p.pid, p.start), facts.facts(p, &table, now))).collect();
-                let events = det.scan(&procs, &env, &mem, s.notify_global, now);
+                // 2.0.3 : indices des programmes a vraie fenetre (apprentissage des programmes inconnus).
+                let wins = winutil::visible_window_pids();
+                let ufacts: HashMap<(u32, u64), gamedetect::Facts> = procs.iter().filter(|p| wins.contains(&p.pid)).map(|p| ((p.pid, p.start), facts.facts(p, &table, now))).collect();
+                // Plus aucune bulle au lancement (2.0.3) : une seule notification, a la fermeture.
+                let events = det.scan(&procs, &env, &mem, false, now);
                 for c in det.refused.drain(..) {
                     let why = c.confidence.as_ref().map(|s| s.summary()).unwrap_or_default();
                     lg.log(&format!("[Detection] non propose : {} ({}) score {} [{}]", c.exe, c.name, why, c.path.as_ref().map(|p| p.display().to_string()).unwrap_or_default()));
@@ -129,12 +187,42 @@ impl Shared {
                     learn_list = crate::knowledge::store::LearnList::load(&me.data_dir);
                 }
                 me.learn_list_tick(&mut learners, &mut learn_list, &procs, &lg, now);
+                // Programmes inconnus : observation discrete (aucune notification pendant qu'ils tournent).
+                for ev in unk.scan(&procs, &env, &mem, &wins, &ufacts, &|p| det.is_running(p.pid, p.start)) {
+                    match ev {
+                        gamedetect::UnknownEvent::Started(c) => {
+                            lg.log(&format!("[Connaissance] {} : programme inconnu avec une fenetre depuis 2 min, observation de ses dossiers", c.exe));
+                            if !learners.contains_key(&c.key) {
+                                if let Some(p) = me.needs_learning(&c, &db) {
+                                    let l = crate::knowledge::learn::Learner::start(&p, p.folders(), now);
+                                    learners.insert(c.key.clone(), (p, l));
+                                }
+                            }
+                        }
+                        gamedetect::UnknownEvent::Ended(c) => {
+                            // Ecran de fermeture SEULEMENT si quelque chose a ete trouve a proteger (dossiers appris, ou
+                            // emplacement connu de la base / des profils / de la connaissance locale) ; sinon, carte discrete
+                            // sur l'accueil, sans notification.
+                            let found = me.close_found(&c, &mut learners, &db, &lg, now);
+                            if found && me.offer_on_close(&c, &known, &mem, s.detect_scope, now) {
+                                show.on_closed(now);
+                                close_cand = Some(c);
+                            } else if !found && gamedetect::in_scope(&c, s.detect_scope) && !known.iter().any(|k| *k == c.exe) && mem.may_propose(&c.key, now) {
+                                lg.log(&format!("[Detection] {} : rien trouve a proteger, carte discrete sur l'accueil seulement", c.exe));
+                                me.queue_card(c, now);
+                            }
+                        }
+                    }
+                }
                 for ev in events {
                     match ev {
                         gamedetect::Event::Ended(c) => {
-                            show.on_closed(now);
-                            if let Some((p, l)) = learners.remove(&c.key) {
-                                me.learn_done(&c.key, &p, l, &lg, now);
+                            // Programme connu detecte mais pas encore protege : meme ecran a sa fermeture, meme condition
+                            // (quelque chose a proteger) ; sa carte est deja en file sinon.
+                            let found = me.close_found(&c, &mut learners, &db, &lg, now);
+                            if found && me.offer_on_close(&c, &known, &mem, s.detect_scope, now) {
+                                close_cand = Some(c);
+                                show.on_closed(now);
                             }
                         }
                         gamedetect::Event::Launched(c) => {
@@ -149,16 +237,38 @@ impl Shared {
                             }
                             me.queue_card(c, now);
                         }
-                        gamedetect::Event::Notify(c) => {
-                            let body = tr(s.lang, K::DetNotifLaunch).replace("{}", &c.name);
-                            crate::notify::Notifier::notify(&crate::notify::WinNotifier, "AutoGameSoftwareSync", &body);
-                        }
+                        // Bulle « vient de demarrer » supprimee en 2.0.3 (jamais pendant l'utilisation).
+                        gamedetect::Event::Notify(_) => {}
                     }
                 }
                 // Aucune recherche en ligne pendant l'utilisation d'un programme detecte (ou en apprentissage).
                 me.det_running.store(det.running_count() > 0 || !learners.is_empty(), Ordering::SeqCst);
             }
         });
+    }
+
+    /// A la fermeture d'un programme : y a-t-il quelque chose a proteger ? Vrai si l'observation (apprentissage) a trouve
+    /// au moins un dossier candidat, ou si l'emplacement est deja connu (profil, base, connaissance locale : aucun
+    /// apprentissage n'avait ete lance). Termine l'apprentissage en cours s'il y en a un.
+    pub(super) fn close_found(&self, c: &gamedetect::Candidate, learners: &mut super::knowledge_ui::Learners, db: &crate::gamedb::GameDb, lg: &Logger, now: u64) -> bool {
+        match learners.remove(&c.key) {
+            Some((p, l)) => !self.learn_done(&c.key, &p, l, lg, now).is_empty(),
+            None => c.profile_id.is_some() || self.needs_learning(c, db).is_none(),
+        }
+    }
+
+    /// Fermeture d'un programme pas encore protege (inconnu appris, ou connu detecte) : sa carte passe en tete de file pour
+    /// l'ecran de fermeture. Faux s'il est protege entre-temps, hors portee, si l'utilisateur a deja repondu « oui » /
+    /// « jamais », ou s'il a deja dit « Plus tard » plus de `CLOSE_LATER_MAX` fois (la carte de l'accueil reste).
+    pub(super) fn offer_on_close(&self, c: &gamedetect::Candidate, known: &[String], mem: &Memory, scope: gamedetect::DetectScope, now: u64) -> bool {
+        if known.iter().any(|k| *k == c.exe) || !gamedetect::in_scope(c, scope) || !mem.may_show_close(&c.key) {
+            return false;
+        }
+        if let Ok(mut q) = self.proposals.lock() {
+            q.promote(c, now);
+            let _ = q.save(&self.data_dir);
+        }
+        true
     }
 
     /// Ajoute une carte a la file (sans doublon) et la persiste (expiration 7 jours).
@@ -192,7 +302,7 @@ impl App {
                 .path
                 .as_ref()
                 .and_then(|p| winutil::exe_icon_rgba(p))
-                .map(|(rgba, w, h)| ctx.load_texture(key.clone(), egui::ColorImage::from_rgba_unmultiplied([w, h], &rgba), egui::TextureOptions::LINEAR));
+                .map(|(rgba, w, h)| ctx.load_texture(key.clone(), egui::ColorImage::from_rgba_unmultiplied([w, h], &rgba), crate::gui::ui::ICON_TEX));
             self.icons.insert(key.clone(), tex);
         }
         self.icons.get(&key).cloned().flatten()
@@ -252,6 +362,22 @@ impl App {
         use gamedetect::{Answer, CardState};
         let t_ms = (ctx.input(|i| i.time) * 1000.0) as u64;
         let now = crate::util::now_ms();
+        self.close_demo();
+        // Fermeture d'un programme pas encore protege (thread de detection) : ecran de proposition a ouvrir.
+        if let Some((key, full, at)) = self.shared.close_req.lock().ok().and_then(|mut r| r.take()) {
+            self.close_open(key, full, at);
+        }
+        // Garde-fous de l'ecran de fermeture (jamais coince en plein ecran) : sa carte n'est plus en file (portee changee,
+        // expiree, resolue autrement) -> ecran ferme ; demande trop ancienne (10 min sans avoir pu s'afficher : fenetre cachee,
+        // reduite...) -> abandonnee, la carte ordinaire reste.
+        if let Some(k) = self.close.key.clone() {
+            let in_queue = self.shared.proposals.lock().map(|q| q.queue.iter().any(|p| p.cand.key == k)).unwrap_or(false);
+            let too_old = !self.close.entered && now.saturating_sub(self.close.at) > gamedetect::CLOSE_WAIT_MS;
+            if !in_queue || too_old {
+                self.pad_log(&format!("[Detection] ecran de fermeture ferme ({})", if in_queue { "trop tard : carte de l'accueil seulement" } else { "sa carte n'est plus en file" }));
+                self.close_done(ctx);
+            }
+        }
         let b = Blockers {
             tutorial: self.wizard.active,
             confirm_open: self.model.confirm.is_some() || self.pending_add.is_some() || self.pending_overlap.is_some(),
@@ -341,6 +467,10 @@ impl App {
         let Some((pending, rank, total, behind)) = snapshot else {
             self.prop_state.sync(None, t_ms);
             self.prop_key = None;
+            // Entre en plein ecran mais plus rien a dessiner (fenetre cachee, confirmation, detection coupee...) : on en sort.
+            if self.close.entered {
+                self.close_done(ctx);
+            }
             return;
         };
         let cand = pending.cand.clone();
@@ -405,13 +535,26 @@ impl App {
                         p.install_dir = cc.install_dir.clone();
                     }
                     let found = crate::knowledge::find_local(&p, &dd, crate::util::now_ms());
-                    if found.is_empty() {
+                    // Recherche en ligne : memes declencheurs qu'en 2.0.2 (cartes de la base, des lanceurs, des profils et des
+                    // emulateurs) ; JAMAIS pour un programme inconnu observe (Why::Learned) : son nom ne part pas en ligne.
+                    if found.is_empty() && cc.why != gamedetect::Why::Learned {
                         sh.request_web(super::knowledge_ui::KnowTarget::Card(cc.key.clone()), p.clone());
                     }
                     let _ = tx.send(Msg::Known(super::knowledge_ui::KnowTarget::Card(cc.key.clone()), p, found));
                     c2.request_repaint();
                 }
             });
+        }
+        // 2.0.3 : fermeture de ce programme = grand ecran de proposition (plein ecran si l'option est active).
+        if self.close.key.as_deref() == Some(cand.key.as_str()) {
+            let icon = self.prop_icon(ctx, &cand);
+            if let Some(a) = self.close_screen(ctx, &cand, icon.as_ref()) {
+                self.prop_apply(ctx, &cand, a, icon, behind.len(), false, now, t_ms);
+            }
+            return;
+        } else if self.close.key.is_some() {
+            // La carte promue n'est plus la carte courante (autre carte passee devant) : ecran ferme, plein ecran quitte.
+            self.close_done(ctx);
         }
         // Fond assombri (clics absorbes).
         egui::Area::new(egui::Id::new("prop_dim")).order(egui::Order::Foreground).fixed_pos(screen.min).interactable(true).show(ctx, |ui| {
@@ -540,7 +683,7 @@ impl App {
                     self.open_picker(ctx, "prop_path", opts);
                 }
                 let chosen = self.prop_path.trim().to_string();
-                let ok = cand.profile_id.is_some() || (!chosen.is_empty() && std::path::Path::new(&chosen).exists());
+                let ok = cand.profile_id.is_some() || (!chosen.is_empty() && self.close.path_exists(std::path::Path::new(&chosen)));
                 ui.add_space(u::tokens::SP_S);
                 // Disposition : « Oui » (principal, le plus grand) a gauche, « Non » juste apres, « Plus tard » aligne a droite.
                 ui.horizontal(|ui| {
@@ -580,21 +723,45 @@ impl App {
             answer = Some(Answer::Later); // Echap / B = Plus tard
         }
         if let Some(a) = answer {
+            self.prop_apply(ctx, &cand, a, icon, behind.len(), true, now, t_ms);
+        }
+    }
+
+    /// Effet d'une reponse a une carte (petite carte ou ecran de fermeture) : memoire des choix, file, animation (petite carte
+    /// seulement), donnees d'usage, ajout. `animate` : animation de sortie de la carte.
+    #[allow(clippy::too_many_arguments)]
+    pub(super) fn prop_apply(&mut self, ctx: &egui::Context, cand: &gamedetect::Candidate, a: gamedetect::Answer, icon: Option<egui::TextureHandle>, behind: usize, animate: bool, now: u64, t_ms: u64) {
+        use gamedetect::Answer;
+        {
             let dd = self.shared.data_dir.clone();
             let name = self.prop_sugg.first().map(|s| s.game_name.clone()).unwrap_or_else(|| cand.name.clone());
             let mut mem = Memory::load(&dd);
             if let Ok(mut q) = self.shared.proposals.lock() {
-                gamedetect::apply_answer(&mut mem, &mut q, &cand, a, now);
+                if !animate && a == Answer::Later {
+                    // Ecran de fermeture : « Plus tard » = compte (au plus CLOSE_LATER_MAX reprises de l'ecran, ensuite carte
+                    // de l'accueil seulement) ; la carte reste en file, mise de cote comme un « Plus tard » ordinaire.
+                    mem.close_later(cand, now);
+                    q.snooze(&cand.key, now);
+                } else {
+                    gamedetect::apply_answer(&mut mem, &mut q, cand, a, now);
+                }
                 let _ = q.save(&dd);
             }
             let _ = mem.save(&dd);
             self.det_mem = mem;
-            let (reduce, why) = gamedetect::reduce_decision(self.model.settings.card_anim, winutil::client_animations_enabled());
-            if let Some(w) = why {
-                self.pad_log(&format!("[Detection] animation de la carte remplacee par un fondu : {}", w));
+            if animate {
+                let (reduce, why) = gamedetect::reduce_decision(self.model.settings.card_anim, winutil::client_animations_enabled());
+                if let Some(w) = why {
+                    self.pad_log(&format!("[Detection] animation de la carte remplacee par un fondu : {}", w));
+                }
+                self.prop_exit = Some(PropExit { answer: a, start_ms: t_ms, name: name.clone(), tex: icon.clone(), key: cand.key.clone(), reduce, layers: gamedetect::visible_layers(behind).0 });
+                self.prop_state.answer(a, &name, t_ms + gamedetect::confirm_start_ms(reduce));
+            } else {
+                self.close_done(ctx);
+                if a == Answer::Yes {
+                    self.prop_state.answer(a, &name, t_ms);
+                }
             }
-            self.prop_exit = Some(PropExit { answer: a, start_ms: t_ms, name: name.clone(), tex: icon.clone(), key: cand.key.clone(), reduce, layers: gamedetect::visible_layers(behind.len()).0 });
-            self.prop_state.answer(a, &name, t_ms + gamedetect::confirm_start_ms(reduce));
             {
                 let reason = match cand.why {
                     gamedetect::Why::LauncherFolder => "launcher",

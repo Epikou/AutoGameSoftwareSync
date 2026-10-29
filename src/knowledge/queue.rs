@@ -136,7 +136,7 @@ mod tests {
         Record { program: Some("Hollow Knight".into()), publisher: Some("Team Cherry".into()), exe: Some("hollow_knight.exe".into()), template: t.into(), kind: Kind::Save, layer, app_version: "1.4.0".into() }
     }
     fn users() -> Vec<String> {
-        vec!["Joueur".to_string(), "pc-desktop".to_string()]
+        vec!["Joueur".to_string(), "epikou".to_string()]
     }
     fn names() -> Vec<String> {
         vec!["Hollow Knight".to_string(), "Team Cherry".to_string()]
@@ -147,7 +147,7 @@ mod tests {
         let ok = sanitize(rec("%LOCALLOW%/Team Cherry/Hollow Knight", Layer::Launcher), &users(), &names()).unwrap();
         assert_eq!(ok.template, "%LOCALLOW%/Team Cherry/Hollow Knight");
         // Nom d'utilisateur, identifiant Steam, identifiant Epic, adresse : jokers.
-        let r = sanitize(rec("%LOCALAPPDATA%/Hollow Knight/Joueur/76561198012345678/5894eec90d3c4b9cac0accb22b5d2530/a@b.c/pc-desktop-saves", Layer::Launcher), &users(), &names()).unwrap();
+        let r = sanitize(rec("%LOCALAPPDATA%/Hollow Knight/Joueur/76561198012345678/5894eec90d3c4b9cac0accb22b5d2530/a@b.c/epikou-saves", Layer::Launcher), &users(), &names()).unwrap();
         assert_eq!(r.template, "%LOCALAPPDATA%/Hollow Knight/*/*/*/*/*");
         // Chemin non generique (lecteur, dossier quelconque) : rien.
         assert!(sanitize(rec("D:/Jeux/Hollow Knight", Layer::Launcher), &users(), &names()).is_none());

@@ -349,15 +349,15 @@ fn elements_trouves_d_un_autre_appareil_dans_le_coffre() {
     let tmp = TempDir::new().unwrap();
     let vault = tmp.path().join("coffre");
     std::fs::create_dir_all(&vault).unwrap();
-    let ally = pc(tmp.path(), "ALLY");
+    let epigos = pc(tmp.path(), "EPIGOS");
     let deck = pc(tmp.path(), "DECK");
-    protect(&ally, &vault, "Hollow Knight", "niveau 3", Some("%LOCALAPPDATA%/Team Cherry/Hollow Knight"));
-    protect(&ally, &vault, "Celeste", "chap 2", Some("%LOCALAPPDATA%/Celeste"));
+    protect(&epigos, &vault, "Hollow Knight", "niveau 3", Some("%LOCALAPPDATA%/Team Cherry/Hollow Knight"));
+    protect(&epigos, &vault, "Celeste", "chap 2", Some("%LOCALAPPDATA%/Celeste"));
     protect(&deck, &vault, "Stardew Valley", "an 2", None);
-    let me = "PC-DESKTOP";
+    let me = "EPIKOU";
     let f = vl::found_from_others(&vault, me, &HashSet::new());
     assert_eq!(f.len(), 2);
-    assert_eq!(f[0].machine, "ALLY", "l'appareil le plus fourni en premier");
+    assert_eq!(f[0].machine, "EPIGOS", "l'appareil le plus fourni en premier");
     assert_eq!(f[0].items.iter().map(|i| i.name.as_str()).collect::<Vec<_>>(), ["Celeste", "Hollow Knight"]);
     assert_eq!(f[1].machine, "DECK");
     // ce qui est deja sur ce PC n'est pas propose
@@ -366,8 +366,8 @@ fn elements_trouves_d_un_autre_appareil_dans_le_coffre() {
     let f = vl::found_from_others(&vault, me, &keys);
     assert_eq!(f[0].items.len(), 1);
     // ses propres copies ne comptent pas comme « autre appareil »
-    assert!(vl::found_from_others(&vault, "ALLY", &HashSet::new()).iter().all(|d| d.machine != "ALLY"));
-    assert_eq!(vl::other_devices(&vault, me), ["ALLY", "DECK"]);
+    assert!(vl::found_from_others(&vault, "EPIGOS", &HashSet::new()).iter().all(|d| d.machine != "EPIGOS"));
+    assert_eq!(vl::other_devices(&vault, me), ["DECK", "EPIGOS"]);
     // coffre neuf ou inexistant : rien
     assert!(vl::found_from_others(&tmp.path().join("neuf"), me, &HashSet::new()).is_empty());
 }
@@ -377,17 +377,17 @@ fn reprise_lie_et_restaure_sans_rien_ecraser() {
     let tmp = TempDir::new().unwrap();
     let vault = tmp.path().join("coffre");
     std::fs::create_dir_all(&vault).unwrap();
-    let ally = pc(tmp.path(), "ALLY");
-    protect(&ally, &vault, "Hollow Knight", "niveau 3", Some("%LOCALAPPDATA%/Team Cherry/Hollow Knight"));
-    protect(&ally, &vault, "Celeste", "chap 2", Some("%LOCALAPPDATA%/Celeste"));
-    protect(&ally, &vault, "Sans Indice", "x", None);
+    let epigos = pc(tmp.path(), "EPIGOS");
+    protect(&epigos, &vault, "Hollow Knight", "niveau 3", Some("%LOCALAPPDATA%/Team Cherry/Hollow Knight"));
+    protect(&epigos, &vault, "Celeste", "chap 2", Some("%LOCALAPPDATA%/Celeste"));
+    protect(&epigos, &vault, "Sans Indice", "x", None);
     // les deux dernieres sont sur un dossier qui contient deja une partie locale (a ne pas ecraser)
-    let me = pc(tmp.path(), "PC-DESKTOP");
+    let me = pc(tmp.path(), "EPIKOU");
     let local = tmp.path().join("local");
     std::fs::create_dir_all(local.join("Celeste")).unwrap();
     std::fs::write(local.join("Celeste").join("ma-partie.dat"), "chap 9 (la mienne)").unwrap();
     let kf = agss::hints::KnownFolders { local_app_data: Some(local.clone()), ..Default::default() };
-    let found = vl::found_from_others(&vault, "PC-DESKTOP", &HashSet::new());
+    let found = vl::found_from_others(&vault, "EPIKOU", &HashSet::new());
     assert_eq!(found[0].items.len(), 3);
     let rep = vl::resume(&me.ctx, &vault, &found[0].items, &kf, &[]);
     assert_eq!(rep.added, ["Celeste", "Hollow Knight"].map(String::from).to_vec(), "{:?}", rep);
@@ -416,9 +416,9 @@ fn reprise_un_nom_different_reste_lie_au_meme_dossier_du_coffre() {
     let tmp = TempDir::new().unwrap();
     let vault = tmp.path().join("coffre");
     std::fs::create_dir_all(&vault).unwrap();
-    let ally = pc(tmp.path(), "ALLY");
-    protect(&ally, &vault, "Hollow Knight", "n", Some("%APPDATA%/HK"));
-    let me = pc(tmp.path(), "PC-DESKTOP");
+    let epigos = pc(tmp.path(), "EPIGOS");
+    protect(&epigos, &vault, "Hollow Knight", "n", Some("%APPDATA%/HK"));
+    let me = pc(tmp.path(), "EPIKOU");
     let kf = agss::hints::KnownFolders { roaming_app_data: Some(tmp.path().join("roaming")), ..Default::default() };
     std::fs::create_dir_all(tmp.path().join("roaming")).unwrap();
     // la cle du coffre peut differer du nom (dossier ecrit avec un autre nom) : le lien est conserve
@@ -717,7 +717,7 @@ fn textes_du_coffre_et_du_selecteur_dans_les_5_langues() {
         assert!(pm.contains("{0}") && pm.contains("{1}") && pm.contains("{2}"), "{}", l.code());
     }
     // textes de reference
-    assert_eq!(tr(Lang::Fr, K::VVaultFoundMany).replace("{0}", "12").replace("{1}", "ALLY"), "On a trouvé 12 éléments de ALLY : tu veux les retrouver ici ?");
+    assert_eq!(tr(Lang::Fr, K::VVaultFoundMany).replace("{0}", "12").replace("{1}", "EPIGOS"), "On a trouvé 12 éléments de EPIGOS : tu veux les retrouver ici ?");
     assert_eq!(tr(Lang::Fr, K::VPickTitleFor).replace("{}", "Celeste"), "Où Celeste range-t-il ses données ?");
     assert!(tr(Lang::Fr, K::VVaultStreamBody).contains("Disponible hors connexion") && tr(Lang::Fr, K::VVaultStreamBody).contains("miroir"));
 }

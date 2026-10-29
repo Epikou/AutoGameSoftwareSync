@@ -143,7 +143,7 @@ fn alerte_de_ressemblance() {
 fn liste_des_jeux_deja_presents_dans_la_destination() {
     let t = TempDir::new().unwrap();
     let dest = t.path();
-    legacy(&dest.join("Field of Mistria"), "current", "Field of Mistria", "PC-DESKTOP", 1_000_000, "a");
+    legacy(&dest.join("Field of Mistria"), "current", "Field of Mistria", "EPIKOU", 1_000_000, "a");
     // meme jeu sous une autre graphie, nouveau format + game.json
     std::fs::create_dir_all(dest.join("fieldofmistria/saves")).unwrap();
     std::fs::write(dest.join("fieldofmistria/game.json"), r#"{"name":"Field of Mistria","key":"fieldofmistria"}"#).unwrap();
@@ -163,11 +163,11 @@ fn alias_local_lier_a_un_jeu_existant_sans_rien_modifier_dans_la_destination() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
     // L'autre PC a deja cree « fieldofmistria ».
-    let b = pc(t.path(), "ALLY", "Field of Mistria", 0);
+    let b = pc(t.path(), "EPIGOS", "Field of Mistria", 0);
     write(&b.game.path, "save.dat", "de-B");
     backup::backup(&b.ctx, &b.game, &dest).unwrap();
     // CE PC a un jeu nomme autrement, donc une autre cle.
-    let mut a = pc(t.path(), "PC-DESKTOP", "Mistria perso", 0);
+    let mut a = pc(t.path(), "EPIKOU", "Mistria perso", 0);
     write(&a.game.path, "save.dat", "de-A");
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
     assert!(dest.join("mistriaperso/saves").is_dir() && dest.join("fieldofmistria/saves").is_dir());
@@ -183,7 +183,7 @@ fn alias_local_lier_a_un_jeu_existant_sans_rien_modifier_dans_la_destination() {
     // Les deux historiques restent lisibles et les nouvelles sauvegardes vont dans le dossier choisi.
     let h = backup::history(&a.ctx, &a.game, &dest);
     let contents: Vec<String> = h.rows.iter().map(|r| r.machine.clone()).collect();
-    assert!(contents.contains(&"ALLY".to_string()) && contents.contains(&"PC-DESKTOP".to_string()), "{:?}", contents);
+    assert!(contents.contains(&"EPIGOS".to_string()) && contents.contains(&"EPIKOU".to_string()), "{:?}", contents);
     write(&a.game.path, "save.dat", "de-A-v2");
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
     assert_eq!(std::fs::read_dir(dest.join("fieldofmistria/saves")).unwrap().count(), 2 + 0, "B + la nouvelle de A");
@@ -199,7 +199,7 @@ fn alias_local_lier_a_un_jeu_existant_sans_rien_modifier_dans_la_destination() {
 fn chaque_sauvegarde_est_un_dossier_unique_sans_renommage_ni_ecrasement() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
-    let m = pc(t.path(), "PC-DESKTOP", "Field of Mistria", 0);
+    let m = pc(t.path(), "EPIKOU", "Field of Mistria", 0);
     write(&m.game.path, "save.dat", "v1");
     write(&m.game.path, "sub/extra.dat", "x");
     backup::backup(&m.ctx, &m.game, &dest).unwrap();
@@ -211,7 +211,7 @@ fn chaque_sauvegarde_est_un_dossier_unique_sans_renommage_ni_ecrasement() {
     }
     // Le nom du dossier : horodatage + machine.
     let name = newest(&dest, &m.game).file_name().unwrap().to_string_lossy().to_string();
-    assert!(name.ends_with("-PC-DESKTOP") && util::parse_timestamp(&name).is_some(), "{}", name);
+    assert!(name.ends_with("-EPIKOU") && util::parse_timestamp(&name).is_some(), "{}", name);
     for i in 2..=6 {
         write(&m.game.path, "save.dat", &format!("v{}", i));
         backup::backup(&m.ctx, &m.game, &dest).unwrap();
@@ -316,16 +316,16 @@ fn arborescence_reelle_de_l_utilisateur_current_copies_de_conflit_tmp_et_version
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
     let root = dest.join("Field of Mistria");
-    legacy(&root, "current", "Field of Mistria", "PC-DESKTOP", 1_800_000_300_000, "etat-courant-lu-par-AutoGameSoftwareSync");
-    legacy(&root, "current (1)", "Field of Mistria", "ALLY", 1_800_000_500_000, "etat-de-l-autre-PC");
-    legacy(&root, "current (2)", "Field of Mistria", "ALLY", 1_800_000_700_000, "etat-le-plus-recent");
+    legacy(&root, "current", "Field of Mistria", "EPIKOU", 1_800_000_300_000, "etat-courant-lu-par-AutoGameSoftwareSync");
+    legacy(&root, "current (1)", "Field of Mistria", "EPIGOS", 1_800_000_500_000, "etat-de-l-autre-PC");
+    legacy(&root, "current (2)", "Field of Mistria", "EPIGOS", 1_800_000_700_000, "etat-le-plus-recent");
     write(&root, ".tmp-20261023-001136-166/files/save.dat", "reste-de-staging-synchronise");
     write(&root, ".tmp-20261023-001136-166/meta.json", "{pas fini");
-    legacy(&root.join("versions"), "20261023-001136-166", "Field of Mistria", "PC-DESKTOP", 1_800_000_100_000, "ancienne-1");
-    legacy(&root.join("versions"), "20261022-235959-001", "Field of Mistria", "ALLY", 1_800_000_000_000, "ancienne-0");
+    legacy(&root.join("versions"), "20261023-001136-166", "Field of Mistria", "EPIKOU", 1_800_000_100_000, "ancienne-1");
+    legacy(&root.join("versions"), "20261022-235959-001", "Field of Mistria", "EPIGOS", 1_800_000_000_000, "ancienne-0");
     let before = tree(&dest);
 
-    let mut a = pc(t.path(), "PC-DESKTOP", "Field of Mistria", 0);
+    let mut a = pc(t.path(), "EPIKOU", "Field of Mistria", 0);
     write(&a.game.path, "save.dat", "mon-local");
     let snap = cloud::scan_dest(&dest, &a.game);
     assert_eq!(snap.versions.len(), 5, "current + 2 copies + 2 versions");
@@ -336,7 +336,7 @@ fn arborescence_reelle_de_l_utilisateur_current_copies_de_conflit_tmp_et_version
     assert_eq!(h.tmp_dirs.len(), 1);
     assert!(h.rows.iter().all(|r| r.kind != VKind::New));
     // Les machines et dates de l'ancien format sont lisibles.
-    assert!(h.rows.iter().any(|r| r.machine == "ALLY" && r.saved_at_ms == 1_800_000_700_000));
+    assert!(h.rows.iter().any(|r| r.machine == "EPIGOS" && r.saved_at_ms == 1_800_000_700_000));
     // Restauration d'une copie de conflit, nom exact, memes protections (snapshot de securite).
     let r = backup::restore_version(&a.ctx, &a.game, &dest, "current (2)").unwrap();
     assert_eq!(read(&a.game.path.join("save.dat")), "etat-le-plus-recent");
@@ -444,8 +444,8 @@ fn deux_pc_horloges_decalees_de_3_minutes_la_chaine_decide_pas_l_horloge() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
     // A est en AVANCE de 3 min, B en RETARD de 3 min.
-    let a = pc(t.path(), "PC-DESKTOP", "Field of Mistria", 180_000);
-    let b = pc(t.path(), "ALLY", "field of mistria", -180_000);
+    let a = pc(t.path(), "EPIKOU", "Field of Mistria", 180_000);
+    let b = pc(t.path(), "EPIGOS", "field of mistria", -180_000);
     write(&a.game.path, "save.dat", "v1-A");
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
     backup::restore(&b.ctx, &b.game, &dest).unwrap();
@@ -455,8 +455,8 @@ fn deux_pc_horloges_decalees_de_3_minutes_la_chaine_decide_pas_l_horloge() {
     // L'horodatage de B (v2) est ANTERIEUR a celui de A (v1) a cause du decalage : A restaure quand meme v2.
     let v: Vec<_> = cloud::scan_dest(&dest, &a.game).new_versions().into_iter().map(|v| (v.meta.machine.clone(), v.sort_ms())).collect();
     assert_eq!(v.len(), 2);
-    let ts_a = v.iter().find(|x| x.0 == "PC-DESKTOP").unwrap().1;
-    let ts_b = v.iter().find(|x| x.0 == "ALLY").unwrap().1;
+    let ts_a = v.iter().find(|x| x.0 == "EPIKOU").unwrap().1;
+    let ts_b = v.iter().find(|x| x.0 == "EPIGOS").unwrap().1;
     assert!(ts_b < ts_a, "le decalage d'horloge inverse bien l'ordre des dates ({} < {})", ts_b, ts_a);
     assert_eq!(backup::plan(&a.ctx, &a.game, &dest).unwrap(), Plan::Restore);
     assert_eq!(backup::plan(&b.ctx, &b.game, &dest).unwrap(), Plan::InSync);
@@ -500,8 +500,8 @@ fn ecritures_concurrentes_de_deux_pc_avec_latence_aucune_collision_ni_ecrasement
     for round in 0..4u64 {
         let t = TempDir::new().unwrap();
         let dest = t.path().join("cloud");
-        let a = pc(t.path(), "PC-DESKTOP", "G", 0);
-        let b = pc(t.path(), "ALLY", "G", 0);
+        let a = pc(t.path(), "EPIKOU", "G", 0);
+        let b = pc(t.path(), "EPIGOS", "G", 0);
         write(&a.game.path, "save.dat", &format!("A{}", round));
         write(&b.game.path, "save.dat", &format!("B{}", round));
         let barrier = Arc::new(Barrier::new(2));
@@ -521,13 +521,13 @@ fn ecritures_concurrentes_de_deux_pc_avec_latence_aucune_collision_ni_ecrasement
             let root = t.path().to_path_buf();
             let r2 = root.clone();
             let ha = s.spawn(move || {
-                let p = pc(&root, "PC-DESKTOP", "G", 0); // Ctx propre au thread (il n'est pas Sync)
+                let p = pc(&root, "EPIKOU", "G", 0); // Ctx propre au thread (il n'est pas Sync)
                 b1.wait();
                 std::thread::sleep(std::time::Duration::from_millis(l1)); // latence d'arrivee aleatoire
                 backup::backup(&p.ctx, &p.game, &d1).map(|_| ()).map_err(|e| e.to_string())
             });
             let hb = s.spawn(move || {
-                let p = pc(&r2, "ALLY", "G", 0);
+                let p = pc(&r2, "EPIGOS", "G", 0);
                 b2.wait();
                 std::thread::sleep(std::time::Duration::from_millis(l2));
                 backup::backup(&p.ctx, &p.game, &d2).map(|_| ()).map_err(|e| e.to_string())
@@ -539,7 +539,7 @@ fn ecritures_concurrentes_de_deux_pc_avec_latence_aucune_collision_ni_ecrasement
         let v = backup::list_versions(&dest, &a.game);
         assert_eq!(v.len(), 2, "chaque PC a son dossier unique (round {})", round);
         let machines: Vec<String> = v.iter().map(|p| store::read_meta(&p.join("meta.json")).unwrap().machine).collect();
-        assert!(machines.contains(&"PC-DESKTOP".to_string()) && machines.contains(&"ALLY".to_string()));
+        assert!(machines.contains(&"EPIKOU".to_string()) && machines.contains(&"EPIGOS".to_string()));
         // Deux branches independantes (ni l'une ni l'autre ne se base sur l'autre) : VRAI conflit, rien perdu.
         let h = backup::history(&a.ctx, &a.game, &dest);
         assert_eq!(h.conflict_heads.len(), 2, "{:?}", h.conflict_heads);
@@ -553,8 +553,8 @@ fn ecritures_concurrentes_de_deux_pc_avec_latence_aucune_collision_ni_ecrasement
 fn resolution_garder_la_mienne_les_deux_versions_restent_une_seule_tete() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
-    let a = pc(t.path(), "PC-DESKTOP", "G", 0);
-    let b = pc(t.path(), "ALLY", "G", 0);
+    let a = pc(t.path(), "EPIKOU", "G", 0);
+    let b = pc(t.path(), "EPIGOS", "G", 0);
     write(&a.game.path, "save.dat", "v1");
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
     backup::restore(&b.ctx, &b.game, &dest).unwrap();
@@ -587,8 +587,8 @@ fn resolution_garder_la_mienne_les_deux_versions_restent_une_seule_tete() {
 fn resolution_restaurer_le_cloud_snapshot_securite_et_version_locale_conservee() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
-    let a = pc(t.path(), "PC-DESKTOP", "G", 0);
-    let b = pc(t.path(), "ALLY", "G", 0);
+    let a = pc(t.path(), "EPIKOU", "G", 0);
+    let b = pc(t.path(), "EPIGOS", "G", 0);
     write(&a.game.path, "save.dat", "v1");
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
     backup::restore(&b.ctx, &b.game, &dest).unwrap();
@@ -610,9 +610,9 @@ fn resolution_restaurer_le_cloud_snapshot_securite_et_version_locale_conservee()
 fn elagage_ne_touche_que_des_dossiers_conformes_et_ne_supprime_jamais_une_tete() {
     let t = TempDir::new().unwrap();
     let dest = t.path().join("cloud");
-    let mut a = pc(t.path(), "PC-DESKTOP", "G", 0);
+    let mut a = pc(t.path(), "EPIKOU", "G", 0);
     a.ctx.keep_versions = 0;
-    let b = pc(t.path(), "ALLY", "G", 0);
+    let b = pc(t.path(), "EPIGOS", "G", 0);
     write(&b.game.path, "save.dat", "branche-B");
     backup::backup(&b.ctx, &b.game, &dest).unwrap(); // une tete, ancienne
     for i in 0..8 {
@@ -681,7 +681,7 @@ fn dates_lisibles_en_heure_locale_selon_la_langue() {
     assert_eq!(timefmt::iso_local(utc, &FixedTz(3600)), "2027-12-31T02:24:15+01:00");
     assert_eq!(timefmt::iso_local(utc, &FixedTz(-5 * 3600 - 1800)), "2027-12-30T19:54:15-05:30");
     // Noms de version et horodatages de journal.
-    assert_eq!(timefmt::version_label("20271231-012415-000-PC-DESKTOP", Lang::Fr, &FixedTz(3600)), "31/12/2027 02:24:15");
+    assert_eq!(timefmt::version_label("20271231-012415-000-EPIKOU", Lang::Fr, &FixedTz(3600)), "31/12/2027 02:24:15");
     assert_eq!(timefmt::version_label("versions/20271231-012415-000", Lang::En, &FixedTz(3600)), "2027-12-31 02:24:15");
     assert_eq!(timefmt::version_label("current (1)", Lang::Fr, &FixedTz(0)), "current (1)");
     assert_eq!(timefmt::log_ts_label("20271231-012415-123", Lang::Fr, &FixedTz(3600)), "31/12/2027 02:24:15");

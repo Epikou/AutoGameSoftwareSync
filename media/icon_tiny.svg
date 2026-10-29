@@ -1,20 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Variante 16 px : disquette verte + grandes fleches de synchronisation blanches, rien d'autre -->
-  <defs>
-    <linearGradient id="disk" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#08a07a"/>
-      <stop offset="1" stop-color="#016048"/>
-    </linearGradient>
-  </defs>
-  <path d="M40 24 H400 L488 112 V440 Q488 488 440 488 H72 Q24 488 24 440 V72 Q24 24 72 24 Z" fill="url(#disk)" stroke="#013f30" stroke-width="20"/>
-  <rect x="130" y="24" width="250" height="130" rx="14" fill="#e3e7ee" stroke="#5c6575" stroke-width="12"/>
-  <rect x="300" y="52" width="56" height="76" rx="8" fill="#016048"/>
-  <g fill="none" stroke="#ffffff" stroke-width="56" stroke-linecap="butt">
-    <path d="M159 304 A100 100 0 0 1 347 288"/>
-    <path d="M353 356 A100 100 0 0 1 165 372"/>
+  <!-- Variante 16 px : disquette verte plate + grandes fleches de synchronisation blanches, rien d'autre.
+       Grille : 1 px = 32 unites ; toutes les aretes droites tombent sur un pixel entier. -->
+  <path d="M96 32 H384 L480 128 V416 Q480 480 416 480 H96 Q32 480 32 416 V96 Q32 32 96 32 Z" fill="#048a68"/>
+  <rect x="160" y="32" width="192" height="96" fill="#e4e8ef"/>
+  <rect x="288" y="48" width="32" height="64" fill="#027257"/>
+  <g fill="none" stroke="#ffffff" stroke-width="64" stroke-linecap="butt">
+    <path d="M166 287 A96 96 0 0 1 346 287"/>
+    <path d="M346 353 A96 96 0 0 1 166 353"/>
   </g>
   <g fill="#ffffff">
-    <path d="M372 322 L386 252 L304 292 Z"/>
-    <path d="M140 338 L126 408 L208 368 Z"/>
+    <path d="M362 332 L384 264 L302 294 Z"/>
+    <path d="M150 308 L128 376 L210 346 Z"/>
   </g>
 </svg>

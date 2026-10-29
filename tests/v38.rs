@@ -184,7 +184,7 @@ fn rest_scene(ui: &mut egui::Ui, st: State) {
         let mut on = true;
         ui::toggle(ui, &mut on, "Démarrer avec l'ordinateur");
         ui::chip(ui, "Jeux", Some(6), true);
-        ui::device_pill(ui, "PC-DESKTOP", t.teal);
+        ui::device_pill(ui, "EPIKOU", t.teal);
     });
     for (i, s) in [st, State::Safe, State::Todo, State::Problem, State::Incoming, State::Paused].iter().enumerate() {
         ui::state_pill(ui, ("p", i), *s, "Texte");

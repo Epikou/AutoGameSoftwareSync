@@ -42,6 +42,10 @@ const WHITELIST: &[(K, &str)] = &[
     (K::VConsentBody, "donnees d'usage : les noms des jeux et logiciels CONNUS font partie de l'envoi (decision de l'auteur, mention obligatoire) : distinction volontaire"),
     // 2.0 (lot 11) : page Ajouter.
     (K::VAddTileProgram, "grande tuile « Un programme ou un jeu » (texte demande par l auteur) : distinction volontaire"),
+    // 2.0.3 : carte de l'accueil, texte demande par l'auteur (bibliotheque de jeux Playnite).
+    (K::VPlayniteCard, "carte « N jeux Playnite pas encore proteges » (Playnite est une bibliotheque de jeux, texte demande par l'auteur) : distinction volontaire"),
+    (K::VPlayniteCardOne, "singulier de VPlayniteCard (bibliotheque de jeux Playnite) : distinction volontaire"),
+    (K::VPlayniteCardFew, "pluriel russe 2-4 de VPlayniteCard (bibliotheque de jeux Playnite) : distinction volontaire"),
 ];
 
 fn strip(s: &str) -> String {

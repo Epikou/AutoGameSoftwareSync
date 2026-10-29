@@ -46,6 +46,7 @@ pub fn real_env(data_dir: &Path, games: Vec<Game>, vault: Option<PathBuf>) -> Sc
         now_ms: crate::util::now_ms(),
         db_probe: true,
         prefix_of: Box::new(move |id| if cfg!(windows) { None } else { crate::proton::find_prefix(&libs2, id) }),
+        playnite: crate::playnite::read(data_dir),
     }
 }
 
@@ -146,6 +147,8 @@ fn sim_env(data_dir: &Path, games: Vec<Game>, vault: Option<PathBuf>, sim: serde
         now_ms: crate::util::now_ms(),
         db_probe: true,
         prefix_of: Box::new(|_| None),
+        // Demonstration : liste Playnite de la simulation (playnite), sinon le fichier du dossier de donnees de demonstration.
+        playnite: sim.get("playnite").and_then(|v| serde_json::from_value(v.clone()).ok()).unwrap_or_else(|| crate::playnite::read_from(&data_dir.join(crate::playnite::FILE))),
     }
 }
 

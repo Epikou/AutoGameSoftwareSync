@@ -188,20 +188,57 @@ fn drive(root: &Path) -> Candidate {
 }
 
 #[test]
+fn coffre_existant_sous_un_ancien_nom_propose_en_premier() {
+    let t = TempDir::new().unwrap();
+    let d = drive(t.path());
+    // cas reel de l'auteur : le coffre de la version precedente est un sous-dossier de « Mon Drive »
+    let old = d.path.join(agss::legacy::VAULT_DIRS[1]);
+    std::fs::create_dir_all(&old).unwrap();
+    protect(t.path(), "EPIKOU", &old, "Celeste");
+    protect(t.path(), "EPIGOS", &old, "Hades");
+    std::fs::write(d.path.join("notes.txt"), "rien a voir").unwrap();
+    std::fs::create_dir_all(d.path.join("Photos")).unwrap();
+    assert!(vl::is_vault(&old) && vl::has_vault_items(&old));
+    assert!(!vl::is_vault(&d.path) && !vl::is_vault(&d.path.join("Photos")));
+    let found = vl::find_existing(std::slice::from_ref(&d), None);
+    assert_eq!(found.len(), 1, "{:?}", found);
+    let e = &found[0];
+    assert_eq!(e.path, old);
+    assert!(e.legacy && !e.marker);
+    assert_eq!(e.items, 2);
+    assert_eq!(e.devices, vec!["EPIGOS".to_string(), "EPIKOU".to_string()]);
+    assert_eq!(e.cand.as_ref().map(|c| c.kind), Some(Kind::GoogleDrive));
+    // choisir la tuile « Google Drive » creerait un coffre neuf VIDE a cote : l'interface le dit d'abord
+    assert_eq!(vl::target_for(&d.path), d.path.join(vl::VAULT_DIR));
+    assert_eq!(vl::existing_beside(&d.path, &found).map(|x| x.path.clone()), Some(old.clone()));
+    // reprendre l'existant : il sert tel quel (rien d'imbrique, rien de deplace)
+    assert_eq!(vl::target_for(&old), old);
+    let target = vl::prepare(&old).unwrap();
+    assert_eq!(target, old);
+    assert!(!old.join(vl::VAULT_DIR).exists());
+    assert_eq!(agss::cloud::list_dest_games(&old).len(), 2, "elements intacts");
+    assert!(old.join(vl::MARKER).is_file(), "marqueur ecrit une fois");
+    // une fois marque, il n'est plus « ancien » et reste repris tel quel
+    let again = vl::find_existing(std::slice::from_ref(&d), None);
+    assert!(again[0].marker && !again[0].legacy);
+    assert_eq!(vl::target_for(&old), old);
+}
+
+#[test]
 fn coffres_existants_actuel_marque_et_nom_actuel_ordonnes() {
     let t = TempDir::new().unwrap();
     let d = drive(t.path());
     // coffre actuel (nom 2.0) avec 1 element, coffre marque au nom choisi a la main avec 2 elements
     let cur = d.path.join(vl::VAULT_DIR);
     std::fs::create_dir_all(&cur).unwrap();
-    protect(t.path(), "PC-DESKTOP", &cur, "Celeste");
+    protect(t.path(), "EPIKOU", &cur, "Celeste");
     let custom = d.path.join("Sauvegardes jeux");
     let p = vl::prepare(&custom.join("..").join("Sauvegardes jeux")).err();
     assert!(p.is_some(), "dossier introuvable : rien n'est cree");
     std::fs::create_dir_all(&custom).unwrap();
     std::fs::write(custom.join(vl::MARKER), "AutoGameSoftwareSync vault v1\n").unwrap();
-    protect(t.path(), "ALLY", &custom, "Hades");
-    protect(t.path(), "ALLY", &custom, "Balatro");
+    protect(t.path(), "EPIGOS", &custom, "Hades");
+    protect(t.path(), "EPIGOS", &custom, "Balatro");
     // un dossier vide au nom de l'appli n'est pas un coffre a reprendre
     let usb = t.path().join("CLE");
     std::fs::create_dir_all(usb.join(vl::VAULT_DIR)).unwrap();

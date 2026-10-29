@@ -63,7 +63,7 @@ impl App {
 
     pub(super) fn man_exe_icon(&mut self, ctx: &egui::Context) -> Option<egui::TextureHandle> {
         if self.man_icon.as_ref().map(|(k, _)| k != &self.man_exe).unwrap_or(true) {
-            let tex = winutil::exe_icon_rgba(std::path::Path::new(&self.man_exe)).map(|(rgba, w, h)| ctx.load_texture("man-exe-icon", egui::ColorImage::from_rgba_unmultiplied([w, h], &rgba), egui::TextureOptions::LINEAR));
+            let tex = winutil::exe_icon_rgba(std::path::Path::new(&self.man_exe)).map(|(rgba, w, h)| ctx.load_texture("man-exe-icon", egui::ColorImage::from_rgba_unmultiplied([w, h], &rgba), crate::gui::ui::ICON_TEX));
             self.man_icon = Some((self.man_exe.clone(), tex));
         }
         self.man_icon.as_ref().and_then(|(_, t)| t.clone())

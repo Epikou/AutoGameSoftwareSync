@@ -143,7 +143,7 @@ pub fn pick_n(l: Lang, n: u64, one: K, many: K) -> K {
 }
 
 /// Elision du francais apres remplacement d'un nom ou d'une date : « de aujourd'hui » -> « d'aujourd'hui », « de hier »
-/// -> « d'hier », « de ALLY » -> « d'ALLY » (mot « de » suivi d'une voyelle, ou de « hier »). Autres langues : inchange.
+/// -> « d'hier », « de EPIGOS » -> « d'EPIGOS » (mot « de » suivi d'une voyelle, ou de « hier »). Autres langues : inchange.
 pub fn elide(l: Lang, s: &str) -> String {
     if shown_lang(l) != Lang::Fr {
         return s.to_string();
@@ -1469,6 +1469,53 @@ keys! {
     VScanPlaced => ("Emplacement choisi par toi", "Location chosen by you"),
     VScanUnticked => ("décoché d'office", "unticked by default"),
     VScanLearnNoExe => ("On ne connaît pas encore son programme : lance-le une fois, puis relance le scan.", "We don't know its program yet: run it once, then scan again."),
+    // 2.0.3 : accueil sans clignotement, tri, ecran de fermeture, notifications, Playnite, copies de securite
+    VSyncingTitle => ("Copie en cours…", "Copying…"),
+    VSortName => ("Nom (A-Z)", "Name (A-Z)"),
+    VSortLastSync => ("Dernière synchronisation", "Last sync"),
+    VSortModified => ("Modifié le", "Last changed"),
+    VSortSize => ("Taille", "Size"),
+    VSortState => ("État (problèmes d'abord)", "Status (problems first)"),
+    VSortTip => ("Ordre des tuiles (mémorisé). Il ne bouge pas pendant les synchronisations.", "Tile order (remembered). It doesn't move during syncs."),
+    VCloseFoundTitle => ("On a trouvé où « {} » range ses données", "We found where “{}” keeps its data"),
+    VCloseNoneTitle => ("On n'a pas trouvé où « {} » range ses données", "We couldn't find where “{}” keeps its data"),
+    VCloseNoneBody => ("Choisis l'emplacement toi-même : on te guide pas à pas.", "Choose the location yourself: we'll guide you step by step."),
+    VCloseAsk => ("Le protéger maintenant ? Une copie sera faite à chaque fermeture.", "Protect it now? A copy is made each time you close it."),
+    VCloseProtect => ("Protéger", "Protect"),
+    VCloseOther => ("Choisir un autre emplacement", "Choose another location"),
+    VCloseNever => ("Jamais pour celui-ci", "Never for this one"),
+    VCloseLater => ("Plus tard", "Later"),
+    VCloseLaterTip => ("On te le reproposera la prochaine fois que tu le fermeras.", "We'll offer it again the next time you close it."),
+    VCloseSize => ("Taille : {}", "Size: {}"),
+    VCloseHint => ("Manette : A pour choisir, B pour plus tard", "Controller: A to choose, B for later"),
+    VCloseNotifTitle => ("« {} » vient de se fermer", "“{}” just closed"),
+    VCloseNotifBody => ("Clique ici pour le protéger : on te montre où il range ses données.", "Click here to protect it: we'll show you where it keeps its data."),
+    VSetCloseFull => ("Ouvrir l'appli en plein écran à la fermeture d'un programme", "Open the app full screen when a program closes"),
+    VSetCloseFullTip => ("Quand un programme pas encore protégé se ferme, l'appli s'ouvre en grand pour te proposer de le protéger (jamais pendant qu'un autre tourne). Désactivé : une simple notification.", "When a program that isn't protected yet closes, the app opens full screen to offer to protect it (never while another one is running). Off: a simple notification."),
+    VNotifHeldTitle => ("Pendant ta session", "During your session"),
+    VNotifHeldUpdated => ("À jour : {}", "Up to date: {}"),
+    VNotifHeldConflict => ("À vérifier : {}", "To check: {}"),
+    VNotifHeldError => ("Problème : {}", "Problem: {}"),
+    VWhyPlaynite => ("Installé dans Playnite ({})", "Installed in Playnite ({})"),
+    VWhyPlayniteManual => ("Ajouté à la main dans Playnite", "Added by hand in Playnite"),
+    VPlayniteSection => ("Bibliothèque Playnite", "Playnite library"),
+    VPlayniteHint => ("installés, pas encore protégés · décochés sauf emplacement sûr", "installed, not protected yet · unticked unless the location is certain"),
+    VPlayniteCard => ("{} jeux Playnite pas encore protégés", "{} Playnite games not protected yet"),
+    VPlayniteCardOne => ("{} jeu Playnite pas encore protégé", "{} Playnite game not protected yet"),
+    VPlayniteCardFew => ("{} jeux Playnite pas encore protégés", "{} Playnite games not protected yet"),
+    VPlayniteCardBody => ("Installés sur ce PC, mais rien ne garde encore leurs données.", "Installed on this PC, but nothing keeps their data yet."),
+    VPlayniteCardGo => ("Voir la liste", "See the list"),
+    VPlayniteCardHide => ("Masquer", "Hide"),
+    VSafetyTitle => ("Copies de sécurité sur cet appareil", "Safety copies on this device"),
+    VSafetyUsed => ("{0} utilisés · {1} copies", "{0} used · {1} copies"),
+    VSafetyUsedOne => ("{0} utilisés · 1 copie", "{0} used · 1 copy"),
+    VSafetyRule => ("Faites avant chaque remise d'une version. Gardées automatiquement : les 3 plus récentes de chaque élément et tout ce qui a moins de 30 jours.", "Made before each version is put back. Always kept: the 3 newest of each item and anything less than 30 days old."),
+    VSafetyFree => ("Libérer de la place", "Free up space"),
+    VSafetyNothing => ("Rien à supprimer : tout est encore utile.", "Nothing to delete: everything is still useful."),
+    VSafetyAskTitle => ("Supprimer {} anciennes copies de sécurité ?", "Delete {} old safety copies?"),
+    VSafetyAskBody => ("{} seront libérés. Les copies récentes restent : « Annuler » reste toujours possible.", "{} will be freed. Recent copies stay: “Undo” is still possible."),
+    VSafetyAskDo => ("Supprimer", "Delete"),
+    VSafetyFreed => ("{} libérés", "{} freed"),
 }
 
 /// Mode d'affichage des textes (2.0) : simple (grand public, par defaut) ou expert (vocabulaire technique d'origine).
@@ -1580,7 +1627,39 @@ pub const SIMPLE_KEYS: &[K] = &[
     K::VPrefHostsPending, K::VPrefHostsBody, K::VPrefHostsApply, K::VPrefHostsKeep, K::VPrefHostsDone, K::VPrefHostsCancelled, K::VPrefHostsFailed,
     K::VPrefRestoreNote, K::VPrefTodoTitle, K::VPrefTodoHint, K::VPrefPrinters, K::VPrefDrives, K::VPrefWifi, K::VPrefDriver, K::VPrefOpenPrinters,
     K::VPrefOpenDrives, K::VPrefOpenWifi,
+    // 2.0.3
+    K::VSyncingTitle, K::VSortName, K::VSortLastSync, K::VSortModified, K::VSortSize, K::VSortState, K::VSortTip, K::VCloseFoundTitle, K::VCloseNoneTitle,
+    K::VCloseNoneBody, K::VCloseAsk, K::VCloseProtect, K::VCloseOther, K::VCloseNever, K::VCloseLater, K::VCloseLaterTip, K::VCloseSize, K::VCloseHint,
+    K::VCloseNotifTitle, K::VCloseNotifBody, K::VSetCloseFull, K::VSetCloseFullTip, K::VNotifHeldTitle, K::VNotifHeldUpdated, K::VNotifHeldConflict,
+    K::VNotifHeldError, K::VWhyPlaynite, K::VWhyPlayniteManual, K::VPlayniteSection, K::VPlayniteHint, K::VPlayniteCard, K::VPlayniteCardOne,
+    K::VPlayniteCardBody, K::VPlayniteCardGo, K::VPlayniteCardHide, K::VSafetyTitle, K::VSafetyUsed, K::VSafetyRule, K::VSafetyFree, K::VSafetyNothing,
+    K::VSafetyAskTitle, K::VSafetyAskBody, K::VSafetyAskDo, K::VSafetyFreed, K::VPlayniteCardFew, K::VSafetyUsedOne,
 ];
+
+/// Forme du pluriel d'un nombre dans une langue (russe : 1 / 2-4 / 5+ ; les autres : 1 / plusieurs).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Plural {
+    One,
+    Few,
+    Many,
+}
+
+pub fn plural_form(n: usize, lang: Lang) -> Plural {
+    match lang {
+        Lang::Ru => {
+            let (m10, m100) = (n % 10, n % 100);
+            if m10 == 1 && m100 != 11 {
+                Plural::One
+            } else if (2..=4).contains(&m10) && !(12..=14).contains(&m100) {
+                Plural::Few
+            } else {
+                Plural::Many
+            }
+        }
+        _ if n == 1 => Plural::One,
+        _ => Plural::Many,
+    }
+}
 
 /// Equivalent du MODE EXPERT d'un texte du mode simple (glossaire ETUDE §6.1 : on garde les mots techniques d'origine).
 /// Identite pour les textes communs aux deux modes. Memes marqueurs de format que la cle simple (verifie par test).

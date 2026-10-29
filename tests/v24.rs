@@ -203,17 +203,17 @@ fn status_json_schema_2_additif() {
     use agss::vm::GameStatus;
     let games = vec![GameIn { name: "Vieux".into(), key: "vieux".into(), exe: Some("v.exe".into()), install_dir: None, save_path: PathBuf::from("C:\\S"), status: GameStatus::UpToDate, last_sync_ms: Some(1_000_000) }];
     let mut doc = build(&Inputs { app_version: "1.0.2", now_ms: 2_000_000, watching: true, paused: false, reachable: true, shared: None, user: "u", games });
-    let x = GameExtra { display_name: "Mon jeu".into(), last_backup_ms: Some(1_500_000), last_action: Some(("backup".into(), 1_500_000)), remote_machine: Some("ALLY".into()), remote_ms: Some(1_400_000), local_files: 3, local_size: 99, versions: 4, machine_color: Some("#0072B2".into()), next_check_ms: Some(2_002_000), ..Default::default() };
-    enrich(&mut doc, &[x], &GlobalExtra { machine: "PC-DESKTOP".into(), machine_color: "#D55E00".into(), reactivity_mode: "instant".into(), conflict_mode: "cloud".into(), ..Default::default() });
+    let x = GameExtra { display_name: "Mon jeu".into(), last_backup_ms: Some(1_500_000), last_action: Some(("backup".into(), 1_500_000)), remote_machine: Some("EPIGOS".into()), remote_ms: Some(1_400_000), local_files: 3, local_size: 99, versions: 4, machine_color: Some("#0072B2".into()), next_check_ms: Some(2_002_000), ..Default::default() };
+    enrich(&mut doc, &[x], &GlobalExtra { machine: "EPIKOU".into(), machine_color: "#D55E00".into(), reactivity_mode: "instant".into(), conflict_mode: "cloud".into(), ..Default::default() });
     let v: serde_json::Value = serde_json::from_str(&to_json(&doc)).unwrap();
     assert_eq!(v["schema"], 2);
     let g = &v["games"][0];
     // Champs du schema 1 conserves (name = nom affiche, key inchangee).
     assert_eq!((g["name"].as_str(), g["key"].as_str(), g["exe"].as_str(), g["state"].as_str()), (Some("Mon jeu"), Some("vieux"), Some("v.exe"), Some("synced")));
     assert_eq!((g["original_name"].as_str(), g["display_name"].as_str(), g["last_action"].as_str()), (Some("Vieux"), Some("Mon jeu"), Some("backup")));
-    assert_eq!((g["local_files"].as_u64(), g["versions_count"].as_u64(), g["remote_head_machine"].as_str(), g["machine_color"].as_str()), (Some(3), Some(4), Some("ALLY"), Some("#0072B2")));
+    assert_eq!((g["local_files"].as_u64(), g["versions_count"].as_u64(), g["remote_head_machine"].as_str(), g["machine_color"].as_str()), (Some(3), Some(4), Some("EPIGOS"), Some("#0072B2")));
     assert!(g["last_backup_utc"].is_string() && g["last_restore_utc"].is_null() && g["next_check_utc"].is_string());
-    assert_eq!((v["machine"].as_str(), v["reactivity_mode"].as_str(), v["conflict_mode"].as_str()), (Some("PC-DESKTOP"), Some("instant"), Some("cloud")));
+    assert_eq!((v["machine"].as_str(), v["reactivity_mode"].as_str(), v["conflict_mode"].as_str()), (Some("EPIKOU"), Some("instant"), Some("cloud")));
     // Un lecteur du schema 1 (champs inconnus ignores) lit toujours le document.
     #[derive(serde::Deserialize)]
     struct Old {
@@ -255,9 +255,9 @@ fn couleurs_de_machines_persistees() {
     use agss::settings::Settings;
     let t = TempDir::new().unwrap();
     let mut s = Settings::default();
-    s.machine_colors.insert("PC-DESKTOP".into(), [10, 20, 30]);
+    s.machine_colors.insert("EPIKOU".into(), [10, 20, 30]);
     std::fs::write(t.path().join("settings.json"), serde_json::to_string(&s).unwrap()).unwrap();
-    assert_eq!(Settings::load_from(t.path()).unwrap().machine_colors["PC-DESKTOP"], [10, 20, 30]);
+    assert_eq!(Settings::load_from(t.path()).unwrap().machine_colors["EPIKOU"], [10, 20, 30]);
     std::fs::write(t.path().join("settings.json"), r#"{"lang":"fr"}"#).unwrap();
     assert!(Settings::load_from(t.path()).unwrap().machine_colors.is_empty());
 }

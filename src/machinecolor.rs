@@ -148,9 +148,9 @@ mod tests {
 
     #[test]
     fn couleur_stable_et_noms_differents_distincts() {
-        assert_eq!(default_color("PC-DESKTOP"), default_color("pc-desktop"));
-        assert_eq!(default_color("PC-DESKTOP"), default_color("PC-DESKTOP"));
-        let names: Vec<String> = ["PC-DESKTOP", "ALLY", "LEGION", "PC-SALON", "BUREAU", "PORTABLE"].iter().map(|s| s.to_string()).collect();
+        assert_eq!(default_color("EPIKOU"), default_color("epikou"));
+        assert_eq!(default_color("EPIKOU"), default_color("EPIKOU"));
+        let names: Vec<String> = ["EPIKOU", "EPIGOS", "LEGION", "PC-SALON", "BUREAU", "PORTABLE"].iter().map(|s| s.to_string()).collect();
         let m = assign(&names, &BTreeMap::new());
         let mut cols: Vec<[u8; 3]> = m.values().copied().collect();
         cols.sort();
@@ -165,15 +165,15 @@ mod tests {
     #[test]
     fn choix_de_l_utilisateur_prioritaire() {
         let mut o = BTreeMap::new();
-        o.insert("PC-DESKTOP".to_string(), [1, 2, 3]);
-        assert_eq!(color_of("PC-DESKTOP", &o), [1, 2, 3]);
-        assert_eq!(assign(&["PC-DESKTOP".to_string()], &o)["PC-DESKTOP"], [1, 2, 3]);
+        o.insert("EPIKOU".to_string(), [1, 2, 3]);
+        assert_eq!(color_of("EPIKOU", &o), [1, 2, 3]);
+        assert_eq!(assign(&["EPIKOU".to_string()], &o)["EPIKOU"], [1, 2, 3]);
         assert_eq!(color_of("AUTRE", &o), default_color("AUTRE"));
     }
 
     #[test]
     fn machine_depuis_le_nom_du_dossier() {
-        assert_eq!(machine_of_dirname("20261025-010519-973-ALLY"), Some("ALLY"));
+        assert_eq!(machine_of_dirname("20261025-010519-973-EPIGOS"), Some("EPIGOS"));
         assert_eq!(machine_of_dirname("20261025-010519-973-PC-SALON"), Some("PC-SALON"));
         assert_eq!(machine_of_dirname("files"), None);
         assert_eq!(to_hex([0, 114, 178]), "#0072B2");

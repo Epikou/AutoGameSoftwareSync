@@ -296,6 +296,9 @@ impl App {
         if self.machines.is_empty() {
             self.set_hint(ui, self.t(K::VSetDevicesNone));
         }
+        // 2.0.3 : place des copies de securite de cet appareil et « Libérer de la place ».
+        let c = ui.ctx().clone();
+        self.safety_section(ui, &c);
     }
 
     // ------------------------------------------------------------ 4. protection automatique
@@ -309,6 +312,8 @@ impl App {
             crate::usage::record(&self.shared.data_dir, "setting_changed", &[("key", "detection"), ("value", if det { "on" } else { "off" })]);
         }
         self.set_hint(ui, self.t(K::VSuggestHint));
+        // 2.0.3 : plein ecran a la fermeture d'un programme pas encore protege (sinon notification seulement).
+        self.close_setting(ui);
         ui.add_space(u::tokens::SP_S);
         let mut start = self.wizard_startup_enabled();
         if self.set_toggle(ui, &mut start, self.t(K::VStartWithPc), Some(K::TipStartupOpenApp)) {

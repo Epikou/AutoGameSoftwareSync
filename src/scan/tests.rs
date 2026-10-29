@@ -161,6 +161,7 @@ fn sim_env(pc: &Pc, data: &Path, games: Vec<Game>) -> ScanEnv {
         now_ms: crate::util::now_ms(),
         db_probe: true,
         prefix_of: Box::new(|_| None),
+        playnite: vec![],
     }
 }
 
@@ -438,4 +439,54 @@ fn reglages_windows_proposes_decoches_dans_peut_etre() {
     assert_eq!(g.display_name.as_deref(), Some("Souris"));
     assert!(g.schedule.is_some() && g.exe.is_none() && g.dest_key.is_none());
     assert_eq!(wp::kind_of_game(data.path(), g), Some(Kind::Mouse));
+}
+// ------------------------------------------------------------------ 2.0.3 : jeux de la bibliotheque Playnite
+
+fn pn(name: &str, source: &str, dir: &Path, exe: &str, appid: Option<u64>) -> crate::playnite::LibGame {
+    crate::playnite::LibGame { id: format!("id-{}", name), name: name.into(), source: source.into(), install_dir: dir.display().to_string(), exes: vec![dir.join(exe).display().to_string()], steam_appid: appid, game_id: appid.map(|a| a.to_string()).unwrap_or_default(), ..Default::default() }
+}
+
+#[test]
+fn jeux_playnite_section_a_part_decoches_sauf_emplacement_sur() {
+    let pc = Pc::new();
+    let data = tmp();
+    let steam = pc.root.join("Steam").join("steamapps").join("common");
+    let u = pc.user();
+    // Jeu ajoute a la main dans Playnite (emulateur), dossier de sauvegardes deduit par son nom ; jeu sans rien ; jeu deja protege.
+    let moon = pc.root.join("Jeux").join("Moon Lander");
+    file(&moon.join("moonlander.exe"), 10);
+    file(&u.join("AppData/Roaming/Moon Lander/slot1.sav"), 300);
+    let bare = pc.root.join("Jeux").join("Bare Title");
+    file(&bare.join("bare.exe"), 10);
+    let kept = pc.root.join("Jeux").join("Kept Title");
+    file(&kept.join("kept.exe"), 10);
+    let protected = vec![Game { name: "Kept Title".into(), path: u.join("AppData/Roaming/Kept"), exe: Some("kept.exe".into()), ..Default::default() }];
+    let mut env = sim_env(&pc, data.path(), protected);
+    env.playnite = vec![
+        pn("Hollow Knight", "Steam", &steam.join("Hollow Knight"), "hollow_knight.exe", Some(367520)),
+        pn("Moon Lander", "", &moon, "moonlander.exe", None),
+        pn("Bare Title", "", &bare, "bare.exe", None),
+        pn("Kept Title", "", &kept, "kept.exe", None),
+    ];
+    // ROM emulee (pas de programme, plateforme console) : jamais proposee, meme si son nom existe dans la base PC.
+    env.playnite.push(crate::playnite::LibGame { id: "rom".into(), name: "Hollow Knight".into(), install_dir: pc.root.join("Roms").display().to_string(), platforms: vec!["Nintendo Switch".into()], ..Default::default() });
+    env.playnite.push(crate::playnite::LibGame { id: "rom2".into(), name: "Zelda Rom".into(), install_dir: pc.root.join("Roms").display().to_string(), platforms: vec!["Nintendo SNES".into()], ..Default::default() });
+    let p = scan(&env);
+    // Un seul « Hollow Knight » (aussi vu par Steam) : les lanceurs passent AVANT Playnite, il garde sa section et son
+    // etiquette Steam (et son programme), emplacement de la base = sur, coche d'office.
+    assert_eq!(p.items.iter().filter(|i| i.name == "Hollow Knight").count(), 1);
+    let hk = find(&p, "Hollow Knight");
+    assert_eq!(hk.origin, Origin::Launcher(crate::detect::Store::Steam));
+    assert!(!hk.is_playnite() && hk.place_sure() && hk.default_checked(), "{:?} {:?}", hk.tier, hk.signs);
+    assert_eq!(hk.exe.as_deref(), Some("hollow_knight.exe"));
+    assert!(p.items.iter().all(|i| i.name != "Zelda Rom"), "ROM emulee jamais proposee");
+    // Emplacement seulement deduit par le nom : propose mais DECOCHE.
+    let ml = find(&p, "Moon Lander");
+    assert!(ml.is_playnite() && ml.selectable() && !ml.place_sure(), "{:?} {:?}", ml.tier, ml.signs);
+    assert!(!ml.default_checked());
+    // Rien trouve : dans la section Playnite, masque avec « Choisir l'emplacement ».
+    let b = find(&p, "Bare Title");
+    assert!(b.is_playnite() && b.tier == Tier::Hidden && b.hide == Some(Hide::NoData));
+    // Deja protege : jamais repropose.
+    assert!(p.items.iter().all(|i| i.name != "Kept Title"));
 }

@@ -39,6 +39,7 @@ pub mod padctl;
 pub mod padfocus;
 pub mod perf;
 pub mod picker;
+pub mod playnite;
 pub mod preview;
 pub mod process;
 pub mod procfacts;

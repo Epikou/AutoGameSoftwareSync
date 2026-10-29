@@ -87,6 +87,14 @@ fn liste_blanche_cote_client() {
     let items = k.props["items"].as_array().unwrap();
     assert_eq!(items.len(), 1);
     assert_eq!(items[0]["title"], "Hollow Knight");
+    // Les memes regles que le serveur : liste d'evenements identique (fichier du Worker).
+    let spec = std::fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("server").join("src").join("spec.js")).unwrap();
+    for (name, props) in usage::EVENTS {
+        assert!(spec.contains(&format!("  {}: {{", name)), "evenement absent du serveur : {}", name);
+        for (p, _) in *props {
+            assert!(spec.contains(&format!("{}:", p)), "propriete absente du serveur : {}.{}", name, p);
+        }
+    }
 }
 
 #[test]

@@ -158,9 +158,9 @@ fn gabarits_universels_entre_prefixe_proton_et_profil_windows() {
     let p = Path::new("/home/deck/.local/share/Steam/steamapps/compatdata/1245620/pfx/drive_c/users/steamuser/AppData/Roaming/EldenRing/76561198000000000");
     let tpl = agss::proton::template_from_prefix_path(p).unwrap();
     assert_eq!(tpl, "%APPDATA%/EldenRing/76561198000000000");
-    let win = KnownFolders { roaming_app_data: Some(PathBuf::from(r"C:\Users\Player\AppData\Roaming")), ..Default::default() };
+    let win = KnownFolders { roaming_app_data: Some(PathBuf::from(r"C:\Users\Epikou\AppData\Roaming")), ..Default::default() };
     let w = agss::hints::expand(&tpl, &win).unwrap();
-    assert!(w.to_string_lossy().replace('\\', "/").ends_with("Users/Player/AppData/Roaming/EldenRing/76561198000000000"), "{}", w.display());
+    assert!(w.to_string_lossy().replace('\\', "/").ends_with("Users/Epikou/AppData/Roaming/EldenRing/76561198000000000"), "{}", w.display());
     // Windows -> gabarit -> prefixe Proton de cette machine (la ou le dossier existe deja).
     let t = TempDir::new().unwrap();
     let pfx_a = t.path().join("lib/steamapps/compatdata/111/pfx");
@@ -168,7 +168,7 @@ fn gabarits_universels_entre_prefixe_proton_et_profil_windows() {
     std::fs::create_dir_all(pfx_a.join("drive_c/users/steamuser")).unwrap();
     let there = pfx_b.join("drive_c/users/steamuser/AppData/Roaming/EldenRing");
     std::fs::create_dir_all(&there).unwrap();
-    let wtpl = agss::hints::to_template(Path::new(r"C:\Users\Player\AppData\Roaming\EldenRing"), &win);
+    let wtpl = agss::hints::to_template(Path::new(r"C:\Users\Epikou\AppData\Roaming\EldenRing"), &win);
     #[cfg(windows)]
     assert_eq!(wtpl.as_deref(), Some("%APPDATA%/EldenRing"));
     let wtpl = wtpl.unwrap_or_else(|| "%APPDATA%/EldenRing".to_string());

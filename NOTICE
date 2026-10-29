@@ -15,3 +15,15 @@ community manifest maintained by the Ludusavi project
 
 This data file is not covered by the GPL: it remains under its own license
 terms, which include attribution, non-commercial use and share-alike.
+
+Third-party icons
+-----------------
+The controller icon of the interface comes from Phosphor Icons
+(https://phosphoricons.com/), MIT License, Copyright (c) 2023 Phosphor Icons,
+embedded through the egui-phosphor crate
+(https://github.com/amPerl/egui-phosphor), MIT License,
+Copyright (c) 2023 Romet Tagobert. The other interface icons are drawn by
+this project.
+
+The application icon (floppy disk, controller and sync arrows) is original
+work of this project.

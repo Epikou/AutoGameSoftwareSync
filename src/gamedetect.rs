@@ -776,7 +776,14 @@ pub struct Decision {
     /// « Plus tard » : pas de nouvelle proposition avant cette date (ms UTC).
     #[serde(default)]
     pub later_until_ms: u64,
+    /// 2.0.3 : nombre de « Plus tard » donnes sur l'ecran de fermeture (au-dela de `CLOSE_LATER_MAX`, plus jamais d'ecran :
+    /// seulement la carte de l'accueil).
+    #[serde(default)]
+    pub close_later: u32,
 }
+
+/// Nombre maximal de fois ou l'ecran de fermeture est REPROPOSE apres un « Plus tard » (ensuite : carte de l'accueil seulement).
+pub const CLOSE_LATER_MAX: u32 = 2;
 
 /// Memoire persistante des choix (par jeu : cle = exe normalise + dossier d'installation).
 #[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Eq)]
@@ -798,7 +805,30 @@ impl Memory {
 
     pub fn answer(&mut self, c: &Candidate, state: &str, now_ms: u64) {
         let later = if state == "later" { now_ms + LATER_MS } else { 0 };
-        self.decisions.insert(c.key.clone(), Decision { state: state.to_string(), exe: c.exe.clone(), name: c.name.clone(), later_until_ms: later });
+        let close_later = self.decisions.get(&c.key).map(|d| d.close_later).unwrap_or(0);
+        self.decisions.insert(c.key.clone(), Decision { state: state.to_string(), exe: c.exe.clone(), name: c.name.clone(), later_until_ms: later, close_later });
+    }
+
+    /// « Plus tard » sur l'ecran de fermeture : compte, et memorise un « plus tard » ordinaire (jamais un refus).
+    pub fn close_later(&mut self, c: &Candidate, now_ms: u64) {
+        let n = self.close_later_count(&c.key) + 1;
+        self.answer(c, "later", now_ms);
+        if let Some(d) = self.decisions.get_mut(&c.key) {
+            d.close_later = n;
+        }
+    }
+
+    pub fn close_later_count(&self, key: &str) -> u32 {
+        self.decisions.get(key).map(|d| d.close_later).unwrap_or(0)
+    }
+
+    /// L'ecran de fermeture peut-il encore etre propose pour ce programme ? Non apres un « oui » / « jamais », ni au-dela
+    /// de `CLOSE_LATER_MAX` « Plus tard » (la carte de l'accueil reste).
+    pub fn may_show_close(&self, key: &str) -> bool {
+        match self.decisions.get(key) {
+            None => true,
+            Some(d) => d.state == "later" && d.close_later <= CLOSE_LATER_MAX,
+        }
     }
 
     /// Peut-on (re)proposer ce jeu maintenant ?
@@ -893,6 +923,11 @@ impl Detector {
     /// Nombre de processus candidats en cours d execution.
     pub fn running_count(&self) -> usize {
         self.running.len()
+    }
+
+    /// Ce processus est-il un candidat en cours (carte de detection) ?
+    pub fn is_running(&self, pid: u32, start: u64) -> bool {
+        self.running.get(&pid).map(|r| r.0 == start).unwrap_or(false)
     }
 
     /// Un passage (toutes les ~5 s). La toute premiere liste sert de reference : les processus deja la ne sont jamais
@@ -1081,6 +1116,18 @@ impl Proposals {
                 self.queue.push_back(p);
             }
         }
+    }
+
+    /// Fermeture du programme (2.0.3) : sa carte passe en tete de file, sans attente ; ajoutee si elle n'y est plus (« Plus
+    /// tard » de l'ecran de fermeture la retire sans rien memoriser : elle revient a la fermeture suivante).
+    pub fn promote(&mut self, c: &Candidate, now_ms: u64) {
+        let p = match self.queue.iter().position(|p| p.cand.key == c.key) {
+            Some(i) => self.queue.remove(i),
+            None => None,
+        };
+        let mut p = p.unwrap_or(Pending { cand: c.clone(), created_ms: now_ms, snooze_until_ms: 0 });
+        p.snooze_until_ms = 0;
+        self.queue.push_front(p);
     }
 
     pub fn save(&self, dir: &Path) -> crate::Res<()> {
@@ -1306,6 +1353,9 @@ pub fn confirm_start_ms(reduce: bool) -> u64 {
 
 /// Delai apres la fermeture avant de passer au premier plan.
 pub const SHOW_ON_CLOSE_DELAY_MS: u64 = 3000;
+/// Au-dela de ce delai sans avoir pu s'afficher (autre programme, plein ecran, mode console...), l'ecran de fermeture est
+/// abandonne : la carte reste sur l'accueil, jamais de surgissement tardif.
+pub const CLOSE_WAIT_MS: u64 = 10 * 60 * 1000;
 
 /// Contexte evalue a chaque passage.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -1330,6 +1380,10 @@ pub enum ShowAction {
     BringToFront,
     /// Windows a refuse : faire clignoter le bouton de la barre des taches, sans insister.
     FlashTaskbar,
+    /// L'appli etait deja au premier plan : rien a demander a Windows (l'ecran de fermeture s'ouvre quand meme).
+    AlreadyFront,
+    /// Impossible de s'afficher pendant `CLOSE_WAIT_MS` : ecran abandonne, la carte de l'accueil suffit.
+    Expired,
 }
 
 /// Machine a etats : une seule fois par fermeture, jamais pendant qu'un jeu tourne, report si un autre jeu / un plein ecran.
@@ -1355,18 +1409,142 @@ impl ShowOnClose {
         if now_ms < t + SHOW_ON_CLOSE_DELAY_MS {
             return ShowAction::None;
         }
+        if now_ms >= t + CLOSE_WAIT_MS {
+            self.closed_at = None; // trop tard : jamais de surgissement des heures apres
+            return ShowAction::Expired;
+        }
         if c.other_game_running || c.fullscreen_active || c.tutorial || c.confirm_open {
-            return ShowAction::None; // reporte (a la fermeture de l'autre jeu / du plein ecran)
+            return ShowAction::None; // reporte (a la fermeture de l'autre jeu / du plein ecran), au plus CLOSE_WAIT_MS
         }
         self.closed_at = None; // une seule fois par fermeture
         if c.already_foreground {
-            return ShowAction::None;
+            return ShowAction::AlreadyFront;
         }
         if front() {
             ShowAction::BringToFront
         } else {
             ShowAction::FlashTaskbar
         }
+    }
+}
+
+// ------------------------------------------------------------------ programmes inconnus : apprentissage (2.0.3)
+
+/// Un programme inconnu doit tourner avec une vraie fenetre depuis au moins 2 minutes avant d'etre observe.
+pub const UNKNOWN_MIN_MS: u64 = 120_000;
+
+/// Programmes courants jamais appris (navigateurs, messageries, bureautique, creation, lecteurs, outils du systeme, des
+/// constructeurs et des lanceurs) : ce ne sont pas des programmes dont on cherche les donnees a leur fermeture, et ils
+/// tournent souvent des heures. Noms Windows seulement (l'apprentissage n'existe pas sous Linux). Cette liste n'est qu'un
+/// filtre de confort : la vraie protection est la regle « ecran seulement si quelque chose a ete trouve ».
+pub const NOT_LEARNED: &[&str] = &[
+    "discord.exe", "spotify.exe", "slack.exe", "teams.exe", "ms-teams.exe", "whatsapp.exe", "telegram.exe", "signal.exe", "zoom.exe", "skype.exe",
+    "obs64.exe", "obs32.exe", "notepad.exe", "notepad++.exe", "mspaint.exe", "winword.exe", "excel.exe", "powerpnt.exe", "outlook.exe", "olk.exe", "onenote.exe",
+    "acrord32.exe", "acrobat.exe", "vlc.exe", "mpc-hc64.exe", "wmplayer.exe", "steamwebhelper.exe", "epicgameslauncher.exe", "galaxyclient.exe",
+    "playnite.desktopapp.exe", "playnite.fullscreenapp.exe", "autogamesoftwaresync.exe", "taskmgr.exe", "systemsettings.exe", "applicationframehost.exe",
+    "searchhost.exe", "textinputhost.exe", "brave.exe", "opera.exe", "vivaldi.exe", "thunderbird.exe", "7zfm.exe", "winrar.exe", "keepass.exe",
+    "keepassxc.exe", "bitwarden.exe", "1password.exe", "battle.net.exe", "eadesktop.exe", "upc.exe", "ubisoftconnect.exe", "gamebar.exe", "xboxpcapp.exe",
+    "nvidia app.exe", "nvcontainer.exe", "msiafterburner.exe", "rtss.exe", "wallpaper64.exe", "wallpaper32.exe", "ds4windows.exe", "anydesk.exe",
+    "teamviewer.exe", "rustdesk.exe", "everything.exe", "powertoys.exe", "snippingtool.exe", "calculatorapp.exe", "windowsterminal.exe", "mmc.exe",
+    "regedit.exe", "control.exe", "mstsc.exe", "explorer.exe", "gimp-2.10.exe", "gimp.exe", "blender.exe", "photoshop.exe", "illustrator.exe", "krita.exe",
+    "inkscape.exe", "audacity.exe", "soffice.bin", "soffice.exe", "swriter.exe", "scalc.exe", "virtualbox.exe", "virtualboxvm.exe", "vmware.exe",
+    "vmplayer.exe", "lghub.exe", "icue.exe", "armourycrate.exe", "armourycrateservice.exe", "armourycrate.service.exe", "legionspace.exe", "steelseriesgg.exe",
+    "razer synapse 3.exe", "razercentral.exe", "nzxt cam.exe", "corsair.service.exe", "amdrsserv.exe", "radeonsoftware.exe", "geforce experience.exe",
+    "msedge.exe", "chrome.exe", "firefox.exe", "foobar2000.exe", "itunes.exe", "onedrive.exe", "dropbox.exe", "googledrivefs.exe",
+];
+
+/// Programme INCONNU a observer (apprentissage pendant l'utilisation) : demarre apres l'appli, vraie fenetre, au moins 2 min,
+/// ni carte de detection (base, lanceur, profil, emulateur), ni outil de developpement, ni programme systeme / console /
+/// lance depuis un terminal, ni programme courant (`NOT_LEARNED`), ni deja suivi, ni deja refuse (« Jamais pour celui-ci »).
+pub fn unknown_candidate(p: &ProcInfo, f: &Facts, has_window: bool, env: &Env, mem: &Memory) -> Option<Candidate> {
+    let exe = p.exe.to_lowercase();
+    if !has_window || exe.is_empty() || is_auxiliary(&exe) || EXCLUDED_EXES.contains(&exe.as_str()) || GENERIC_EXES.contains(&exe.as_str()) || NOT_LEARNED.contains(&exe.as_str()) {
+        return None;
+    }
+    if env.known_exes.iter().any(|k| *k == exe) {
+        return None;
+    }
+    if f.age_ms.map(|a| a < UNKNOWN_MIN_MS).unwrap_or(true) {
+        return None;
+    }
+    let path = p.path.as_ref()?;
+    let np = norm_path(path);
+    if is_system_path(&np) || is_aux_dir(&np) || linux_excluded(&exe, &np) || veto_of(&np, f, true, true).is_some() {
+        return None;
+    }
+    // Deja une carte possible (base, lanceur, emulateur) : la detection ordinaire s'en charge.
+    if assess(p, env, f).map(|c| is_proposable(&c)).unwrap_or(false) {
+        return None;
+    }
+    let install = install_dir_of(path, env.launcher_roots);
+    let key = format!("{}|{}", exe, norm_path(&install));
+    if mem.decisions.get(&key).map(|d| d.state == "no" || d.state == "yes").unwrap_or(false) {
+        return None;
+    }
+    let product = f.product.as_deref().map(str::trim).filter(|s| s.chars().count() >= 3 && !s.to_lowercase().contains("operating system")).map(|s| s.to_string());
+    let name = product.unwrap_or_else(|| pretty_name(&p.exe));
+    Some(Candidate { key, exe, path: Some(path.clone()), why: Why::Learned, name, install_dir: Some(install), profile_id: None, app: false, confidence: None })
+}
+
+/// Evenement de l'observation des programmes inconnus.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum UnknownEvent {
+    /// A observer (dossiers modifies) jusqu'a sa fermeture.
+    Started(Candidate),
+    /// Tous ses processus se sont fermes.
+    Ended(Candidate),
+}
+
+/// Observation des programmes inconnus (machine a etats pure, comme `Detector`).
+#[derive(Default, Debug)]
+pub struct UnknownWatch {
+    baseline: HashSet<(u32, u64)>,
+    baseline_done: bool,
+    /// pid -> (heure de demarrage, candidat).
+    running: HashMap<u32, (u64, Candidate)>,
+    /// Portee de la detection (un programme inconnu n'est jamais un logiciel a profil : hors portee « Logiciels »).
+    pub scope: DetectScope,
+}
+
+impl UnknownWatch {
+    pub fn running_count(&self) -> usize {
+        self.running.values().map(|(_, c)| c.key.as_str()).collect::<HashSet<_>>().len()
+    }
+
+    /// Un passage. `windows` : processus qui ont une vraie fenetre visible ; `facts` : indices d'execution ; `skip` :
+    /// processus deja pris par la detection ordinaire.
+    pub fn scan(&mut self, procs: &[ProcInfo], env: &Env, mem: &Memory, windows: &HashSet<u32>, facts: &HashMap<(u32, u64), Facts>, skip: &dyn Fn(&ProcInfo) -> bool) -> Vec<UnknownEvent> {
+        let mut out = Vec::new();
+        if !self.baseline_done {
+            self.baseline = procs.iter().map(|p| (p.pid, p.start)).collect();
+            self.baseline_done = true;
+            return out;
+        }
+        let alive: HashSet<(u32, u64)> = procs.iter().map(|p| (p.pid, p.start)).collect();
+        for p in procs {
+            if self.baseline.contains(&(p.pid, p.start)) || self.running.get(&p.pid).map(|r| r.0 == p.start).unwrap_or(false) || skip(p) {
+                continue;
+            }
+            let f = facts.get(&(p.pid, p.start)).cloned().unwrap_or_default();
+            let Some(c) = unknown_candidate(p, &f, windows.contains(&p.pid), env, mem) else { continue };
+            if !in_scope(&c, self.scope) {
+                continue;
+            }
+            let already = self.running.values().any(|(_, o)| o.key == c.key);
+            self.running.insert(p.pid, (p.start, c.clone()));
+            if !already {
+                out.push(UnknownEvent::Started(c));
+            }
+        }
+        let gone: Vec<u32> = self.running.iter().filter(|(pid, (st, _))| !alive.contains(&(**pid, *st))).map(|(p, _)| *p).collect();
+        for pid in gone {
+            if let Some((_, c)) = self.running.remove(&pid) {
+                if !self.running.values().any(|(_, o)| o.key == c.key) {
+                    out.push(UnknownEvent::Ended(c));
+                }
+            }
+        }
+        out
     }
 }
 

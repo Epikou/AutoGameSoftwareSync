@@ -50,15 +50,15 @@ const REAL_FALSE_POSITIVES: &[(&str, &str)] = &[
     ("gh.exe", r"C:\Program Files\GitHub CLI\gh.exe"),
     ("moonlight.exe", r"C:\Program Files\Moonlight Game Streaming\Moonlight.exe"),
     ("everything.exe", r"C:\Program Files (x86)\Everything\Everything.exe"),
-    ("cargo.exe", r"C:\Users\player\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin\cargo.exe"),
-    ("tsgo.exe", r"C:\Users\player\AppData\Local\Programs\Antigravity IDE\resources\app\node_modules\@typescript\native-preview-win32-x64\lib\tsgo.exe"),
-    ("openconsole.exe", r"C:\Users\player\AppData\Local\Programs\Antigravity IDE\resources\app\node_modules\node-pty\build\Release\conpty\OpenConsole.exe"),
+    ("cargo.exe", r"C:\Users\epiko\.rustup\toolchains\stable-x86_64-pc-windows-msvc\bin\cargo.exe"),
+    ("tsgo.exe", r"C:\Users\epiko\AppData\Local\Programs\Antigravity IDE\resources\app\node_modules\@typescript\native-preview-win32-x64\lib\tsgo.exe"),
+    ("openconsole.exe", r"C:\Users\epiko\AppData\Local\Programs\Antigravity IDE\resources\app\node_modules\node-pty\build\Release\conpty\OpenConsole.exe"),
 ];
 
 #[cfg(windows)]
 const STUDY_FALSE_POSITIVES: &[(&str, &str)] = &[
     ("echo.exe", r"C:\Program Files\Git\usr\bin\echo.exe"),
-    ("cargo.exe", r"C:\Users\player\.cargo\bin\cargo.exe"),
+    ("cargo.exe", r"C:\Users\epiko\.cargo\bin\cargo.exe"),
     ("node.exe", r"C:\Program Files\nodejs\node.exe"),
     ("control.exe", r"C:\Windows\System32\control.exe"),
     ("cmd.exe", r"C:\Windows\System32\cmd.exe"),
@@ -167,7 +167,7 @@ fn vrais_jeux_emulateurs_et_profils_proposes() {
         ("fortniteclient-win64-shipping.exe", r"C:\Program Files\Epic Games\Fortnite\FortniteGame\Binaries\Win64\FortniteClient-Win64-Shipping.exe", game_facts()),
         ("witcher3.exe", r"C:\GOG Games\The Witcher 3 Wild Hunt GOTY\bin\x64\witcher3.exe", game_facts()),
         ("haloinfinite.exe", r"C:\XboxGames\Halo Infinite\Content\HaloInfinite.exe", game_facts()),
-        ("celeste.exe", r"C:\Users\player\AppData\Roaming\itch\apps\celeste\Celeste.exe", game_facts()),
+        ("celeste.exe", r"C:\Users\epiko\AppData\Roaming\itch\apps\celeste\Celeste.exe", game_facts()),
         ("fifa23.exe", r"C:\Program Files\EA Games\FIFA 23\FIFA23.exe", game_facts()),
         ("acvalhalla.exe", r"C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\games\Assassin's Creed Valhalla\ACValhalla.exe", game_facts()),
         // Lanceur installe hors de son dossier par defaut : confirme par son manifeste
@@ -202,7 +202,7 @@ fn vrais_jeux_emulateurs_et_profils_proposes() {
 fn profils_integres_gardes_et_verifies() {
     let hint = |id: &str, name: &str, app: bool, installed: bool| ProfileHint { id: id.into(), name: name.into(), app, installed };
     let vs = hint("vscode", "Visual Studio Code settings", true, true);
-    let c = assess_profile(&p("code.exe", r"C:\Users\player\AppData\Local\Programs\Microsoft VS Code\Code.exe"), &game_facts(), &vs).unwrap();
+    let c = assess_profile(&p("code.exe", r"C:\Users\epiko\AppData\Local\Programs\Microsoft VS Code\Code.exe"), &game_facts(), &vs).unwrap();
     assert!(is_proposable(&c) && c.why == Why::Profile && c.app, "{:?}", c.confidence);
     // PowerShell : programme console lance depuis le Terminal (normal pour ce profil cure).
     let ps = hint("powershell-profile", "PowerShell profile", false, true);

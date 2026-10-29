@@ -166,7 +166,7 @@ impl App {
             (State::Busy, self.t(K::VCopyingPct).replace("{}", "64")),
             (State::Todo, self.t(K::VToDo).to_string()),
             (State::Problem, self.t(K::VFileLocked).to_string()),
-            (State::Incoming, self.t(K::VNewerFrom).replace("{}", "ALLY")),
+            (State::Incoming, self.t(K::VNewerFrom).replace("{}", "EPIGOS")),
             (State::Paused, self.t(K::VPausedInUse).to_string()),
         ]
     }
@@ -218,8 +218,8 @@ impl App {
                     }
                 });
                 ui.horizontal(|ui| {
-                    u::device_pill(ui, "PC-DESKTOP", t.teal);
-                    u::device_pill(ui, "ALLY", t.purple);
+                    u::device_pill(ui, "EPIKOU", t.teal);
+                    u::device_pill(ui, "EPIGOS", t.purple);
                 });
             });
             let ui = &mut b[0];
@@ -344,7 +344,7 @@ impl App {
                 other => other.to_string(),
             };
             u::timeline(ui, "tl", &marks, &label, &mut g.tl_sel);
-            let card = self.t(K::VVersionCard).replace("{0}", &self.t(K::VYesterdayAt).replace("{}", "21:14")).replace("{1}", "ALLY").replace("{2}", "3");
+            let card = self.t(K::VVersionCard).replace("{0}", &self.t(K::VYesterdayAt).replace("{}", "21:14")).replace("{1}", "EPIGOS").replace("{2}", "3");
             u::cascade_in(ui, "vcard", 0, g.tl_sel as u64 + 1000 * ep, |ui| {
                 let words = self.t(K::VPreviewWords).replace("{0}", "2").replace("{1}", "1");
                 egui::Frame::new().fill(u::col(t.card2)).stroke(egui::Stroke::new(1.0_f32, u::col(t.line))).corner_radius(u::tokens::R_MD).inner_margin(egui::Margin::symmetric(14, 12)).show(ui, |ui| {

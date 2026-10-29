@@ -94,11 +94,11 @@ mod tests {
     #[test]
     fn une_ligne_par_transition_et_declenchement() {
         let mut t = Transitions::default();
-        let mut rem = || ("ALLY".to_string(), "02:47:36".to_string());
+        let mut rem = || ("EPIGOS".to_string(), "02:47:36".to_string());
         assert_eq!(t.observe("J", &GameStatus::UpToDate, 0, &mut rem), Obs::default(), "premier constat a jour : silencieux");
         assert_eq!(t.observe("J", &GameStatus::UpToDate, 1000, &mut rem), Obs::default(), "pas de repetition");
         let o = t.observe("J", &GameStatus::CloudNewer, 2000, &mut rem);
-        assert_eq!(o.line.as_deref(), Some("etat : a jour -> cloud plus recent (sauvegarde de ALLY vue a 02:47:36)"));
+        assert_eq!(o.line.as_deref(), Some("etat : a jour -> cloud plus recent (sauvegarde de EPIGOS vue a 02:47:36)"));
         assert!(o.trigger);
         // Meme etat : pas de ligne, pas de relance avant 60 s ; puis relance silencieuse.
         let o = t.observe("J", &GameStatus::CloudNewer, 10_000, &mut rem);

@@ -98,7 +98,7 @@
 
 ## Расширение для Playnite
 
-Пользуетесь Playnite? Бесплатное расширение показывает на странице каждой игры состояние защиты, дату последней синхронизации и устройство, с которого она пришла, в его цвете. Работает в полноэкранном режиме с самыми популярными темами (Solaris, ReskinPS5, PS5ish...). Оно только читает данные и никогда не трогает ваши сохранения.
+Пользуетесь Playnite? Бесплатное расширение показывает на странице каждой игры состояние защиты, дату последней синхронизации и устройство, с которого она пришла, в его цвете. Работает в полноэкранном режиме с самыми популярными темами (Solaris, ReskinPS5, PS5ish...). Оно читает состояние ваших сохранений и, начиная с AutoGameSoftwareSync 2.0.3, передаёт приложению список установленных игр Playnite, чтобы оно предложило ещё не защищённые. Оно никогда не трогает ваши сохранения.
 
 <p align="center"><img src="https://raw.githubusercontent.com/Epikou/AutoGameSoftwareSync-Playnite/main/screenshots/solaris-badge.png" width="720" alt="Значок AutoGameSoftwareSync в теме Solaris"></p>
 
@@ -106,7 +106,7 @@
 
 ## Linux / SteamOS
 
-Доступна и сборка для Linux (x86_64): SteamOS (Steam Deck, Legion Go S...), Bazzite и Ubuntu. Скачай `AutoGameSoftwareSync-v2.0.0-linux-x86_64.tar.gz` со страницы [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), распакуй архив и запусти `install-linux.sh` (права администратора не нужны). Копии полностью совместимы с версией для Windows через то же хранилище, включая игры Windows под Proton. Руководство по установке (на французском): [docs/LINUX.md](docs/LINUX.md).
+Доступна и сборка для Linux (x86_64): SteamOS (Steam Deck, Legion Go S...), Bazzite и Ubuntu. Скачай `AutoGameSoftwareSync-vX.Y.Z-linux-x86_64.tar.gz` со страницы [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), распакуй архив и запусти `install-linux.sh` (права администратора не нужны). Копии полностью совместимы с версией для Windows через то же хранилище, включая игры Windows под Proton. Руководство по установке (на французском): [docs/LINUX.md](docs/LINUX.md).
 
 ![Linux](screenshots/en/linux.png)
 

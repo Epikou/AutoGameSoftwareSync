@@ -185,12 +185,23 @@ fn noms_autogamesoftwaresync_partout() {
     assert_eq!(agss::winutil::RUN_VALUE, "AutoGameSoftwareSync");
     assert_eq!(TASK_FOLDER, "AutoGameSoftwareSync");
     assert_eq!(appdirs::APP_DIR, "AutoGameSoftwareSync");
+    // Textes d'interface : plus aucune trace des anciens noms (ils ne vivent que dans `legacy`).
+    for k in agss::i18n::ALL_KEYS {
+        for l in [Lang::Fr, Lang::En, Lang::Ru, Lang::Es, Lang::Zh] {
+            let s = tr(l, *k).to_lowercase();
+            for old in agss::legacy::DATA_DIRS.iter().chain(agss::legacy::TASK_FOLDERS.iter()) {
+                let o = old.to_lowercase();
+                let bad = if o == agss::legacy::DATA_DIRS[2].to_lowercase() { s.split(|c: char| !c.is_alphanumeric()).any(|w| w == o) } else { s.contains(&o) };
+                assert!(!bad, "{:?}/{:?} cite un ancien nom", l, k);
+            }
+        }
+    }
 }
 
 #[test]
 fn migration_du_dossier_de_donnees_precedent_puis_ancien() {
     let t = TempDir::new().unwrap();
-    let (prev, old, new) = (t.path().join("ancien-a"), t.path().join("ancien-b"), t.path().join("AutoGameSoftwareSync"));
+    let (prev, old, new) = (t.path().join(agss::legacy::DATA_DIRS[0]), t.path().join(agss::legacy::DATA_DIRS[2]), t.path().join("AutoGameSoftwareSync"));
     let pick = |a: &PathBuf, b: &PathBuf| appdirs::pick_first_existing(&[a.clone(), b.clone()]);
     assert_eq!(pick(&prev, &old), None);
     std::fs::create_dir_all(&old).unwrap();
@@ -229,3 +240,180 @@ fn variable_d_environnement_prioritaire() {
     }
 }
 
+// ------------------------------------------------------------------ entree Run et taches planifiees
+
+fn old(id: &str) -> String {
+    format!("{}\\{}", agss::legacy::TASK_FOLDERS[0], if id == "agss" { agss::legacy::APP_RULE_ID } else { id })
+}
+
+fn newt(id: &str) -> String {
+    format!("AutoGameSoftwareSync\\{}", id)
+}
+
+#[cfg(windows)]
+#[test]
+fn entree_run_reecrite_seulement_si_elle_vise_notre_ancien_exe() {
+    let new = pb("C:\\Apps\\AutoGameSoftwareSync.exe");
+    for n in agss::legacy::EXE_NAMES {
+        assert_eq!(rewrite_run_command(&format!("\"C:\\Old\\{}\" --tray", n), &new), Some("\"C:\\Apps\\AutoGameSoftwareSync.exe\" --tray".into()));
+    }
+    assert_eq!(rewrite_run_command(&format!("C:\\Old\\{}", agss::legacy::EXE_NAMES[1]), &new), Some("\"C:\\Apps\\AutoGameSoftwareSync.exe\"".into()));
+    assert_eq!(rewrite_run_command("\"C:\\Tools\\OtherApp.exe\" --tray", &new), None, "pas a nous : intact");
+}
+
+#[test]
+fn anciennes_taches_reconnues_seulement_si_elles_sont_les_notres() {
+    for f in agss::legacy::TASK_FOLDERS {
+        for ok in ["agss", "gdrive", "onedrive", "dropbox", "custom-12"] {
+            let id = if ok == "agss" { agss::legacy::APP_RULE_ID } else { ok };
+            assert!(is_legacy_task(&format!("{}\\{}", f, id)), "{} {}", f, ok);
+            assert!(is_legacy_task(&format!("\\{}\\{}", f, id)));
+        }
+        for bad in ["tache-d-un-autre", "custom-", "custom-x", "", "gdrive\\x", "..\\gdrive"] {
+            assert!(!is_legacy_task(&format!("{}\\{}", f, bad)), "{} {}", f, bad);
+        }
+        assert!(!is_legacy_task(f));
+    }
+    assert!(!is_legacy_task(&newt("gdrive")), "les taches du dossier actuel ne sont pas des anciennes");
+    assert!(!is_legacy_task("Microsoft\\Windows\\gdrive"));
+}
+
+
+struct FakeSched {
+    tasks: RefCell<Vec<String>>,
+    deny_create: bool,
+    deny_delete: bool,
+    ops: RefCell<Vec<String>>,
+}
+
+impl FakeSched {
+    fn new(tasks: &[&str]) -> Self {
+        FakeSched { tasks: RefCell::new(tasks.iter().map(|s| s.to_string()).collect()), deny_create: false, deny_delete: false, ops: RefCell::new(vec![]) }
+    }
+}
+
+impl Scheduler for FakeSched {
+    fn list(&self) -> Result<Vec<String>, SchedError> {
+        Ok(self.tasks.borrow().iter().filter(|n| is_own_task(n)).cloned().collect())
+    }
+    fn list_legacy(&self) -> Result<Vec<String>, SchedError> {
+        Ok(self.tasks.borrow().iter().filter(|n| is_legacy_task(n)).cloned().collect())
+    }
+    fn create(&self, name: &str, _x: &[u8]) -> Result<(), SchedError> {
+        if self.deny_create {
+            return Err(SchedError::AccessDenied("refuse".into()));
+        }
+        self.ops.borrow_mut().push(format!("create {}", name));
+        self.tasks.borrow_mut().push(name.to_string());
+        Ok(())
+    }
+    fn delete(&self, name: &str) -> Result<(), SchedError> {
+        if self.deny_delete {
+            return Err(SchedError::AccessDenied("refuse".into()));
+        }
+        self.ops.borrow_mut().push(format!("delete {}", name));
+        self.tasks.borrow_mut().retain(|t| t != name);
+        Ok(())
+    }
+    fn run(&self, _n: &str) -> Result<(), SchedError> {
+        Ok(())
+    }
+    fn query_xml(&self, _n: &str) -> Result<String, SchedError> {
+        Ok(String::new())
+    }
+}
+
+
+fn rules(found: &[&str]) -> Vec<Rule> {
+    ["agss", "gdrive", "custom-2"]
+        .iter()
+        .map(|id| Rule { id: id.to_string(), kind: ToolKind::Custom, name: id.to_string(), command: pb("C:\\Apps\\AutoGameSoftwareSync.exe"), args: "--tray".into(), delay_secs: 40, enabled: false, found: found.contains(id), minimized: false })
+        .collect()
+}
+
+#[test]
+fn plan_de_migration_ne_touche_que_nos_anciennes_taches() {
+    let legacy = vec![old("agss"), old("gdrive"), old("custom-2")];
+    let p = plan_migrate(&legacy, &rules(&["agss", "gdrive"]));
+    assert_eq!(p.create.iter().map(|r| r.id.as_str()).collect::<Vec<_>>(), vec!["agss", "gdrive"]);
+    assert!(p.create.iter().all(|r| r.enabled), "la tache existait : la regle est activee");
+    assert_eq!(p.delete, vec![old("agss"), old("gdrive")]);
+    // custom-2 : programme introuvable -> l'ancienne tache est LAISSEE (rien n'est perdu).
+    assert!(!p.delete.iter().any(|d| d.contains("custom-2")));
+    // Une tache inconnue du dossier n'est jamais prise en compte.
+    let p2 = plan_migrate(&[old("tache-d-un-autre")], &rules(&["agss"]));
+    assert!(p2.create.is_empty() && p2.delete.is_empty());
+    // Le second ancien dossier de taches est migre aussi.
+    let other = format!("{}\\{}", agss::legacy::TASK_FOLDERS[1], "gdrive");
+    let p3 = plan_migrate(&[other.clone()], &rules(&["gdrive"]));
+    assert_eq!(p3.delete, vec![other]);
+}
+
+#[test]
+fn migration_automatique_sans_elevation() {
+    let s = FakeSched::new(&[&old("agss"), &old("gdrive"), &old("tache-d-un-autre"), "Microsoft\\Windows\\x"]);
+    let r = migrate_tasks_auto(&s, &rules(&["agss", "gdrive"]), "PC\\moi");
+    assert_eq!(r, TaskMigration::Done(2));
+    let t = s.tasks.borrow().clone();
+    assert!(t.contains(&newt("agss")) && t.contains(&newt("gdrive")), "nouvelles taches creees");
+    assert!(!t.contains(&old("agss")) && !t.contains(&old("gdrive")), "anciennes taches retirees");
+    assert!(t.contains(&old("tache-d-un-autre")) && t.contains(&"Microsoft\\Windows\\x".to_string()), "autres taches jamais touchees");
+    // Creations AVANT suppressions.
+    let ops = s.ops.borrow().clone();
+    let first_delete = ops.iter().position(|o| o.starts_with("delete")).unwrap();
+    assert!(ops[..first_delete].iter().all(|o| o.starts_with("create")) && first_delete == 2);
+    // Idempotent : une 2e execution n'a plus rien a faire.
+    assert_eq!(migrate_tasks_auto(&s, &rules(&["agss", "gdrive"]), "PC\\moi"), TaskMigration::NothingToDo);
+}
+
+#[test]
+fn migration_refusee_garde_les_anciennes_taches() {
+    // Creation refusee (droits) : invite dans les Reglages, l'ancienne tache reste.
+    let mut s = FakeSched::new(&[&old("agss")]);
+    s.deny_create = true;
+    assert_eq!(migrate_tasks_auto(&s, &rules(&["agss"]), "u"), TaskMigration::NeedsElevation(1));
+    assert_eq!(*s.tasks.borrow(), vec![old("agss")]);
+    // Creation reussie mais suppression refusee : la nouvelle existe, l'ancienne reste, invite dans les Reglages.
+    let mut s = FakeSched::new(&[&old("agss")]);
+    s.deny_delete = true;
+    assert_eq!(migrate_tasks_auto(&s, &rules(&["agss"]), "u"), TaskMigration::NeedsElevation(1));
+    assert!(s.tasks.borrow().contains(&old("agss")) && s.tasks.borrow().contains(&newt("agss")));
+}
+
+#[test]
+fn migration_avec_elevation_une_seule_fenetre() {
+    let mut s = FakeSched::new(&[&old("agss"), &old("gdrive")]);
+    s.deny_create = true;
+    let calls = RefCell::new(Vec::<ApplyFile>::new());
+    let msg = migrate_tasks_with(&s, &rules(&["agss", "gdrive"]), "u", &|f| {
+        calls.borrow_mut().push(ApplyFile { creates: f.creates.clone(), deletes: f.deletes.clone() });
+        Ok(())
+    })
+    .unwrap();
+    assert!(msg.contains("2"), "{}", msg);
+    let c = calls.borrow();
+    assert_eq!(c.len(), 1, "une seule elevation (une seule fenetre UAC)");
+    assert_eq!(c[0].creates.iter().map(|x| x.0.clone()).collect::<Vec<_>>(), vec![newt("agss"), newt("gdrive")]);
+    assert_eq!(c[0].deletes, vec![old("agss"), old("gdrive")]);
+    // Refus de l'utilisateur dans la fenetre Windows : rien n'est modifie.
+    let r = migrate_tasks_with(&s, &rules(&["agss"]), "u", &|_| Err("annule".into()));
+    assert!(r.is_err());
+    assert!(s.ops.borrow().is_empty() && s.tasks.borrow().len() == 2);
+}
+
+#[test]
+fn cote_eleve_l_ancienne_tache_n_est_supprimee_que_si_les_nouvelles_sont_creees() {
+    // Etape avec droits eleves : une creation echoue -> les anciennes taches restent.
+    let mut s = FakeSched::new(&[&old("agss")]);
+    s.deny_create = true;
+    let f = ApplyFile { creates: vec![(newt("agss"), "<x/>".into())], deletes: vec![old("agss")] };
+    let out = apply_file(&s, &f);
+    assert!(out.deleted.is_empty() && !out.failed.is_empty());
+    assert_eq!(*s.tasks.borrow(), vec![old("agss")]);
+    // Tout va bien : creation puis suppression. Une tache hors de nos dossiers est refusee.
+    let s = FakeSched::new(&[&old("agss")]);
+    let f = ApplyFile { creates: vec![(newt("agss"), "<x/>".into())], deletes: vec![old("agss"), old("inconnue"), "Microsoft\\y".into()] };
+    let out = apply_file(&s, &f);
+    assert_eq!(out.deleted, vec![old("agss")]);
+    assert_eq!(out.failed.len(), 2, "tache inconnue et tache hors dossier refusees");
+}

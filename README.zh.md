@@ -98,7 +98,7 @@
 
 ## Playnite 扩展
 
-使用 Playnite？这个免费扩展会在每个游戏页面上显示其保护状态、上次同步的时间以及来源设备（以该设备的颜色显示）。它支持全屏模式下最常用的主题（Solaris、ReskinPS5、PS5ish……）。它只读取信息，从不触碰你的存档。
+使用 Playnite？这个免费扩展会在每个游戏页面上显示其保护状态、上次同步的时间以及来源设备（以该设备的颜色显示）。它支持全屏模式下最常用的主题（Solaris、ReskinPS5、PS5ish……）。它读取存档状态，并在 AutoGameSoftwareSync 2.0.3 或更高版本中把你已安装的 Playnite 游戏列表发送给应用，以便提示尚未保护的游戏。它从不触碰你的存档。
 
 <p align="center"><img src="https://raw.githubusercontent.com/Epikou/AutoGameSoftwareSync-Playnite/main/screenshots/solaris-badge.png" width="720" alt="Solaris 主题中的 AutoGameSoftwareSync 徽章"></p>
 
@@ -106,7 +106,7 @@
 
 ## Linux / SteamOS
 
-同时提供 Linux 版本（x86_64）：SteamOS（Steam Deck、Legion Go S 等）、Bazzite 和 Ubuntu。请从 [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) 页面下载 `AutoGameSoftwareSync-v2.0.0-linux-x86_64.tar.gz`，解压后运行 `install-linux.sh`（无需管理员权限）。通过同一个保险库，副本与 Windows 版完全兼容，包括通过 Proton 运行的 Windows 游戏。安装指南（法语）：[docs/LINUX.md](docs/LINUX.md)。
+同时提供 Linux 版本（x86_64）：SteamOS（Steam Deck、Legion Go S 等）、Bazzite 和 Ubuntu。请从 [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) 页面下载 `AutoGameSoftwareSync-vX.Y.Z-linux-x86_64.tar.gz`，解压后运行 `install-linux.sh`（无需管理员权限）。通过同一个保险库，副本与 Windows 版完全兼容，包括通过 Proton 运行的 Windows 游戏。安装指南（法语）：[docs/LINUX.md](docs/LINUX.md)。
 
 ![Linux](screenshots/en/linux.png)
 

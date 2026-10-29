@@ -11,7 +11,7 @@ impl App {
         crate::i18n::format_bytes(self.model.settings.lang, b)
     }
 
-    /// Texte avec un nom ou une date a la place de « {} », elision du francais (« d'aujourd'hui », « d'ALLY »).
+    /// Texte avec un nom ou une date a la place de « {} », elision du francais (« d'aujourd'hui », « d'EPIGOS »).
     pub(super) fn tf(&self, k: K, v: &str) -> String {
         crate::i18n::elide(self.model.settings.lang, &self.t(k).replace("{}", v))
     }
@@ -444,7 +444,7 @@ impl App {
         let loaded = uilogic::pick_font(&cands, &|p| p.is_file()).and_then(|p| std::fs::read(&p).ok().map(|b| (p, b)));
         match loaded {
             Some((path, bytes)) => {
-                let mut fonts = egui::FontDefinitions::default();
+                let mut fonts = ui::glyphs::fonts_with_icons();
                 fonts.font_data.insert("cjk".to_string(), std::sync::Arc::new(egui::FontData::from_owned(bytes)));
                 for fam in [egui::FontFamily::Proportional, egui::FontFamily::Monospace] {
                     if let Some(v) = fonts.families.get_mut(&fam) {

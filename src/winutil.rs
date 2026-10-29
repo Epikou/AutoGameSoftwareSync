@@ -221,9 +221,16 @@ pub fn exe_icon_rgba(exe: &Path) -> Option<(Vec<u8>, usize, usize)> {
     let wide: Vec<u16> = exe.as_os_str().to_string_lossy().encode_utf16().chain(std::iter::once(0)).collect();
     unsafe {
         let mut info: SHFILEINFOW = std::mem::zeroed();
-        let r = SHGetFileInfoW(wide.as_ptr(), 0, &mut info, std::mem::size_of::<SHFILEINFOW>() as u32, SHGFI_ICON | SHGFI_LARGEICON);
-        if r == 0 || info.hIcon.is_null() {
-            return None;
+        // 2.0.3 : icone en 96 px (nette sur une tuile de 48 a 60 px, ecrans haute densite compris) ; sinon 32 px du shell.
+        let mut big: windows_sys::Win32::UI::WindowsAndMessaging::HICON = std::ptr::null_mut();
+        let n = PrivateExtractIconsW(wide.as_ptr(), 0, 96, 96, &mut big, std::ptr::null_mut(), 1, 0);
+        if n >= 1 && n != u32::MAX && !big.is_null() {
+            info.hIcon = big;
+        } else {
+            let r = SHGetFileInfoW(wide.as_ptr(), 0, &mut info, std::mem::size_of::<SHFILEINFOW>() as u32, SHGFI_ICON | SHGFI_LARGEICON);
+            if r == 0 || info.hIcon.is_null() {
+                return None;
+            }
         }
         let mut ii: ICONINFO = std::mem::zeroed();
         let mut out = None;
@@ -459,6 +466,38 @@ pub fn bring_to_front(title: &str) -> bool {
     show_window(title);
     std::thread::sleep(std::time::Duration::from_millis(150));
     unsafe { find_window(title).map(|h| GetForegroundWindow() == h).unwrap_or(false) }
+}
+
+/// Processus qui ont une VRAIE fenetre (visible, sans proprietaire, pas une fenetre d'outil, avec un titre, au moins
+/// 200 x 150) : apprentissage des programmes inconnus (2.0.3). Lecture seule.
+pub fn visible_window_pids() -> std::collections::HashSet<u32> {
+    use windows_sys::Win32::Foundation::{HWND, LPARAM, RECT};
+    use windows_sys::Win32::UI::WindowsAndMessaging::*;
+    unsafe extern "system" fn cb(h: HWND, l: LPARAM) -> i32 {
+        let set = &mut *(l as *mut std::collections::HashSet<u32>);
+        if IsWindowVisible(h) == 0 || !GetWindow(h, GW_OWNER).is_null() {
+            return 1;
+        }
+        let ex = GetWindowLongPtrW(h, GWL_EXSTYLE) as u32;
+        if ex & WS_EX_TOOLWINDOW != 0 || GetWindowTextLengthW(h) == 0 {
+            return 1;
+        }
+        let mut r = RECT { left: 0, top: 0, right: 0, bottom: 0 };
+        if GetWindowRect(h, &mut r) == 0 || r.right - r.left < 200 || r.bottom - r.top < 150 {
+            return 1;
+        }
+        let mut pid: u32 = 0;
+        GetWindowThreadProcessId(h, &mut pid);
+        if pid != 0 {
+            set.insert(pid);
+        }
+        1
+    }
+    let mut set: std::collections::HashSet<u32> = std::collections::HashSet::new();
+    unsafe {
+        EnumWindows(Some(cb), &mut set as *mut _ as LPARAM);
+    }
+    set
 }
 
 /// Fait clignoter le bouton de la barre des taches (repli sans insister quand le premier plan est refuse).

@@ -184,9 +184,9 @@ pub fn apply(cache: &mut Cache, f: Fetched) {
     }
 }
 
-/// Adresses a interroger, dans l'ordre.
-pub fn candidate_urls() -> [&'static str; 1] {
-    [LATEST_URL]
+/// Adresses a interroger, dans l'ordre : la nouvelle puis l'ancienne (repli).
+pub fn candidate_urls() -> [&'static str; 2] {
+    [LATEST_URL, crate::legacy::UPDATE_URL]
 }
 
 /// Premier resultat qui n'est pas un echec reseau / adresse inexistante ; sinon le dernier echec.
@@ -202,9 +202,11 @@ pub fn first_answer(attempts: &mut [&mut dyn FnMut() -> Fetched]) -> Fetched {
     last
 }
 
-/// Controle complet (redirections suivies).
+/// Controle complet : nouvelle adresse (redirections suivies), repli sur l'ancienne si elle n'existe pas encore.
+/// L'ETag n'est valable que pour l'adresse principale.
 pub fn fetch_latest(etag: Option<&str>) -> Fetched {
-    let [a] = candidate_urls();
+    let [a, b] = candidate_urls();
     let mut f1 = || fetch(a, etag);
-    first_answer(&mut [&mut f1])
+    let mut f2 = || fetch(b, None);
+    first_answer(&mut [&mut f1, &mut f2])
 }

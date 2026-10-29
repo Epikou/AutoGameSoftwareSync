@@ -101,11 +101,13 @@ pub const OPTIONS: &[Opt] = &[
     // Appareils
     o("device_colors", Card::Devices, K::VSetDevices, false),
     o("device_colors_all", Card::Devices, K::BtnDeviceReset, true),
+    o("safety_free", Card::Devices, K::VSafetyFree, false),
     // Protection automatique
     o("detect_enabled", Card::Protect, K::VSuggestNew, false),
     o("scan", Card::Protect, K::VFindOnPc, false),
     o("startup_app", Card::Protect, K::VStartWithPc, false),
     o("card_anim", Card::Protect, K::CardAnimTitle, false),
+    o("close_fullscreen", Card::Protect, K::VSetCloseFull, false),
     o("detect_scope", Card::Protect, K::DetScopeTitle, true),
     o("detect_ignored", Card::Protect, K::DetIgnoredTitle, true),
     ow("startup_background", Card::Protect, K::StartupBackground, true),
@@ -198,6 +200,10 @@ pub const SETTING_FIELDS: &[(&str, Exposure)] = &[
     ("heavy_notified", Internal),
     ("usage_late", Internal),
     ("usage_late_ms", Internal),
+    ("home_sort", Internal),
+    ("close_fullscreen", Of("close_fullscreen")),
+    ("playnite_card_hidden", Internal),
+    ("playnite_card_hidden_until_ms", Internal),
 ];
 
 /// Cartes dont le titre ou une option (visible dans ce mode) contient `query` (sans tenir compte de la casse). Requete
@@ -223,6 +229,8 @@ pub const SIMPLE_SETTINGS_KEYS: &[K] = &[
     K::SetUsage, K::SetUsageToggle, K::UsageWhat, K::UsageOff, K::BtnUsageView, K::BtnUsageErase, K::UsagePrivacyLink, K::VExpertMode, K::VSetExpertHint,
     K::VNavSettings, K::DestUnreachable, K::VChooseVault, K::VVaultChange, K::VVaultConnected, K::VVaultFree, K::VVaultNoneSet, K::VVaultOpen,
     K::VVaultSeeTip, K::VVaultStreamBody, K::VVaultStreamTag, K::VVaultStreamTitle, K::VVaultUnreachableDetail,
+    K::VSetCloseFull, K::VSetCloseFullTip, K::VSafetyTitle, K::VSafetyUsed, K::VSafetyUsedOne, K::VSafetyRule, K::VSafetyFree, K::VSafetyNothing, K::VSafetyAskTitle,
+    K::VSafetyAskBody, K::VSafetyAskDo, K::VSafetyFreed,
 ];
 
 /// Textes qui peuvent apparaitre dans la page Ajouter et le formulaire d'ajout du mode simple (memes garanties).

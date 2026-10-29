@@ -98,7 +98,7 @@ La 2.0.0 es la primera versión con actualización automática: **instálala a m
 
 ## Extensión de Playnite
 
-¿Usas Playnite? La extensión gratuita muestra en la ficha de cada juego su estado de protección, la fecha de la última sincronización y el dispositivo del que viene, con su color. Funciona en pantalla completa con los temas más usados (Solaris, ReskinPS5, PS5ish...). Solo lee: nunca toca tus partidas guardadas.
+¿Usas Playnite? La extensión gratuita muestra en la ficha de cada juego su estado de protección, la fecha de la última sincronización y el dispositivo del que viene, con su color. Funciona en pantalla completa con los temas más usados (Solaris, ReskinPS5, PS5ish...). Lee el estado de tus partidas guardadas y, con AutoGameSoftwareSync 2.0.3 o posterior, le envía la lista de tus juegos de Playnite instalados para que la aplicación te proponga los que aún no están protegidos. Nunca toca tus partidas guardadas.
 
 <p align="center"><img src="https://raw.githubusercontent.com/Epikou/AutoGameSoftwareSync-Playnite/main/screenshots/solaris-badge.png" width="720" alt="Insignia de AutoGameSoftwareSync en el tema Solaris"></p>
 
@@ -106,7 +106,7 @@ La 2.0.0 es la primera versión con actualización automática: **instálala a m
 
 ## Linux / SteamOS
 
-También hay una versión para Linux (x86_64): SteamOS (Steam Deck, Legion Go S...), Bazzite y Ubuntu. Descarga `AutoGameSoftwareSync-v2.0.0-linux-x86_64.tar.gz` desde la página de [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), extráelo y ejecuta `install-linux.sh` (no requiere permisos de administrador). Las copias son totalmente compatibles con la versión de Windows a través del mismo cofre, incluidos los juegos de Windows ejecutados con Proton. Guía de instalación (en francés): [docs/LINUX.md](docs/LINUX.md).
+También hay una versión para Linux (x86_64): SteamOS (Steam Deck, Legion Go S...), Bazzite y Ubuntu. Descarga `AutoGameSoftwareSync-vX.Y.Z-linux-x86_64.tar.gz` desde la página de [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), extráelo y ejecuta `install-linux.sh` (no requiere permisos de administrador). Las copias son totalmente compatibles con la versión de Windows a través del mismo cofre, incluidos los juegos de Windows ejecutados con Proton. Guía de instalación (en francés): [docs/LINUX.md](docs/LINUX.md).
 
 ![Linux](screenshots/en/linux.png)
 

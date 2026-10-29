@@ -104,9 +104,22 @@ fn constantes_de_publication() {
 #[test]
 fn fichiers_du_lot_sans_mention_interdite() {
     let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
-    for f in ["src/selfupdate.rs", "src/selfupdate/tests.rs", "src/gui/update_ui.rs"] {
+    for f in ["src/selfupdate.rs", "src/selfupdate/tests.rs", "src/gui/update_ui.rs", "examples/release_tool.rs", "tools/make-release.ps1"] {
         let t = std::fs::read_to_string(root.join(f)).unwrap_or_else(|_| panic!("{} manquant", f));
+        let l = t.to_lowercase();
+        for bad in ["claude", "anthropic", "co-authored"] {
+            assert!(!l.contains(bad), "{} mentionne {}", f, bad);
+        }
         // jamais de cle privee en clair dans les sources
         assert!(!t.contains("BEGIN PRIVATE KEY"), "{}", f);
+    }
+    // le script de publication ne publie rien : aucun appel direct a `gh release create` hors affichage de la commande
+    let ps = std::fs::read_to_string(root.join("tools/make-release.ps1")).unwrap();
+    for line in ps.lines() {
+        let t = line.trim_start();
+        if t.starts_with('#') {
+            continue;
+        }
+        assert!(!(t.starts_with("gh ") || t.starts_with("& gh") || t.contains("Invoke-Expression")), "le script ne doit rien publier : {}", line);
     }
 }

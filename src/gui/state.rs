@@ -74,6 +74,13 @@ pub struct Shared {
     /// Contexte egui de la fenetre : les threads de fond reveillent l interface quand un etat visible change (aucun
     /// redessin periodique au repos).
     pub ui_ctx: Mutex<Option<egui::Context>>,
+    /// 2.0.3 : un programme DETECTE (jeu, programme connu) tourne : notifications gardees jusqu'a sa fermeture.
+    pub det_games: AtomicBool,
+    /// Notifications gardees pendant l'utilisation et problemes deja signales.
+    pub notif_gate: Mutex<crate::notify::Gate>,
+    /// Fermeture d'un programme pas encore protege : ecran de proposition a ouvrir (cle de la carte, plein ecran ?, instant de
+    /// la demande en ms : au-dela de `gamedetect::CLOSE_WAIT_MS` sans avoir pu s'afficher, l'ecran est abandonne).
+    pub close_req: Mutex<Option<(String, bool, u64)>>,
 }
 
 impl Shared {
@@ -112,6 +119,9 @@ impl Shared {
             ui_frames: std::sync::atomic::AtomicU32::new(0),
             upd_report: Mutex::new(None),
             ui_ctx: Mutex::new(None),
+            det_games: AtomicBool::new(false),
+            notif_gate: Mutex::new(Default::default()),
+            close_req: Mutex::new(None),
         })
     }
 
@@ -196,7 +206,6 @@ impl Shared {
             for g in &cfg.games {
                 w.auto_cloud.insert(g.name.clone(), settings.conflict_for(&g.name) == crate::settings::ConflictMode::Cloud);
             }
-            let dd = me.data_dir.clone();
             let me2 = me.clone();
             let me_chg = me.clone();
             w.on_change = Some(Box::new(move || me_chg.status_dirty.store(true, Ordering::SeqCst)));
@@ -226,7 +235,7 @@ impl Shared {
                         q.push((format!("{}\n{}", ev.game, title), true));
                     }
                 }
-                notify_event(&dd, lang, &ev)
+                notify_event(&me2, lang, &ev)
             }));
             log.log("surveillance demarree depuis l'interface");
             me.set_state(WatchState::Running);
@@ -300,9 +309,13 @@ impl Shared {
     }
 }
 
-pub(super) fn notify_event(dd: &std::path::Path, lang: Lang, ev: &WatchEvent) {
-    // Notification Windows envoyee par l'application elle-meme (voir notify.rs), si les reglages l'autorisent.
-    crate::notify::deliver(&crate::notify::WinNotifier, dd, lang, ev);
+pub(super) fn notify_event(sh: &Shared, lang: Lang, ev: &WatchEvent) {
+    // Notification envoyee par l'application elle-meme (voir notify.rs), si les reglages l'autorisent ; 2.0.3 : jamais pendant
+    // qu'un programme suivi ou detecte tourne (gardee puis regroupee a sa fermeture), copies sans programme silencieuses.
+    let busy = sh.games_running.load(Ordering::SeqCst) || sh.det_games.load(Ordering::SeqCst);
+    if let Ok(mut g) = sh.notif_gate.lock() {
+        crate::notify::deliver_gated(&crate::notify::WinNotifier, &sh.data_dir, lang, ev, busy, &mut g);
+    }
 }
 
 // ================================================================== messages des threads de travail
@@ -511,6 +524,10 @@ pub struct App {
     pub(super) picker: picker_ui::PickerUi,
     /// Scan du PC (lot 9).
     pub(super) scan: scan_ui::ScanUi,
+    /// 2.0.3 : ecran de proposition a la fermeture d'un programme, copies de securite (Reglages), carte Playnite.
+    pub(super) close: close_ui::CloseUi,
+    pub(super) safety_ui: safety_ui::SafetyUi,
+    pub(super) playnite: playnite_ui::PlayniteUi,
     /// Nouveau PC (lot 12) : migration en 4 ecrans, recuperations differees, inventaire des logiciels.
     pub(super) migrate: migrate_ui::MigrateUi,
     /// Toasts 2.0 (« C'est fait · Annuler »), affiches au-dessus de tout.

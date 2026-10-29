@@ -27,7 +27,7 @@ impl App {
                 .get(name)
                 .and_then(|g| g.exe_path.clone())
                 .and_then(|p| winutil::exe_icon_rgba(&p))
-                .map(|(rgba, w, h)| ectx.load_texture(format!("icon-{}", name), egui::ColorImage::from_rgba_unmultiplied([w, h], &rgba), egui::TextureOptions::LINEAR));
+                .map(|(rgba, w, h)| ectx.load_texture(format!("icon-{}", name), egui::ColorImage::from_rgba_unmultiplied([w, h], &rgba), crate::gui::ui::ICON_TEX));
             self.icons.insert(name.to_string(), tex);
         }
         self.icons.get(name).cloned().flatten()

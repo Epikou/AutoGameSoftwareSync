@@ -3,6 +3,8 @@ use super::*;
 
 impl App {
     pub(super) fn new(cc: &eframe::CreationContext<'_>, shared: Arc<Shared>, opts: LaunchOpts) -> App {
+        // 2.0.3 : icones de l'interface (police Phosphor embarquee) installees avant la premiere image.
+        cc.egui_ctx.set_fonts(ui::glyphs::fonts_with_icons());
         let (tx, rx) = channel();
         let ctx = make_ctx(&shared.data_dir);
         let model = AppModel::new(ctx).unwrap_or_else(|_| AppModel::new(make_ctx(&shared.data_dir)).expect("init"));
@@ -308,6 +310,9 @@ impl App {
             vault: Default::default(),
             picker: Default::default(),
             scan: Default::default(),
+            close: Default::default(),
+            safety_ui: Default::default(),
+            playnite: Default::default(),
             migrate: Default::default(),
             toasts: Default::default(),
             support: None,

@@ -326,6 +326,190 @@ pub fn recent_ms(f: &Facts) -> u64 {
     f.last_sync_ms.unwrap_or(0).max(f.head.as_ref().map(|h| h.saved_ms).unwrap_or(0))
 }
 
+// ================================================================== tri choisi et ordre fige (2.0.3)
+
+/// Tri de l'accueil choisi par l'utilisateur (menu a gauche des filtres, memorise dans les reglages).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SortKey {
+    /// Nom affiche, A-Z (accents et casse ignores).
+    Name,
+    /// Derniere synchro reussie sur cet appareil, la plus recente d'abord.
+    LastSync,
+    /// Derniere modification (version la plus recente du coffre), la plus recente d'abord.
+    Modified,
+    /// Taille de la version active du coffre, la plus grosse d'abord.
+    Size,
+    /// Etat : problemes d'abord (tri historique de l'accueil).
+    #[default]
+    State,
+}
+
+impl SortKey {
+    pub const ALL: [SortKey; 5] = [SortKey::Name, SortKey::LastSync, SortKey::Modified, SortKey::Size, SortKey::State];
+}
+
+/// Ligne triable avec tout ce que les tris choisis utilisent.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SortRow {
+    pub name: String,
+    pub shown: String,
+    pub state: State,
+    /// Activite la plus recente (tri par etat, comme avant).
+    pub recent_ms: u64,
+    pub last_sync_ms: u64,
+    pub modified_ms: u64,
+    pub bytes: u64,
+    /// Vrai probleme (conflit, erreur) : seul changement d'etat qui recalcule l'ordre pendant que l'accueil est affiche.
+    pub real_problem: bool,
+}
+
+/// Ordre (noms d'origine) selon le tri choisi. A egalite : nom affiche puis nom d'origine (toujours deterministe).
+pub fn sorted_names(rows: &[SortRow], key: SortKey) -> Vec<String> {
+    if key == SortKey::State {
+        let mut r: Vec<Row> = rows.iter().map(|x| Row { name: x.name.clone(), shown: x.shown.clone(), state: x.state, recent_ms: x.recent_ms }).collect();
+        sort_rows(&mut r);
+        return r.into_iter().map(|x| x.name).collect();
+    }
+    let mut v: Vec<&SortRow> = rows.iter().collect();
+    let by_name = |a: &&SortRow, b: &&SortRow| fold(&a.shown).cmp(&fold(&b.shown)).then_with(|| a.name.cmp(&b.name));
+    v.sort_by(|a, b| {
+        let o = match key {
+            SortKey::LastSync => b.last_sync_ms.cmp(&a.last_sync_ms),
+            SortKey::Modified => b.modified_ms.cmp(&a.modified_ms),
+            SortKey::Size => b.bytes.cmp(&a.bytes),
+            SortKey::Name | SortKey::State => std::cmp::Ordering::Equal,
+        };
+        o.then_with(|| by_name(a, b))
+    });
+    v.into_iter().map(|x| x.name.clone()).collect()
+}
+
+/// Ordre fige des tuiles pendant que l'accueil est affiche : une copie qui commence ou finit ne deplace plus aucune tuile.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct FrozenOrder {
+    order: Vec<String>,
+    key: Option<SortKey>,
+    epoch: u64,
+    problems: Vec<String>,
+}
+
+impl FrozenOrder {
+    /// Ordre a afficher. Recalcule seulement : au retour sur l'accueil (`epoch` change), au changement de tri, ou quand un
+    /// element passe en vrai probleme (conflit, erreur). Un element ajoute va a sa place triee ; un element retire disparait.
+    pub fn apply(&mut self, rows: &[SortRow], key: SortKey, epoch: u64) -> Vec<String> {
+        let mut problems: Vec<String> = rows.iter().filter(|r| r.real_problem).map(|r| r.name.clone()).collect();
+        problems.sort();
+        let new_problem = problems.iter().any(|p| !self.problems.contains(p));
+        let names: std::collections::HashSet<&str> = rows.iter().map(|r| r.name.as_str()).collect();
+        let added = rows.iter().any(|r| !self.order.contains(&r.name));
+        if self.key != Some(key) || self.epoch != epoch || new_problem || added {
+            let full = sorted_names(rows, key);
+            if self.key == Some(key) && self.epoch == epoch && !new_problem {
+                // Seulement des ajouts : les tuiles deja la gardent leur ordre relatif, la nouvelle s'insere a sa place.
+                let mut out: Vec<String> = self.order.iter().filter(|n| names.contains(n.as_str())).cloned().collect();
+                let missing: Vec<String> = full.iter().filter(|n| !out.contains(n)).cloned().collect();
+                for n in &missing {
+                    let pos = full.iter().position(|x| x == n).unwrap_or(0);
+                    let before: Vec<&String> = full[..pos].iter().collect();
+                    let at = out.iter().rposition(|x| before.contains(&x)).map(|i| i + 1).unwrap_or(0);
+                    out.insert(at, n.clone());
+                }
+                self.order = out;
+            } else {
+                self.order = full;
+            }
+            self.key = Some(key);
+            self.epoch = epoch;
+        } else {
+            self.order.retain(|n| names.contains(n.as_str()));
+        }
+        self.problems = problems;
+        self.order.clone()
+    }
+
+    /// L'ordre fige differe-t-il de l'ordre trie actuel ? (au calme, l'accueil avance alors d'une epoque pour se reordonner)
+    pub fn stale(&self, rows: &[SortRow], key: SortKey) -> bool {
+        self.key == Some(key) && sorted_names(rows, key) != self.order
+    }
+}
+
+/// Duree de calme (aucune copie en cours) avant que l'accueil se reordonne tout seul.
+pub const REORDER_CALM_MS: u64 = 30_000;
+
+/// Duree d'activite avant d'annoncer « Synchronisation… » et duree minimale d'affichage de tout titre passager.
+pub const HEADLINE_HOLD_MS: u64 = 2000;
+
+/// Titre passager (copie en cours, ou seulement des copies a faire) : soumis a l'hysteresis.
+fn transient(h: Headline, state: State) -> bool {
+    matches!(h, Headline::Copying(_)) || (matches!(h, Headline::ToCheck(_)) && state == State::Todo)
+}
+
+/// Titre calme (rien a signaler) : a l'abri ou version recue.
+fn calm(h: Headline) -> bool {
+    matches!(h, Headline::AllSafe | Headline::Incoming(_))
+}
+
+/// Hysteresis du titre de l'accueil : « Synchronisation… » seulement si l'activite dure plus de 2 s, et tout titre passager
+/// reste au moins 2 s : plus d'aller-retour bouclier / « Tout est a l'abri » pendant les synchros rapides. Les titres
+/// importants (coffre, protection arretee ou en pause, vrai probleme) s'affichent tout de suite.
+#[derive(Clone, Debug, Default)]
+pub struct HeadlineHold {
+    shown: Option<Summary>,
+    shown_at: u64,
+    busy_since: Option<u64>,
+}
+
+impl HeadlineHold {
+    pub fn apply(&mut self, raw: Summary, now_ms: u64) -> Summary {
+        let raw_t = transient(raw.headline, raw.state);
+        if raw_t {
+            self.busy_since.get_or_insert(now_ms);
+        } else {
+            self.busy_since = None;
+        }
+        let Some(prev) = self.shown else {
+            // Premiere image : jamais un titre passager (on l'annoncera s'il dure).
+            let s = if raw_t { Summary { state: State::Safe, headline: Headline::AllSafe, action: Some(MainAction::SyncAll), ..raw } } else { raw };
+            self.shown = Some(s);
+            self.shown_at = now_ms;
+            return s;
+        };
+        let prev_t = transient(prev.headline, prev.state);
+        let held = now_ms.saturating_sub(self.shown_at) < HEADLINE_HOLD_MS;
+        let next = if raw_t {
+            if prev_t {
+                // Deja annonce : on suit les compteurs ; changement de nature (a faire <-> copie) seulement apres 2 s.
+                if std::mem::discriminant(&prev.headline) == std::mem::discriminant(&raw.headline) || !held { raw } else { Summary { total: raw.total, last_copy_ms: raw.last_copy_ms, ..prev } }
+            } else if now_ms.saturating_sub(self.busy_since.unwrap_or(now_ms)) >= HEADLINE_HOLD_MS {
+                raw
+            } else if calm(prev.headline) {
+                Summary { total: raw.total, last_copy_ms: prev.last_copy_ms, ..prev }
+            } else {
+                Summary { state: State::Safe, headline: Headline::AllSafe, action: Some(MainAction::SyncAll), ..raw }
+            }
+        } else if prev_t && held && calm(raw.headline) {
+            Summary { total: raw.total, ..prev }
+        } else {
+            raw
+        };
+        if std::mem::discriminant(&next.headline) != std::mem::discriminant(&prev.headline) || next.state != prev.state {
+            self.shown_at = now_ms;
+        }
+        self.shown = Some(next);
+        next
+    }
+
+    /// Un redessin est-il attendu pour faire evoluer le titre ? Seulement pendant les deux fenetres d'hysteresis (les 2 s
+    /// avant d'annoncer une activite, les 2 s de tenue d'un titre passager) : un « a faire » durable (element planifie,
+    /// surveillance arretee) ne demande AUCUN redessin au repos.
+    pub fn pending(&self, now_ms: u64) -> bool {
+        let starting = self.busy_since.map(|b| now_ms.saturating_sub(b) < HEADLINE_HOLD_MS + 100).unwrap_or(false);
+        let holding = self.shown.map(|s| transient(s.headline, s.state)).unwrap_or(false) && now_ms.saturating_sub(self.shown_at) < HEADLINE_HOLD_MS + 100;
+        starting || holding
+    }
+}
+
 // ================================================================== resume global (bandeau)
 
 /// Etat de la surveillance vu par l'accueil.

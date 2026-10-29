@@ -48,30 +48,30 @@ fn elagage_retire_seulement_les_marques_des_versions_supprimees() {
     let tmp = TempDir::new().unwrap();
     let dest = tmp.path().join("coffre");
     std::fs::create_dir_all(&dest).unwrap();
-    let (a, ga) = pc(tmp.path(), "PC-DESKTOP");
+    let (a, ga) = pc(tmp.path(), "EPIKOU");
     let key = agss::cloud::dest_key(&ga);
     save(&a, &ga, &dest, "v1");
     let first = backup::list_versions(&dest, &ga);
     assert_eq!(first.len(), 1);
     let snap = agss::cloud::scan_dest(&dest, &ga);
     let v1 = snap.versions[0].id.clone();
-    // ALLY a la version 1 (marque) ; SALON a une marque d'une version pas encore arrivee dans ce coffre (recente).
-    assert!(home::note_position(&dest, "ALLY", &key, &v1, agss::util::now_ms()));
+    // EPIGOS a la version 1 (marque) ; SALON a une marque d'une version pas encore arrivee dans ce coffre (recente).
+    assert!(home::note_position(&dest, "EPIGOS", &key, &v1, agss::util::now_ms()));
     assert!(home::note_position(&dest, "SALON", &key, "version-pas-encore-arrivee", agss::util::now_ms()));
     let salon_before = std::fs::read(marks_dir(&dest, "SALON").join(home::mark_file_name(&key, "version-pas-encore-arrivee"))).unwrap();
     // Versions 2 et 3 : rien n'est elague (3 gardees), aucune marque retiree.
     save(&a, &ga, &dest, "v2");
     save(&a, &ga, &dest, "v3");
     assert_eq!(backup::list_versions(&dest, &ga).len(), 3);
-    assert_eq!(files_in(&marks_dir(&dest, "ALLY")).len(), 1, "version 1 encore la : marque gardee");
-    // PC-DESKTOP note la version 3 (la sienne, active).
+    assert_eq!(files_in(&marks_dir(&dest, "EPIGOS")).len(), 1, "version 1 encore la : marque gardee");
+    // EPIKOU note la version 3 (la sienne, active).
     let v3 = agss::cloud::scan_dest(&dest, &ga).versions.iter().max_by_key(|v| v.sort_ms()).unwrap().id.clone();
-    assert!(home::note_position(&dest, "PC-DESKTOP", &key, &v3, agss::util::now_ms()));
-    // Version 4 : la version 1 est elaguee -> la marque d'ALLY qui la designait est retiree, les autres restent.
+    assert!(home::note_position(&dest, "EPIKOU", &key, &v3, agss::util::now_ms()));
+    // Version 4 : la version 1 est elaguee -> la marque d'EPIGOS qui la designait est retiree, les autres restent.
     save(&a, &ga, &dest, "v4");
     assert_eq!(backup::list_versions(&dest, &ga).len(), 3);
-    assert!(files_in(&marks_dir(&dest, "ALLY")).is_empty(), "marque de la version elaguee retiree : {:?}", files_in(&marks_dir(&dest, "ALLY")));
-    assert_eq!(files_in(&marks_dir(&dest, "PC-DESKTOP")), [home::mark_file_name(&key, &v3)], "marque d'une version encore presente gardee");
+    assert!(files_in(&marks_dir(&dest, "EPIGOS")).is_empty(), "marque de la version elaguee retiree : {:?}", files_in(&marks_dir(&dest, "EPIGOS")));
+    assert_eq!(files_in(&marks_dir(&dest, "EPIKOU")), [home::mark_file_name(&key, &v3)], "marque d'une version encore presente gardee");
     let salon_after = std::fs::read(marks_dir(&dest, "SALON").join(home::mark_file_name(&key, "version-pas-encore-arrivee"))).unwrap();
     assert_eq!(salon_before, salon_after, "marque recente d'une version pas encore arrivee : gardee, jamais reecrite");
     // Les versions et les fichiers ne sont pas touches par le nettoyage.
@@ -83,7 +83,7 @@ fn marques_orphelines_anciennes_retirees_prudemment() {
     let tmp = TempDir::new().unwrap();
     let dest = tmp.path().join("coffre");
     std::fs::create_dir_all(&dest).unwrap();
-    let (a, ga) = pc(tmp.path(), "PC-DESKTOP");
+    let (a, ga) = pc(tmp.path(), "EPIKOU");
     let key = agss::cloud::dest_key(&ga);
     save(&a, &ga, &dest, "v1");
     save(&a, &ga, &dest, "v2");
@@ -192,7 +192,7 @@ fn ecrans_sans_format_de_taille_fixe() {
 fn elision_du_francais_apres_remplacement() {
     assert_eq!(i18n::elide(Lang::Fr, "La version de aujourd'hui à 16:38 est remise."), "La version d'aujourd'hui à 16:38 est remise.");
     assert_eq!(i18n::elide(Lang::Fr, "Remettre la version de hier à 21:14 ?"), "Remettre la version d'hier à 21:14 ?");
-    assert_eq!(i18n::elide(Lang::Fr, "Nouvelle version de ALLY"), "Nouvelle version d'ALLY");
+    assert_eq!(i18n::elide(Lang::Fr, "Nouvelle version de EPIGOS"), "Nouvelle version d'EPIGOS");
     assert_eq!(i18n::elide(Lang::Fr, "Prendre celle de Ordi-salon"), "Prendre celle d'Ordi-salon");
     // rien a changer : consonne, « h » aspire d'un nom, mot qui finit par « de »
     assert_eq!(i18n::elide(Lang::Fr, "La version de mardi 20 · copie de sécurité"), "La version de mardi 20 · copie de sécurité");
@@ -200,8 +200,77 @@ fn elision_du_francais_apres_remplacement() {
     assert_eq!(i18n::elide(Lang::Fr, "Le mode à la demande est actif"), "Le mode à la demande est actif");
     assert_eq!(i18n::elide(Lang::Fr, "garde aussi"), "garde aussi");
     // autres langues : inchange
-    assert_eq!(i18n::elide(Lang::Es, "La versión de ayer de ALLY"), "La versión de ayer de ALLY");
-    assert_eq!(i18n::elide(Lang::En, "de ALLY"), "de ALLY");
+    assert_eq!(i18n::elide(Lang::Es, "La versión de ayer de EPIGOS"), "La versión de ayer de EPIGOS");
+    assert_eq!(i18n::elide(Lang::En, "de EPIGOS"), "de EPIGOS");
+}
+
+/// Bout en bout d'une mise a jour depuis la 1.3.3 : dossier de donnees a l'ancien nom copie (jamais modifie), coffre a
+/// l'ancien nom retrouve, etat « a jour » conserve, synchro entre deux appareils ensuite, aucune perte.
+#[test]
+fn mise_a_jour_depuis_la_1_3_3_de_bout_en_bout() {
+    let tmp = TempDir::new().unwrap();
+    let root = tmp.path();
+    // 1.3.3 : coffre sous un ancien nom dans « Mon Drive », deux versions de Celeste par EPIKOU
+    let drive = root.join("Mon Drive");
+    let old_vault = drive.join(agss::legacy::VAULT_DIRS[1]);
+    std::fs::create_dir_all(&old_vault).unwrap();
+    let old_data = root.join("ancien-dossier-de-donnees");
+    std::fs::create_dir_all(&old_data).unwrap();
+    let saves = root.join("Celeste-saves");
+    std::fs::create_dir_all(&saves).unwrap();
+    {
+        let mut ctx = Ctx::new(old_data.clone());
+        ctx.machine = "EPIKOU".into();
+        ctx.procs = Box::new(NotRunning);
+        let g = Game { name: "Celeste".into(), path: saves.clone(), exe: Some("Celeste.exe".into()), ..Default::default() };
+        let cfg = agss::config::Config { games: vec![g.clone()], dest: Some(old_vault.clone()) };
+        cfg.save(&ctx).unwrap();
+        std::fs::write(old_data.join("settings.json"), r#"{"lang":"fr","theme":"dark","tutorial_seen":true,"usage_asked":"1.3"}"#).unwrap();
+        save(&ctx, &g, &old_vault, "chapitre 6");
+        save(&ctx, &g, &old_vault, "chapitre 7");
+    }
+    let before: Vec<(String, Vec<u8>)> = walk(&old_data);
+    let vault_before = walk(&old_vault);
+    // 2.0 : copie verifiee vers le nouveau dossier, l'ancien n'est pas touche
+    let new_data = root.join("AutoGameSoftwareSync");
+    let rep = agss::appdirs::migrate(&old_data, &new_data).unwrap();
+    assert!(rep.skipped.is_none() && rep.files >= 2, "{:?}", rep);
+    assert_eq!(walk(&old_data), before, "ancien dossier de donnees intact");
+    let mut a = Ctx::new(new_data.clone());
+    a.machine = "EPIKOU".into();
+    a.procs = Box::new(NotRunning);
+    let cfg = agss::config::Config::load(&a).unwrap();
+    assert_eq!(cfg.games.len(), 1);
+    assert_eq!(cfg.dest.as_deref(), Some(old_vault.as_path()), "le coffre de la 1.3.3 reste le coffre");
+    let g = cfg.games[0].clone();
+    assert_eq!(agss::vm::compute_status(&a, &g, Some(&old_vault)), agss::vm::GameStatus::UpToDate, "etat de synchro conserve");
+    // premier lancement de la 2.0 : « Quoi de neuf » + consentement, pas l'assistant complet
+    let s = agss::settings::Settings::load_from(&new_data).unwrap();
+    let f = agss::onboarding::Facts { first_install: !s.tutorial_seen, has_vault: true, has_items: true, consent_needed: agss::usage::needs_question(s.usage_asked.as_deref(), "2.0.0") };
+    let (plan, whats_new) = agss::onboarding::plan_for(&f);
+    assert!(whats_new && plan == 0, "« Quoi de neuf » seul (la question des statistiques est en bas de cet ecran)");
+    // le coffre a l'ancien nom est trouve et propose (repris tel quel)
+    let cand = agss::vaults::Candidate { kind: agss::vaults::Kind::GoogleDrive, path: drive.clone(), streaming: Some(false), work: false };
+    let found = agss::vaults::find_existing(&[cand], Some(&old_vault));
+    assert_eq!(found.first().map(|e| e.path.clone()), Some(old_vault.clone()));
+    assert_eq!(agss::vaults::target_for(&old_vault), old_vault);
+    // un deuxieme appareil (EPIGOS, 2.0) recupere, joue, recopie ; EPIKOU recoit la nouvelle version
+    let (b, mut gb) = pc(root, "EPIGOS");
+    gb.name = "Celeste".into();
+    backup::restore(&b, &gb, &old_vault).unwrap();
+    assert_eq!(std::fs::read_to_string(gb.path.join("slot1.dat")).unwrap(), "chapitre 7");
+    save(&b, &gb, &old_vault, "chapitre 8 sur EPIGOS");
+    assert_eq!(agss::vm::compute_status(&a, &g, Some(&old_vault)), agss::vm::GameStatus::CloudNewer);
+    backup::restore(&a, &g, &old_vault).unwrap();
+    assert_eq!(std::fs::read_to_string(saves.join("slot1.dat")).unwrap(), "chapitre 8 sur EPIGOS");
+    // aucune perte : toutes les versions de la 1.3.3 sont encore dans le coffre, et la partie d'avant est dans une copie
+    // de securite de cet appareil
+    let after = walk(&old_vault);
+    for (p, bytes) in &vault_before {
+        assert!(after.iter().any(|(q, b2)| q == p && b2 == bytes), "fichier du coffre perdu ou modifie : {}", p);
+    }
+    let safety = backup::safety_copies(&a, &g);
+    assert!(!safety.is_empty(), "copie de securite avant la restauration");
 }
 
 fn walk(p: &Path) -> Vec<(String, Vec<u8>)> {
@@ -223,7 +292,7 @@ fn coffre_absent_jamais_recree_par_la_surveillance() {
     let tmp = TempDir::new().unwrap();
     let dest = tmp.path().join("Dropbox").join("AutoGameSoftwareSync");
     std::fs::create_dir_all(tmp.path().join("Dropbox")).unwrap();
-    let (a, mut g) = pc(tmp.path(), "PC-DESKTOP");
+    let (a, mut g) = pc(tmp.path(), "EPIKOU");
     g.name = "Notes".into();
     std::fs::write(g.path.join("notes.txt"), "v1").unwrap();
     let log = Logger::new(a.data_dir.join("logs").join("watch.log"), false);
@@ -253,5 +322,5 @@ fn coffre_absent_jamais_recree_par_la_surveillance() {
 
 #[test]
 fn version_2_0_1() {
-    assert_eq!(env!("CARGO_PKG_VERSION"), "2.0.2");
+    assert_eq!(env!("CARGO_PKG_VERSION"), "2.0.3");
 }

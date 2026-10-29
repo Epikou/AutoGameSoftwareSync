@@ -465,5 +465,10 @@ fn textes_2_0_1_dans_les_cinq_langues() {
             }
         }
     }
+    // jamais l'ancien vocabulaire dans les nouveaux ecrans
+    for f in ["weight_ui.rs", "usage_ui.rs"] {
+        let s = src(&format!("src/gui/{}", f));
+        assert!(!s.to_lowercase().contains("claude"));
+    }
     let _personal = personal;
 }

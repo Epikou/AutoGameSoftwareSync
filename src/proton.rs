@@ -345,7 +345,7 @@ mod tests {
     #[test]
     fn windows_paths_map_to_drive_c_and_z() {
         let u = pfx().join("drive_c/users/steamuser");
-        assert_eq!(translate_windows_path(r"C:\Users\player\AppData\Local\Jeu", &pfx()), Some(u.join("AppData/Local/Jeu")));
+        assert_eq!(translate_windows_path(r"C:\Users\epiko\AppData\Local\Jeu", &pfx()), Some(u.join("AppData/Local/Jeu")));
         assert_eq!(translate_windows_path(r"c:/Users/Public/Documents/Jeu", &pfx()), Some(pfx().join("drive_c/users/Public/Documents/Jeu")));
         assert_eq!(translate_windows_path(r"C:\ProgramData\Jeu", &pfx()), Some(pfx().join("drive_c/ProgramData/Jeu")));
         assert_eq!(translate_windows_path(r"Z:\home\deck\jeu.exe", &pfx()), Some(PathBuf::from("/home/deck/jeu.exe")));

@@ -160,6 +160,8 @@ impl Sign {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Origin {
     Launcher(Store),
+    /// Jeu installe dans Playnite (liste ecrite par l'extension) : source Playnite (« Steam », « GOG », vide = ajoute a la main).
+    Playnite(String),
     /// Base embarquee, titre non installe (dossier de sauvegardes trouve).
     Base,
     Profile,
@@ -281,7 +283,16 @@ impl Item {
     /// Coche par defaut : recommande, nouveau, pas deja protege. Jamais un element de la categorie Windows (Bureau, menu
     /// Demarrer, epingles, fond d'ecran, futures preferences) : ils restent proposes, decoches, y compris au premier lancement.
     pub fn default_checked(&self) -> bool {
-        self.tier == Tier::Recommended && self.already.is_none() && !self.seen && self.cat != Cat::System
+        self.tier == Tier::Recommended && self.already.is_none() && !self.seen && self.cat != Cat::System && (!self.is_playnite() || self.place_sure())
+    }
+    /// Jeu de la bibliotheque Playnite (section a part du scan).
+    pub fn is_playnite(&self) -> bool {
+        matches!(self.origin, Origin::Playnite(_))
+    }
+    /// Emplacement connu de facon sure (profil cure, base embarquee, base maison confirmee) : seul cas coche d'office pour un
+    /// jeu Playnite (2.0.3) ; une deduction par le nom reste decochee.
+    pub fn place_sure(&self) -> bool {
+        self.signs.iter().any(|s| matches!(s, Sign::Profile | Sign::BaseKnown | Sign::HomeBase))
     }
     /// Peut-on le cocher ? (ni masque ni deja protege)
     pub fn selectable(&self) -> bool {
@@ -430,6 +441,8 @@ pub struct ScanEnv {
     pub db_probe: bool,
     /// Linux : prefixe Proton d'un jeu Steam (AppID).
     pub prefix_of: Box<dyn Fn(u64) -> Option<PathBuf> + Send + Sync>,
+    /// 2.0.3 : jeux installes dans Playnite (fichier de l'extension ; vide sans Playnite ou sous Linux).
+    pub playnite: Vec<crate::playnite::LibGame>,
 }
 
 // ================================================================== progression partagee
@@ -663,6 +676,23 @@ fn step_games(r: &mut Run) {
         let it = launcher_item(r, g);
         r.push(it);
         r.frac(Cat::Games, 0.15 + 0.55 * (i + 1) as f32 / n as f32);
+    }
+    // 2.0.3 : jeux installes dans Playnite, APRES ceux des lanceurs (section « Playnite » du scan) : un jeu de Steam / GOG /
+    // Epic... garde sa section, son etiquette et son programme ; Playnite n'ajoute que les jeux qu'aucun lanceur n'a vus
+    // (jeux PC seulement : les ROM emulees ne sont pas proposees). Meme traitement ensuite (profils, base, connaissance).
+    let launcher_names: Vec<String> = inst.iter().map(|g| g.name.clone()).collect();
+    for g in crate::playnite::not_seen_by_launchers(&env.playnite, &env.games, &launcher_names) {
+        if r.cancelled() {
+            return;
+        }
+        let inst = crate::playnite::to_installed(g);
+        if inst.install_dir.as_os_str().is_empty() {
+            continue;
+        }
+        r.install_dirs.push(inst.install_dir.clone());
+        let mut it = launcher_item(r, &inst);
+        it.origin = Origin::Playnite(g.source.trim().to_string());
+        r.push(it);
     }
     // Profils de jeux et emulateurs installes (hors bibliotheques des lanceurs).
     for p in env.profiles.iter().filter(|p| p.category == "game" || p.category == "emulator") {

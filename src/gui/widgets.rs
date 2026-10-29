@@ -40,6 +40,9 @@ pub fn paint_folder(p: &egui::Painter, r: egui::Rect, col: Color32) {
 
 /// Manette : corps, croix directionnelle, deux boutons.
 pub fn paint_pad(p: &egui::Painter, r: egui::Rect, col: Color32, bg: Color32) {
+    if super::ui::glyphs::paint_char(p, r.expand(r.width() * 0.1), egui_phosphor::regular::GAME_CONTROLLER, col, 0.0) {
+        return;
+    }
     let c = r.center();
     let s = r.height().min(r.width()) / 16.0;
     let body = egui::Rect::from_center_size(c, egui::vec2(15.0 * s, 8.0 * s));

@@ -85,7 +85,7 @@ fn resume_global_un_seul_message_le_plus_important() {
 
 #[test]
 fn etat_de_chaque_tuile() {
-    let me = "PC-DESKTOP";
+    let me = "EPIKOU";
     let st = |s: GameStatus| home::item_state(&facts(s), None, true, me);
     let mut ok = facts(GameStatus::UpToDate);
     ok.last_sync_ms = Some(42);
@@ -99,10 +99,10 @@ fn etat_de_chaque_tuile() {
     assert_eq!(st(GameStatus::Error("acces refuse".into())), (State::Problem, Why::Problem("acces refuse".into())));
     // Version recue : de quel appareil.
     let mut inc = facts(GameStatus::CloudNewer);
-    inc.head = head("ALLY", "v2", "h2");
-    assert_eq!(home::item_state(&inc, None, true, me), (State::Incoming, Why::NewerFrom("ALLY".into())));
-    inc.head = head("pc-desktop", "v2", "h2");
-    assert_eq!(home::item_state(&inc, None, true, me), (State::Incoming, Why::NewerFrom(String::new())), "pas « de PC-DESKTOP » pour soi-meme");
+    inc.head = head("EPIGOS", "v2", "h2");
+    assert_eq!(home::item_state(&inc, None, true, me), (State::Incoming, Why::NewerFrom("EPIGOS".into())));
+    inc.head = head("epikou", "v2", "h2");
+    assert_eq!(home::item_state(&inc, None, true, me), (State::Incoming, Why::NewerFrom(String::new())), "pas « de EPIKOU » pour soi-meme");
     // Copie en cours (pourcentage), pause par l'utilisateur, coffre injoignable.
     assert_eq!(home::item_state(&ok, Some(Some(0.643)), true, me), (State::Busy, Why::Copying(Some(64))));
     assert_eq!(home::item_state(&ok, Some(None), true, me), (State::Busy, Why::Copying(None)));
@@ -120,38 +120,38 @@ fn etat_de_chaque_tuile() {
 
 #[test]
 fn etat_de_synchro_entre_appareils() {
-    let me = "PC-DESKTOP";
+    let me = "EPIKOU";
     // Seul appareil.
     let mut f = facts(GameStatus::UpToDate);
-    f.head = head("PC-DESKTOP", "v1", "h1");
-    f.writers = vec![("PC-DESKTOP".into(), "v1".into(), "h1".into(), 1)];
+    f.head = head("EPIKOU", "v1", "h1");
+    f.writers = vec![("EPIKOU".into(), "v1".into(), "h1".into(), 1)];
     assert_eq!(home::device_sync(&f, me, true), DeviceSync::OnlyHere);
     // L'autre appareil a remis cette version (marque de position) : a jour sur 2 appareils.
-    f.marks = vec![("ALLY".into(), "v1".into())];
+    f.marks = vec![("EPIGOS".into(), "v1".into())];
     assert_eq!(home::device_sync(&f, me, true), DeviceSync::UpToDateOn(2));
-    assert_eq!(home::devices_at_head(&f, me), ["ALLY", "PC-DESKTOP"]);
-    // Sa marque designe une version plus ancienne : en attente sur ALLY.
-    f.marks = vec![("ALLY".into(), "v0".into())];
-    assert_eq!(home::device_sync(&f, me, true), DeviceSync::Waiting(vec!["ALLY".into()]));
+    assert_eq!(home::devices_at_head(&f, me), ["EPIGOS", "EPIKOU"]);
+    // Sa marque designe une version plus ancienne : en attente sur EPIGOS.
+    f.marks = vec![("EPIGOS".into(), "v0".into())];
+    assert_eq!(home::device_sync(&f, me, true), DeviceSync::Waiting(vec!["EPIGOS".into()]));
     // L'autre appareil a ecrit une version au MEME contenu (sa derniere) : a jour aussi, sans marque.
     f.marks.clear();
-    f.writers.push(("ALLY".into(), "v1b".into(), "h1".into(), 2));
+    f.writers.push(("EPIGOS".into(), "v1b".into(), "h1".into(), 2));
     assert_eq!(home::device_sync(&f, me, true), DeviceSync::UpToDateOn(2));
     // ... mais si sa DERNIERE version a un autre contenu, il n'est pas a jour.
-    f.writers.push(("ALLY".into(), "v1c".into(), "h9".into(), 3));
-    assert_eq!(home::device_sync(&f, me, true), DeviceSync::Waiting(vec!["ALLY".into()]));
+    f.writers.push(("EPIGOS".into(), "v1c".into(), "h9".into(), 3));
+    assert_eq!(home::device_sync(&f, me, true), DeviceSync::Waiting(vec!["EPIGOS".into()]));
     // Trois appareils, casse des noms ignoree.
     f.writers.clear();
-    f.marks = vec![("ally".into(), "v1".into()), ("STEAMDECK-1a2b".into(), "v1".into())];
+    f.marks = vec![("epigos".into(), "v1".into()), ("STEAMDECK-1a2b".into(), "v1".into())];
     assert_eq!(home::device_sync(&f, me, true), DeviceSync::UpToDateOn(3));
     // Plus recent sur l'autre appareil / ici / dans le coffre.
     let mut n = facts(GameStatus::CloudNewer);
-    n.head = head("ALLY", "v2", "h2");
-    assert_eq!(home::device_sync(&n, me, true), DeviceSync::NewerOn("ALLY".into()));
-    n.head = head("PC-DESKTOP", "v2", "h2");
+    n.head = head("EPIGOS", "v2", "h2");
+    assert_eq!(home::device_sync(&n, me, true), DeviceSync::NewerOn("EPIGOS".into()));
+    n.head = head("EPIKOU", "v2", "h2");
     assert_eq!(home::device_sync(&n, me, true), DeviceSync::NewerInVault);
     let mut l = facts(GameStatus::LocalChanged);
-    l.head = head("ALLY", "v2", "h2");
+    l.head = head("EPIGOS", "v2", "h2");
     assert_eq!(home::device_sync(&l, me, true), DeviceSync::NewerHere);
     // Jamais copie, rien dans le coffre : seulement ici. Conflit. Coffre injoignable : on ne dit rien.
     assert_eq!(home::device_sync(&facts(GameStatus::Never), me, true), DeviceSync::OnlyHere);
@@ -159,16 +159,16 @@ fn etat_de_synchro_entre_appareils() {
     assert_eq!(home::device_sync(&f, me, false), DeviceSync::Unknown);
     // Programme ouvert : etat local inconnu ; on ne dit que ce qui est sur pour les autres.
     let mut r = facts(GameStatus::Running);
-    r.head = head("ALLY", "v1", "h1");
+    r.head = head("EPIGOS", "v1", "h1");
     assert_eq!(home::device_sync(&r, me, true), DeviceSync::Unknown);
     r.marks = vec![("STEAMDECK".into(), "v1".into())];
     assert_eq!(home::device_sync(&r, me, true), DeviceSync::UpToDateOn(2));
-    r.marks.push(("PC-DESKTOP".into(), "v1".into()));
+    r.marks.push(("EPIKOU".into(), "v1".into()));
     assert_eq!(home::device_sync(&r, me, true), DeviceSync::UpToDateOn(3), "sa propre marque compte pendant que le programme tourne");
     // Jamais copie ici mais une version existe ailleurs : plus recent la-bas.
     let mut nv = facts(GameStatus::Never);
-    nv.head = head("ALLY", "v1", "h1");
-    assert_eq!(home::device_sync(&nv, me, true), DeviceSync::NewerOn("ALLY".into()));
+    nv.head = head("EPIGOS", "v1", "h1");
+    assert_eq!(home::device_sync(&nv, me, true), DeviceSync::NewerOn("EPIGOS".into()));
 }
 
 // ================================================================== synchro entre appareils (vrai coffre, 2 appareils)
@@ -208,48 +208,48 @@ fn deux_appareils_dans_un_vrai_coffre_temporaire() {
     let tmp = TempDir::new().unwrap();
     let dest = tmp.path().join("coffre");
     std::fs::create_dir_all(&dest).unwrap();
-    let a = pc(tmp.path(), "PC-DESKTOP");
-    let b = pc(tmp.path(), "ALLY");
+    let a = pc(tmp.path(), "EPIKOU");
+    let b = pc(tmp.path(), "EPIGOS");
     // A protege sa partie.
     std::fs::write(a.game.path.join("slot1.dat"), "niveau 3").unwrap();
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
     let fa = gather_one(&a, &dest);
     assert_eq!(fa.status, GameStatus::UpToDate);
-    assert_eq!(fa.head.as_ref().unwrap().machine, "PC-DESKTOP");
-    assert_eq!(home::device_sync(&fa, "PC-DESKTOP", true), DeviceSync::OnlyHere);
-    // B voit la version de A : plus recent sur PC-DESKTOP.
+    assert_eq!(fa.head.as_ref().unwrap().machine, "EPIKOU");
+    assert_eq!(home::device_sync(&fa, "EPIKOU", true), DeviceSync::OnlyHere);
+    // B voit la version de A : plus recent sur EPIKOU.
     let fb = gather_one(&b, &dest);
     assert_eq!(fb.status, GameStatus::CloudNewer);
-    assert_eq!(home::item_state(&fb, None, true, "ALLY"), (State::Incoming, Why::NewerFrom("PC-DESKTOP".into())));
-    assert_eq!(home::device_sync(&fb, "ALLY", true), DeviceSync::NewerOn("PC-DESKTOP".into()));
+    assert_eq!(home::item_state(&fb, None, true, "EPIGOS"), (State::Incoming, Why::NewerFrom("EPIKOU".into())));
+    assert_eq!(home::device_sync(&fb, "EPIGOS", true), DeviceSync::NewerOn("EPIKOU".into()));
     // B remet la version (aucune version ecrite), puis note sa position (fil d'etat de l'interface).
     backup::restore(&b.ctx, &b.game, &dest).unwrap();
     let mut sb = HashMap::new();
     sb.insert(b.game.name.clone(), vm::compute_status(&b.ctx, &b.game, Some(&dest)));
     assert_eq!(sb[&b.game.name], GameStatus::UpToDate);
-    assert_eq!(home::note_positions(&dest, "ALLY", &[b.game.clone()], &sb), 1);
-    assert_eq!(home::note_positions(&dest, "ALLY", &[b.game.clone()], &sb), 0, "marque ecrite UNE fois");
+    assert_eq!(home::note_positions(&dest, "EPIGOS", &[b.game.clone()], &sb), 1);
+    assert_eq!(home::note_positions(&dest, "EPIGOS", &[b.game.clone()], &sb), 0, "marque ecrite UNE fois");
     // Vu de A comme de B : a jour sur 2 appareils.
-    assert_eq!(home::device_sync(&gather_one(&a, &dest), "PC-DESKTOP", true), DeviceSync::UpToDateOn(2));
-    assert_eq!(home::device_sync(&gather_one(&b, &dest), "ALLY", true), DeviceSync::UpToDateOn(2));
-    // A modifie et recopie : A attend ALLY, B voit plus recent sur PC-DESKTOP.
+    assert_eq!(home::device_sync(&gather_one(&a, &dest), "EPIKOU", true), DeviceSync::UpToDateOn(2));
+    assert_eq!(home::device_sync(&gather_one(&b, &dest), "EPIGOS", true), DeviceSync::UpToDateOn(2));
+    // A modifie et recopie : A attend EPIGOS, B voit plus recent sur EPIKOU.
     std::thread::sleep(std::time::Duration::from_millis(20));
     std::fs::write(a.game.path.join("slot1.dat"), "niveau 4").unwrap();
     backup::backup(&a.ctx, &a.game, &dest).unwrap();
-    assert_eq!(home::device_sync(&gather_one(&a, &dest), "PC-DESKTOP", true), DeviceSync::Waiting(vec!["ALLY".into()]));
-    assert_eq!(home::device_sync(&gather_one(&b, &dest), "ALLY", true), DeviceSync::NewerOn("PC-DESKTOP".into()));
+    assert_eq!(home::device_sync(&gather_one(&a, &dest), "EPIKOU", true), DeviceSync::Waiting(vec!["EPIGOS".into()]));
+    assert_eq!(home::device_sync(&gather_one(&b, &dest), "EPIGOS", true), DeviceSync::NewerOn("EPIKOU".into()));
     // B remet la nouvelle version : sa marque est remplacee (l'ancienne retiree), a jour sur 2 appareils.
     backup::restore(&b.ctx, &b.game, &dest).unwrap();
     sb.insert(b.game.name.clone(), vm::compute_status(&b.ctx, &b.game, Some(&dest)));
-    assert_eq!(home::note_positions(&dest, "ALLY", &[b.game.clone()], &sb), 1);
+    assert_eq!(home::note_positions(&dest, "EPIGOS", &[b.game.clone()], &sb), 1);
     let key = agss::cloud::dest_key(&b.game);
     assert_eq!(home::positions(&dest, &key).len(), 1, "une seule marque par appareil et par element");
-    assert_eq!(home::device_sync(&gather_one(&a, &dest), "PC-DESKTOP", true), DeviceSync::UpToDateOn(2));
+    assert_eq!(home::device_sync(&gather_one(&a, &dest), "EPIKOU", true), DeviceSync::UpToDateOn(2));
     // Les marques ne genent rien : liste des elements du coffre, appareils vus, versions.
     assert!(dest.join(home::DEVICES_DIR).is_dir());
     let dg = agss::cloud::list_dest_games(&dest);
     assert_eq!(dg.len(), 1, "le dossier des marques n'est pas un element : {:?}", dg.iter().map(|d| &d.name).collect::<Vec<_>>());
-    assert_eq!(agss::cloud::machines_seen(&dest), ["PC-DESKTOP"]);
+    assert_eq!(agss::cloud::machines_seen(&dest), ["EPIKOU"]);
     assert_eq!(backup::list_versions(&dest, &a.game).len(), 2);
     assert_eq!(gather_one(&a, &dest).versions, 2);
 }
@@ -260,7 +260,7 @@ fn synchroniser_maintenant_un_element_sans_programme() {
     let tmp = TempDir::new().unwrap();
     let dest = tmp.path().join("coffre");
     std::fs::create_dir_all(&dest).unwrap();
-    let a = pc(tmp.path(), "PC-DESKTOP");
+    let a = pc(tmp.path(), "EPIKOU");
     std::fs::write(a.game.path.join("notes.txt"), "v1").unwrap();
     let log = Logger::new(a.ctx.data_dir.join("logs").join("watch.log"), false);
     let triggers = std::sync::Arc::new(std::sync::Mutex::new(Vec::<Option<String>>::new()));
@@ -431,7 +431,7 @@ fn vocabulaire_de_l_accueil() {
     assert_eq!(tr(Lang::Fr, K::VNavSettings), "Réglages");
     assert_eq!(tr(Lang::Fr, K::VSyncAllNow), "Tout synchroniser maintenant");
     assert_eq!(tr(Lang::Fr, K::VUpToDateOn).replace("{}", "2"), "À jour sur 2 appareils");
-    assert_eq!(tr(Lang::Fr, K::VNewerOn).replace("{}", "ALLY"), "Plus récent sur ALLY");
+    assert_eq!(tr(Lang::Fr, K::VNewerOn).replace("{}", "EPIGOS"), "Plus récent sur EPIGOS");
     assert_eq!(tr(Lang::Fr, K::VFindOnPc), "Chercher sur mon PC");
     assert_eq!(tr(Lang::Fr, K::VVaultUnreachable), "Ton coffre est injoignable");
     assert_eq!(tr(Lang::Fr, K::VAllSafe), "Tout est à l'abri");
@@ -469,6 +469,6 @@ fn tuile_avec_ligne_des_appareils_et_texte_complet_en_infobulle() {
     assert!(!elided, "texte court : rien n'est raccourci");
     assert_eq!(rect.width(), 200.0, "largeur imposee par la grille");
     assert_eq!(rect.height(), ui::tokens::tile_size(false).1);
-    let (elided, _) = draw_tile("The Legend of Heroes: Trails through Daybreak II Deluxe Edition Ultimate", Some("À jour ici · en attente sur STEAMDECK-1a2b, ALLY"));
+    let (elided, _) = draw_tile("The Legend of Heroes: Trails through Daybreak II Deluxe Edition Ultimate", Some("À jour ici · en attente sur STEAMDECK-1a2b, EPIGOS"));
     assert!(elided, "texte trop long : signale, l'accueil montre alors le texte complet en infobulle");
 }

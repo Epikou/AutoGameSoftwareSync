@@ -99,9 +99,13 @@ fn paint_icon(p: &egui::Painter, r: Rect, icon: TileIcon) {
             p.galley(r.center() - g.size() / 2.0, g, col(fg));
         }
         TileIcon::Glyph(gl, bg) => {
-            p.rect_filled(r, 10.0, col(bg));
-            let fg = mix(crate::theme::text_on(bg), bg, 0.1);
-            paint_glyph(p, r.shrink(r.width() * 0.21), gl, col(fg));
+            // 2.0.3 : icone de categorie sur un fond SOBRE teinte de la couleur de l'element (theme sombre et clair).
+            let t = tokens(p.ctx());
+            let fill = mix(t.card2, bg, if t.dark { 0.42 } else { 0.22 });
+            p.rect_filled(r, 10.0, col(fill));
+            p.rect_stroke(r, 10.0, Stroke::new(1.0_f32, col_a(bg, if t.dark { 0.55 } else { 0.35 })), egui::StrokeKind::Inside);
+            let fg = mix(t.text, bg, if t.dark { 0.15 } else { 0.35 });
+            paint_glyph(p, r.shrink(r.width() * 0.2), gl, col(fg));
         }
     }
 }

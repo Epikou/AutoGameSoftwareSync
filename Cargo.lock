@@ -339,13 +339,14 @@ checksum = "f2032f911046de80f0a198e0901378627c33f59ea0ac00e363d481118bd70a53"
 
 [[package]]
 name = "autogamesoftwaresync"
-version = "2.0.2"
+version = "2.0.3"
 dependencies = [
  "color_quant",
  "ctrlc",
  "dirs 5.0.1",
  "ed25519-dalek",
  "eframe",
+ "egui-phosphor",
  "flate2",
  "getrandom 0.2.17",
  "gif",
@@ -1036,6 +1037,15 @@ dependencies = [
  "log",
  "nohash-hasher",
  "profiling",
+]
+
+[[package]]
+name = "egui-phosphor"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "171d57331491e92f0a7c73fad1088716e3200984309f4f8684731b750cee1378"
+dependencies = [
+ "egui",
 ]
 
 [[package]]

@@ -40,10 +40,10 @@ fn read(g: &Game) -> String {
 /// A est a jour avec V1 ; B restaure V1, change et sauvegarde V2 dans `dest`.
 fn setup(t: &TempDir) -> (Ctx, Game, Ctx, Game, std::path::PathBuf) {
     let dest = t.path().join("cloud");
-    let (a, ga) = machine(t.path(), "PC-DESKTOP");
+    let (a, ga) = machine(t.path(), "EPIKOU");
     std::fs::write(ga.path.join("s.dat"), "1").unwrap();
     backup::backup(&a, &ga, &dest).unwrap();
-    let (b, gb) = machine(t.path(), "ALLY");
+    let (b, gb) = machine(t.path(), "EPIGOS");
     backup::restore(&b, &gb, &dest).unwrap();
     (a, ga, b, gb, dest)
 }
@@ -205,7 +205,7 @@ fn pause_puis_reprise_la_surveillance_repart() {
     let a_dir = a.data_dir.clone();
     let h = std::thread::spawn(move || {
         let mut ctx = Ctx::new(a_dir);
-        ctx.machine = "PC-DESKTOP".into();
+        ctx.machine = "EPIKOU".into();
         ctx.procs = Box::new(NotRunning);
         let log = Logger::new(ctx.data_dir.join("logs").join("watch.log"), false);
         let cfg = WatchCfg { stable_ms: 200, resync_ms: 600_000, max_tries: 3, safety_ms: 200, retry_ms: 100, retry_max_ms: 5_000 };

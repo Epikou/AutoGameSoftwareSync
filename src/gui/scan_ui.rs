@@ -48,6 +48,8 @@ pub struct ScanUi {
     demo_home: bool,
     scroll_to: Option<f32>,
     scroll_hidden: bool,
+    /// Ouvert depuis la carte Playnite de l'accueil : la section Playnite est amenee a l'ecran.
+    pub(super) scroll_playnite: bool,
 }
 
 impl ScanUi {
@@ -195,6 +197,8 @@ impl App {
         let mut parts: Vec<String> = Vec::new();
         parts.push(match &it.origin {
             Origin::Launcher(s) => self.t(K::VWhyLauncher).replace("{}", s.label()),
+            Origin::Playnite(s) if s.is_empty() => self.t(K::VWhyPlayniteManual).to_string(),
+            Origin::Playnite(s) => self.t(K::VWhyPlaynite).replace("{}", s),
             Origin::Base => self.t(K::VWhyBase).to_string(),
             Origin::Profile => self.t(K::VWhyProfile).to_string(),
             Origin::Emulator => self.t(K::VWhyEmulator).to_string(),
@@ -450,19 +454,30 @@ impl App {
     fn scan_results(&mut self, ui: &mut egui::Ui, ctx: &egui::Context, v: &scan::Progress) {
         let t = u::tokens(ctx);
         let fresh = |it: &&Item| !it.seen || it.already.is_some();
-        let mut rec: Vec<&Item> = v.items.iter().filter(|i| i.tier == Tier::Recommended).filter(fresh).collect();
-        let mut maybe: Vec<&Item> = v.items.iter().filter(|i| i.tier == Tier::Maybe).filter(fresh).collect();
-        let mut seen: Vec<&Item> = v.items.iter().filter(|i| i.tier != Tier::Hidden && i.seen && i.already.is_none()).collect();
-        let mut hidden: Vec<&Item> = v.items.iter().filter(|i| i.tier == Tier::Hidden).collect();
+        // 2.0.3 : jeux de la bibliotheque Playnite pas encore proteges, dans leur propre section (en tete).
+        let mut pn: Vec<&Item> = v.items.iter().filter(|i| i.is_playnite() && i.already.is_none()).collect();
+        let other = |i: &&Item| !i.is_playnite();
+        let mut rec: Vec<&Item> = v.items.iter().filter(other).filter(|i| i.tier == Tier::Recommended).filter(fresh).collect();
+        let mut maybe: Vec<&Item> = v.items.iter().filter(other).filter(|i| i.tier == Tier::Maybe).filter(fresh).collect();
+        let mut seen: Vec<&Item> = v.items.iter().filter(other).filter(|i| i.tier != Tier::Hidden && i.seen && i.already.is_none()).collect();
+        let mut hidden: Vec<&Item> = v.items.iter().filter(other).filter(|i| i.tier == Tier::Hidden).collect();
+        pn.sort_by(|a, b| (a.tier == Tier::Hidden, std::cmp::Reverse(a.score), a.name.to_lowercase()).cmp(&(b.tier == Tier::Hidden, std::cmp::Reverse(b.score), b.name.to_lowercase())));
         let order = |a: &&Item, b: &&Item| (a.cat, a.already.is_some(), std::cmp::Reverse(a.score), a.name.to_lowercase()).cmp(&(b.cat, b.already.is_some(), std::cmp::Reverse(b.score), b.name.to_lowercase()));
         for g in [&mut rec, &mut maybe, &mut seen, &mut hidden] {
             g.sort_by(order);
         }
         let mut idx = 0usize;
-        if v.finished && rec.iter().chain(maybe.iter()).all(|i| i.already.is_some()) && !v.cancelled {
+        if v.finished && pn.is_empty() && rec.iter().chain(maybe.iter()).all(|i| i.already.is_some()) && !v.cancelled {
             ui.add_space(u::tokens::SP_S);
             let nothing = v.items.iter().all(|i| i.tier == Tier::Hidden);
             ui.label(RichText::new(if nothing { self.t(K::VHideNoData) } else { self.t(K::VScanNothingNew) }).color(u::col(t.weak)));
+        }
+        if !pn.is_empty() {
+            let r = self.group_header(ui, self.t(K::VPlayniteSection), pn.len(), self.t(K::VPlayniteHint), false, None);
+            if std::mem::take(&mut self.scan.scroll_playnite) {
+                r.scroll_to_me(Some(egui::Align::TOP));
+            }
+            self.scan_rows(ui, ctx, &pn, v, &mut idx, true);
         }
         if !rec.is_empty() {
             self.group_header(ui, self.t(K::VScanRecommended), rec.len(), self.t(K::VScanRecommendedHint), false, None);
@@ -699,7 +714,7 @@ impl App {
             ctx.request_repaint_after(Duration::from_millis(30));
             return None;
         }
-        let tex = winutil::exe_icon_rgba(p).map(|(rgba, w, h)| ctx.load_texture(format!("scan-icon-{}", p.display()), egui::ColorImage::from_rgba_unmultiplied([w, h], &rgba), egui::TextureOptions::LINEAR));
+        let tex = winutil::exe_icon_rgba(p).map(|(rgba, w, h)| ctx.load_texture(format!("scan-icon-{}", p.display()), egui::ColorImage::from_rgba_unmultiplied([w, h], &rgba), crate::gui::ui::ICON_TEX));
         self.scan.icons.insert(p.to_path_buf(), tex.clone());
         tex
     }

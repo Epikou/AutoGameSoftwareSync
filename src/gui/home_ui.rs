@@ -33,6 +33,14 @@ pub struct HomeUi {
     /// fois quand les faits sont charges.
     demo: Vec<(String, String, f64)>,
     demo_read: bool,
+    /// 2.0.3 : ordre des tuiles fige tant que l'accueil est affiche, et hysteresis du titre.
+    pub(super) frozen: home::FrozenOrder,
+    pub(super) hold: home::HeadlineHold,
+    /// Diagnostic des captures (`AGSS_UI_ORDER_LOG=fichier`) : ordre des tuiles et titre a chaque changement.
+    order_log: Option<(PathBuf, String)>,
+    demo_sortmenu: bool,
+    /// Debut du calme (plus aucune copie) : apres `REORDER_CALM_MS`, l'ordre des tuiles est recalcule s'il a change.
+    calm_since: Option<Instant>,
 }
 
 /// Une tuile prete a dessiner.
@@ -48,6 +56,13 @@ pub(super) struct Item {
     recent: u64,
     /// Alerte poids : l'element depasse le seuil (pastille « Lourd »).
     pub(super) heavy: bool,
+    /// Tris choisis (2.0.3) : derniere synchro, derniere version, taille, vrai probleme.
+    last_sync: u64,
+    modified: u64,
+    bytes: u64,
+    real_problem: bool,
+    /// Copie a faire qui partira toute seule dans quelques secondes (pas de copie planifiee) : rien a verifier.
+    soon: bool,
 }
 
 /// Action demandee pendant le dessin, executee ensuite (aucun emprunt de `self` pendant le dessin).
@@ -130,6 +145,37 @@ impl App {
         }
     }
 
+    fn sort_label(&self, k: home::SortKey) -> &'static str {
+        self.t(match k {
+            home::SortKey::Name => K::VSortName,
+            home::SortKey::LastSync => K::VSortLastSync,
+            home::SortKey::Modified => K::VSortModified,
+            home::SortKey::Size => K::VSortSize,
+            home::SortKey::State => K::VSortState,
+        })
+    }
+
+    /// Diagnostic (jamais dans l'interface) : `AGSS_UI_ORDER_LOG=<fichier>` ajoute une ligne « ms | titre | ordre » a chaque
+    /// changement de l'ordre des tuiles ou du titre (mesure du clignotement pendant une rafale de synchros).
+    fn home_order_log(&mut self, items: &[Item], h: Headline) {
+        if self.home.order_log.is_none() {
+            match std::env::var_os("AGSS_UI_ORDER_LOG") {
+                Some(p) => self.home.order_log = Some((PathBuf::from(p), String::new())),
+                None => return,
+            }
+        }
+        let Some((path, last)) = self.home.order_log.as_mut() else { return };
+        let states: Vec<String> = items.iter().map(|i| format!("{}={:?}", i.name, i.state)).collect();
+        let line = format!("{:?} | {} | epoque {}", h, items.iter().map(|i| i.name.as_str()).collect::<Vec<_>>().join(", "), self.home.epoch);
+        if *last != line {
+            *last = line.clone();
+            use std::io::Write;
+            if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(path.as_path()) {
+                let _ = writeln!(f, "{} | {} | {}", crate::util::now_ms(), line, states.join(" "));
+            }
+        }
+    }
+
     /// Tuiles de l'accueil (toutes categories), triees par priorite.
     pub(super) fn home_items(&self, ctx: &egui::Context, busy: &[String]) -> Vec<Item> {
         let now = crate::util::now_ms();
@@ -181,16 +227,45 @@ impl App {
                 }
                 tip.push(self.t(K::TipGameName).to_string());
             }
-            items.push(Item { name: g.name.clone(), shown: f.shown.clone(), kind: f.kind, state, status: status_txt, sync, progress: if state == State::Busy { frac.or(Some(0.0)) } else { None }, tip: tip.join("\n"), recent: home::recent_ms(&f), heavy });
+            let real_problem = state == State::Problem && !matches!(why, Why::Locked);
+            items.push(Item {
+                name: g.name.clone(),
+                shown: f.shown.clone(),
+                kind: f.kind,
+                state,
+                status: status_txt,
+                sync,
+                progress: if state == State::Busy { frac.or(Some(0.0)) } else { None },
+                tip: tip.join("\n"),
+                recent: home::recent_ms(&f),
+                heavy,
+                last_sync: f.last_sync_ms.unwrap_or(0),
+                modified: f.head.as_ref().map(|h| h.saved_ms).unwrap_or(0),
+                bytes: f.bytes,
+                real_problem,
+                soon: matches!(why, Why::Pending) && g.schedule.is_none(),
+            });
         }
-        let mut rows: Vec<home::Row> = items.iter().map(|i| home::Row { name: i.name.clone(), shown: i.shown.clone(), state: i.state, recent_ms: i.recent }).collect();
-        home::sort_rows(&mut rows);
+        // Ordre du tri choisi (sans le gel de l'accueil : fiche, captures).
+        let order = home::sorted_names(&Self::sort_rows_of(&items), self.model.settings.home_sort);
+        Self::reorder(items, &order)
+    }
+
+    fn sort_rows_of(items: &[Item]) -> Vec<home::SortRow> {
+        items
+            .iter()
+            .map(|i| home::SortRow { name: i.name.clone(), shown: i.shown.clone(), state: i.state, recent_ms: i.recent, last_sync_ms: i.last_sync, modified_ms: i.modified, bytes: i.bytes, real_problem: i.real_problem })
+            .collect()
+    }
+
+    fn reorder(mut items: Vec<Item>, order: &[String]) -> Vec<Item> {
         let mut sorted = Vec::with_capacity(items.len());
-        for r in rows {
-            if let Some(p) = items.iter().position(|i| i.name == r.name) {
-                sorted.push(items.swap_remove(p));
+        for n in order {
+            if let Some(p) = items.iter().position(|i| i.name == *n) {
+                sorted.push(items.remove(p));
             }
         }
+        sorted.extend(items);
         sorted
     }
 
@@ -244,6 +319,26 @@ impl App {
             return;
         }
         let items = self.home_items(ctx, &busy);
+        // Ordre FIGE tant que l'accueil est affiche (2.0.3) : recalcule au retour sur l'accueil, au changement de tri ou de
+        // filtre (epoque), quand un element passe en vrai probleme, ou AU CALME (30 s sans aucune copie) si l'ordre a change
+        // (jamais pendant une synchro). Un seul redessin est programme a la fin du calme : aucun redessin periodique.
+        let rows = Self::sort_rows_of(&items);
+        if busy.is_empty() {
+            let since = *self.home.calm_since.get_or_insert_with(Instant::now);
+            if self.home.frozen.stale(&rows, self.model.settings.home_sort) {
+                let left = Duration::from_millis(home::REORDER_CALM_MS).saturating_sub(since.elapsed());
+                if left.is_zero() {
+                    self.home.epoch += 1;
+                    self.home.calm_since = Some(Instant::now());
+                } else {
+                    ctx.request_repaint_after(left + Duration::from_millis(50));
+                }
+            }
+        } else {
+            self.home.calm_since = None;
+        }
+        let order = self.home.frozen.apply(&rows, self.model.settings.home_sort, self.home.epoch);
+        let items = Self::reorder(items, &order);
         let mut act: Option<Act> = None;
         // Diagnostic des captures (AGSS_UI_HOME_DEMO) : menu, confirmation, fiche, selection au clavier, copie.
         if !self.home.demo_read {
@@ -282,6 +377,7 @@ impl App {
                 }
                 "scan" => act = Some(Act::Scan),
                 "search" => self.home.query = v.clone(),
+                "sortmenu" => self.home.demo_sortmenu = true,
                 "pause" => act = name.map(Act::TogglePause),
                 "restart" => act = Some(Act::Restart),
                 "sync" if self.shared.state() == WatchState::Running => act = Some(Act::SyncOne(v.clone())),
@@ -299,17 +395,25 @@ impl App {
         let expert = self.model.settings.expert_mode;
 
         // ---- bandeau d'etat global (un seul message)
-        let states: Vec<State> = items.iter().map(|i| i.state).collect();
         let watch = match self.shared.state() {
             WatchState::Running if self.shared.paused.load(Ordering::SeqCst) => home::Watch::Paused,
             WatchState::Running | WatchState::Other(_) => home::Watch::Running,
             WatchState::Error(_) => home::Watch::Failed,
             WatchState::Stopped => home::Watch::Starting,
         };
+        // 2.0.3 : une modification qui sera copiee toute seule dans quelques secondes n'est pas « a verifier » (la tuile dit
+        // « Copie a faire ») ; seule une vraie copie de plus de 2 s change le titre.
+        let states: Vec<State> = items.iter().map(|i| if i.state == State::Todo && i.soon && watch == home::Watch::Running { State::Safe } else { i.state }).collect();
         let last = self.home.facts.iter().filter_map(|f| f.last_sync_ms).max();
         let configured = self.model.dest().is_some();
-        let s = home::summary(&states, configured, self.dest_ok != Some(false), watch, last);
+        let raw = home::summary(&states, configured, self.dest_ok != Some(false), watch, last);
         let now = crate::util::now_ms();
+        // Hysteresis (2.0.3) : « Synchronisation… » seulement au-dela de 2 s d'activite, et au moins 2 s a l'ecran.
+        let s = self.home.hold.apply(raw, now);
+        if self.home.hold.pending(now) {
+            ctx.request_repaint_after(Duration::from_millis(250));
+        }
+        self.home_order_log(&items, s.headline);
         let protected = if s.total == 1 { self.t(K::VOneItemProtected).to_string() } else { self.t(K::VItemsProtected).replace("{}", &s.total.to_string()) };
         let (title, detail): (String, String) = match s.headline {
             Headline::NoVault => (self.t(K::VNoVault).into(), self.t(K::VNoVaultDetail).into()),
@@ -317,7 +421,7 @@ impl App {
             Headline::WatchFailed => (self.t(K::VProtectionStopped).into(), self.t(K::VProtectionStoppedDetail).into()),
             Headline::WatchPaused => (self.t(K::VProtectionPaused).into(), self.t(K::VProtectionPausedDetail).into()),
             Headline::ToCheck(n) => (self.t(K::VToCheck).replace("{}", &n.to_string()), self.t(K::VToCheckDetail).into()),
-            Headline::Copying(_) => (self.t(K::VCopying).into(), protected.clone()),
+            Headline::Copying(_) => (self.t(K::VSyncingTitle).into(), protected.clone()),
             Headline::Incoming(_) => (self.tm(K::VNewerArrived).into(), protected.clone()),
             Headline::AllSafe => {
                 let d = match s.last_copy_ms {
@@ -355,6 +459,10 @@ impl App {
         // ---- Nouveau PC : programmes installes depuis, dont les donnees peuvent etre remises (recuperation differee)
         self.migrate_cards(ui, ctx);
         self.prefs_home_card(ui, ctx);
+        // 2.0.3 : jeux installes dans Playnite pas encore proteges (carte discrete).
+        if !items.is_empty() {
+            self.playnite_home_card(ui, ctx);
+        }
 
         // ---- accueil vide
         if items.is_empty() {
@@ -376,6 +484,32 @@ impl App {
 
         // ---- filtres (compteurs)
         ui.horizontal_wrapped(|ui| {
+            // Menu de tri (2.0.3), juste a gauche des filtres ; choix memorise dans les reglages.
+            let cur = self.model.settings.home_sort;
+            let mut pick: Option<home::SortKey> = None;
+            if std::mem::take(&mut self.home.demo_sortmenu) {
+                let id = ui.make_persistent_id("home_sort").with("popup");
+                ui.memory_mut(|m| m.open_popup(id));
+            }
+            let cb = egui::ComboBox::from_id_salt("home_sort").selected_text(self.sort_label(cur)).show_ui(ui, |ui| {
+                for k in home::SortKey::ALL {
+                    if ui.selectable_label(k == cur, self.sort_label(k)).clicked() {
+                        pick = Some(k);
+                    }
+                }
+            });
+            let r = self.deco(ui, cb.response, None).on_hover_text(self.t(K::VSortTip));
+            if self.pad_mode && r.clicked() && pick.is_none() {
+                // Manette : A fait defiler les tris (le menu deroulant reste utilisable a la souris).
+                let i = home::SortKey::ALL.iter().position(|k| *k == cur).unwrap_or(0);
+                pick = Some(home::SortKey::ALL[(i + 1) % home::SortKey::ALL.len()]);
+                ui.memory_mut(|m| m.close_popup());
+            }
+            if let Some(k) = pick.filter(|k| *k != cur) {
+                self.model.settings.home_sort = k;
+                let _ = self.model.save_settings();
+                self.home.epoch += 1;
+            }
             for (i, (f, k)) in Filter::ALL.iter().zip([K::VFilterAll, K::VFilterGames, K::VFilterApps, K::VFilterFolders]).enumerate() {
                 let r = u::chip(ui, self.t(k), Some(counts[i]), self.home.filter == *f);
                 if self.deco(ui, r, None).clicked() && self.home.filter != *f {
@@ -434,15 +568,12 @@ impl App {
                     for _ in 0..cols {
                         if i < shown.len() {
                             let it = shown[i];
+                            // 2.0.3 : vraie icone du programme ; sinon icone de sa categorie sur un fond teinte (plus de lettre).
                             let icon = match (&textures[i], it.kind) {
                                 (Some(tex), _) => TileIcon::Texture(tex),
-                                (None, Kind::Folder) => TileIcon::Glyph(Glyph::Folder, [0x2f, 0x4a, 0x3b]),
-                                (None, _) => TileIcon::Initial("", home::initial_color(&it.shown)),
-                            };
-                            let ini = u::tile::initials(&it.shown);
-                            let icon = match icon {
-                                TileIcon::Initial(_, c) => TileIcon::Initial(&ini, c),
-                                other => other,
+                                (None, Kind::Folder) => TileIcon::Glyph(Glyph::Folder, [0x2f, 0x6a, 0x55]),
+                                (None, Kind::App) => TileIcon::Glyph(Glyph::Window, home::initial_color(&it.shown)),
+                                (None, Kind::Game) => TileIcon::Glyph(Glyph::Pad, home::initial_color(&it.shown)),
                             };
                             let spec = u::TileSpec {
                                 name: &it.shown,

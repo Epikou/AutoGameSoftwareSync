@@ -98,7 +98,7 @@ Version 2.0.0 is the first version with automatic updates, so **install it by ha
 
 ## Playnite extension
 
-Using Playnite? The free extension shows on each game page its protection state, the date of the last sync and the device it comes from, in its own colour. It works in fullscreen mode with the most popular themes (Solaris, ReskinPS5, PS5ish...). It only reads: it never touches your saves.
+Using Playnite? The free extension shows on each game page its protection state, the date of the last sync and the device it comes from, in its own colour. It works in fullscreen mode with the most popular themes (Solaris, ReskinPS5, PS5ish...). It reads your saves' state and, with AutoGameSoftwareSync 2.0.3 or newer, sends it the list of your installed Playnite games so the app can suggest the ones not protected yet. It never touches your saves.
 
 <p align="center"><img src="https://raw.githubusercontent.com/Epikou/AutoGameSoftwareSync-Playnite/main/screenshots/solaris-badge.png" width="720" alt="AutoGameSoftwareSync badge in the Solaris theme"></p>
 
@@ -106,7 +106,7 @@ Using Playnite? The free extension shows on each game page its protection state,
 
 ## Linux / SteamOS
 
-A Linux build (x86_64) is available too: SteamOS (Steam Deck, Legion Go S...), Bazzite and Ubuntu. Download `AutoGameSoftwareSync-v2.0.0-linux-x86_64.tar.gz` from the [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) page, extract it and run `install-linux.sh` (no administrator rights needed). Copies are fully compatible with the Windows version through the same vault, including Windows games run with Proton. Installation guide (in French): [docs/LINUX.md](docs/LINUX.md).
+A Linux build (x86_64) is available too: SteamOS (Steam Deck, Legion Go S...), Bazzite and Ubuntu. Download `AutoGameSoftwareSync-vX.Y.Z-linux-x86_64.tar.gz` from the [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) page, extract it and run `install-linux.sh` (no administrator rights needed). Copies are fully compatible with the Windows version through the same vault, including Windows games run with Proton. Installation guide (in French): [docs/LINUX.md](docs/LINUX.md).
 
 ![Linux](screenshots/en/linux.png)
 

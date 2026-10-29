@@ -99,6 +99,9 @@ pub fn theme(ctx: &egui::Context) -> UiTheme {
     ctx.data(|d| d.get_temp::<UiTheme>(theme_id())).unwrap_or(UiTheme { tokens: Tokens::default_dark(), big: false })
 }
 
+/// Textures des icones de programmes (2.0.3) : lissage + mipmaps (nettes une fois reduites, en grand format comme en petit).
+pub const ICON_TEX: egui::TextureOptions = egui::TextureOptions { magnification: egui::TextureFilter::Linear, minification: egui::TextureFilter::Linear, wrap_mode: egui::TextureWrapMode::ClampToEdge, mipmap_mode: Some(egui::TextureFilter::Linear) };
+
 pub fn tokens(ctx: &egui::Context) -> Tokens {
     theme(ctx).tokens
 }

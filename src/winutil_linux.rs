@@ -81,6 +81,12 @@ pub fn flash_taskbar(_title: &str) {
     cmd(eframe::egui::ViewportCommand::RequestUserAttention(eframe::egui::UserAttentionType::Informational));
 }
 
+/// Aucune API commune a X11 et Wayland pour lister les fenetres des autres programmes : l'apprentissage des programmes
+/// inconnus (2.0.3) ne s'applique pas sous Linux (ensemble vide).
+pub fn visible_window_pids() -> std::collections::HashSet<u32> {
+    std::collections::HashSet::new()
+}
+
 /// Non detecte sous Linux (aucune API commune a X11 et Wayland) : la carte s'affiche normalement.
 pub fn foreground_is_fullscreen() -> bool {
     false
@@ -142,11 +148,11 @@ pub fn client_animations_enabled() -> bool {
     ANIM_ON.load(Ordering::SeqCst)
 }
 
-static ALLY: OnceLock<bool> = OnceLock::new();
+static HANDHELD: OnceLock<bool> = OnceLock::new();
 
 /// Steam Deck, console portable connue ou mode jeu de SteamOS (gamescope) ? Evalue une fois.
 pub fn handheld_session() -> bool {
-    *ALLY.get_or_init(|| {
+    *HANDHELD.get_or_init(|| {
         let rd = |f: &str| std::fs::read_to_string(format!("/sys/class/dmi/id/{}", f)).unwrap_or_default();
         crate::uilogic::handheld_from(&|k| std::env::var(k).ok(), &rd("board_vendor"), &rd("product_name"))
     })

@@ -39,6 +39,87 @@ fn nom_du_produit_binaire_titre_et_valeur_run() {
     assert_eq!(startup::TASK_FOLDER, "AutoGameSoftwareSync");
 }
 
+#[test]
+fn migration_copie_verifiee_sans_toucher_a_l_ancien_dossier() {
+    let t = TempDir::new().unwrap();
+    let old = t.path().join(agss::legacy::DATA_DIRS[0]);
+    let new = t.path().join("AutoGameSoftwareSync");
+    write(&old.join("config.json"), r#"{"games":[]}"#);
+    write(&old.join("settings.json"), r#"{"lang":"fr"}"#);
+    write(&old.join("state.json"), "{}");
+    write(&old.join("clock.json"), r#"{"offset_ms":5}"#);
+    write(&old.join("catalog.yaml"), "x: 1");
+    write(&old.join("safety/G/20260101/files/s.dat"), "precieux");
+    write(&old.join("logs/watch.log"), "ligne");
+    write(&old.join("watch.lock"), "123"); // verrou : jamais migre
+    write(&old.join("tmp/x"), "tmp"); // dossier de travail : jamais migre
+    let before: Vec<(String, String)> = walkdir::WalkDir::new(&old).into_iter().filter_map(|e| e.ok()).filter(|e| e.file_type().is_file()).map(|e| (e.path().display().to_string(), util::hash_file(e.path()).unwrap())).collect();
+    let r = appdirs::migrate(&old, &new).unwrap();
+    assert_eq!(r.skipped, None);
+    assert_eq!(r.files, 7);
+    assert_eq!(read(&new.join("settings.json")), r#"{"lang":"fr"}"#);
+    assert_eq!(read(&new.join("safety/G/20260101/files/s.dat")), "precieux");
+    assert!(new.join(appdirs::MIGRATION_MARKER).exists());
+    assert!(!new.join("watch.lock").exists() && !new.join("tmp").exists());
+    // L'ancien dossier est strictement intact.
+    let after: Vec<(String, String)> = walkdir::WalkDir::new(&old).into_iter().filter_map(|e| e.ok()).filter(|e| e.file_type().is_file()).map(|e| (e.path().display().to_string(), util::hash_file(e.path()).unwrap())).collect();
+    assert_eq!(before, after, "ancien dossier modifie");
+    // Pas de reste de dossier de travail.
+    assert!(!t.path().join("AutoGameSoftwareSync.migrating").exists());
+    // Deuxieme appel : deja migre, rien ne change.
+    write(&new.join("settings.json"), r#"{"lang":"en"}"#);
+    let r2 = appdirs::migrate(&old, &new).unwrap();
+    assert_eq!(r2.skipped.as_deref(), Some("deja migre"));
+    assert_eq!(read(&new.join("settings.json")), r#"{"lang":"en"}"#, "rien n'est ecrase");
+    assert!(appdirs::report_line(&old, &r).contains("7 fichier(s)") && appdirs::report_line(&old, &r2).contains("non effectuee"));
+}
+
+#[test]
+fn migration_n_ecrase_jamais_un_nouveau_dossier_non_vide_et_gere_les_cas_vides() {
+    let t = TempDir::new().unwrap();
+    let old = t.path().join(agss::legacy::DATA_DIRS[0]);
+    let new = t.path().join("AutoGameSoftwareSync");
+    // Ancien dossier absent.
+    assert!(appdirs::migrate(&old, &new).unwrap().skipped.is_some());
+    write(&old.join("config.json"), "ancien");
+    // Nouveau non vide : rien n'est ecrase.
+    write(&new.join("settings.json"), "nouveau");
+    let r = appdirs::migrate(&old, &new).unwrap();
+    assert!(r.skipped.unwrap().contains("pas vide"));
+    assert_eq!(read(&new.join("settings.json")), "nouveau");
+    assert!(!new.join("config.json").exists());
+    // Nouveau vide (existe mais sans rien) : migration possible.
+    std::fs::remove_file(new.join("settings.json")).unwrap();
+    assert_eq!(appdirs::migrate(&old, &new).unwrap().files, 1);
+    assert_eq!(read(&new.join("config.json")), "ancien");
+    // Ancien dossier sans rien de migrable.
+    let (o2, n2) = (t.path().join("O2"), t.path().join("N2"));
+    write(&o2.join("watch.lock"), "1");
+    assert_eq!(appdirs::migrate(&o2, &n2).unwrap().skipped.as_deref(), Some("rien a migrer"));
+    assert!(!n2.exists());
+}
+
+#[test]
+fn dossier_de_donnees_variables_d_environnement() {
+    let (new_v, old_v) = ("AUTOGAMESOFTWARESYNC_DATA_DIR", agss::legacy::ENV_VARS);
+    for v in old_v.iter().copied().chain([new_v]) {
+        std::env::remove_var(v);
+    }
+    assert_eq!(appdirs::data_dir_from_env(), None);
+    // Une ancienne variable est encore comprise (par priorite decroissante)...
+    std::env::set_var(old_v[2], "C:/ancien-3");
+    assert_eq!(appdirs::data_dir_from_env(), Some(PathBuf::from("C:/ancien-3")));
+    std::env::set_var(old_v[0], "C:/ancien-1");
+    assert_eq!(appdirs::data_dir_from_env(), Some(PathBuf::from("C:/ancien-1")));
+    // ... mais la nouvelle variable est TOUJOURS prioritaire.
+    std::env::set_var(new_v, "C:/nouveau");
+    assert_eq!(appdirs::data_dir_from_env(), Some(PathBuf::from("C:/nouveau")));
+    for v in old_v.iter().copied().chain([new_v]) {
+        std::env::remove_var(v);
+    }
+    assert!(appdirs::default_data_dir().unwrap().ends_with("AutoGameSoftwareSync"));
+}
+
 // ================================================================== valeurs par defaut / premier lancement
 
 #[test]
@@ -127,7 +208,14 @@ fn icone_ico_multi_tailles_png_embarques_et_svg_vert() {
     let svg = read(&media.join("icon.svg")).to_lowercase();
     assert!(svg.contains("#028463"), "vert de l'application dominant");
     assert!(!svg.contains("#3b6fd8") && !svg.contains("#1e3d8f"), "plus de bleu d'origine");
-    assert!(svg.contains("a52 52"), "fleches de synchronisation en arc");
+    // 2.0.3 : icone redessinee a plat (aucune ombre portee, floue aux petites tailles) ; fleches de synchronisation en arc.
+    assert!(svg.contains("a48 48 0 0 1"), "fleches de synchronisation en arc");
+    assert!(!svg.contains("<filter") && !svg.contains("fedropshadow"), "aucune ombre portee");
+    for f in ["icon_small.svg", "icon_tiny.svg"] {
+        let s = read(&media.join(f)).to_lowercase();
+        assert!(!s.contains("<filter"), "{} : aucune ombre portee", f);
+        assert!(s.contains(" a") && s.contains("0 0 1 "), "{} : fleches en arc", f);
+    }
     for f in ["icon_original.svg", "icon_original.ico", "icon_small.svg", "icon_tiny.svg"] {
         assert!(media.join(f).exists(), "{} manquant", f);
     }
@@ -220,8 +308,8 @@ fn content(dest: &Path, g: &Game) -> Vec<String> {
 
 /// Cree un vrai conflit : A et B partent de v1, chacun sauvegarde sa propre version.
 fn conflict(t: &Path, dest: &Path) -> (Pc, Pc) {
-    let a = pc(t, "PC-DESKTOP");
-    let b = pc(t, "ALLY");
+    let a = pc(t, "EPIKOU");
+    let b = pc(t, "EPIGOS");
     write(&a.game.path.join("save.dat"), "v1");
     backup::backup(&a.ctx, &a.game, dest).unwrap();
     backup::restore(&b.ctx, &b.game, dest).unwrap();

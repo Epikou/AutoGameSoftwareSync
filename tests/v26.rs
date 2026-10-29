@@ -424,10 +424,12 @@ fn afficher_l_appli_a_la_fermeture_regles() {
         assert_eq!(s.tick(&off, 10_000, granted), ShowAction::None);
         assert_eq!(s.tick(&ctx_ok(), 20_000, granted), ShowAction::None);
     }
-    // Deja au premier plan : rien. Premier plan refuse par Windows : clignotement, sans insister.
+    // Deja au premier plan : rien a demander a Windows (2.0.3 : signale, l'ecran de fermeture s'ouvre). Premier plan refuse
+    // par Windows : clignotement, sans insister.
     let mut s = ShowOnClose::default();
     s.on_closed(0);
-    assert_eq!(s.tick(&ShowCtx { already_foreground: true, ..ctx_ok() }, 10_000, granted), ShowAction::None);
+    assert_eq!(s.tick(&ShowCtx { already_foreground: true, ..ctx_ok() }, 10_000, granted), ShowAction::AlreadyFront);
+    assert_eq!(s.tick(&ShowCtx { already_foreground: true, ..ctx_ok() }, 20_000, granted), ShowAction::None, "une seule fois");
     let mut s = ShowOnClose::default();
     s.on_closed(0);
     let mut tries = 0;

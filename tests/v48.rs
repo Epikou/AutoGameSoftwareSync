@@ -202,7 +202,7 @@ fn reglages_windows_decoches_partout_et_noms_stables() {
     let b = device(tmp.path(), "Handheld", b_sys);
     let mut here = agss::migrate::Here::empty(true);
     here.personal = agss::migrate::pref_known(&b.data_dir, true);
-    let devs = agss::migrate::devices(&vault, "ALLY", &Default::default());
+    let devs = agss::migrate::devices(&vault, "HANDHELD", &Default::default());
     let d = devs.iter().find(|d| d.name == "DESKTOP").unwrap();
     assert_eq!(d.todo, 1, "le mode d'alimentation d'un autre appareil n'est jamais propose");
     let plans = agss::migrate::check(&vault, d, &Default::default(), &here, None, &|_, _| {});
@@ -543,7 +543,7 @@ fn liste_a_refaire_lue_dans_le_coffre_pour_le_nouveau_pc() {
     let a = device(tmp.path(), "DESKTOP", s);
     let g = pref_game(&a, Kind::TodoList);
     backup::backup(&a, &g, &vault).unwrap();
-    let devs = agss::migrate::devices(&vault, "ALLY", &Default::default());
+    let devs = agss::migrate::devices(&vault, "HANDHELD", &Default::default());
     let d = devs.iter().find(|d| d.name == "DESKTOP").unwrap();
     let t = agss::migrate::todo_list_of(&vault, d).unwrap();
     assert_eq!(t.wifi, vec!["HomeNet".to_string()]);

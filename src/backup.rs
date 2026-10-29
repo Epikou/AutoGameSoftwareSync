@@ -13,6 +13,7 @@ use crate::cloud::{self, Snapshot, VKind, Version};
 use crate::config::{Game, State};
 use crate::store::{self, Meta};
 use crate::{perf, util, Ctx, Res};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 pub const DEFAULT_KEEP: usize = 10;
@@ -636,8 +637,25 @@ fn restore_staged(ctx: &Ctx, game: &Game, v: &Version, staging: PathBuf, op: &mu
 /// Copie de securite VERIFIEE de l'etat local (`<donnees>/safety/<jeu>/<horodatage>/files/...` + meta.json ecrit en
 /// dernier). `lfiles` : scan local non vide. `what` complete le message d'echec (« restauration annulee »...).
 fn safety_snapshot(ctx: &Ctx, game: &Game, target: &store::GameTarget, lfiles: Vec<store::FileInfo>, llatest: u64, note: &str, what: &str) -> Res<PathBuf> {
-    let dir = store::unique_dir(&safety_root(ctx, game), &util::timestamp(util::now_ms()));
     let lmeta = store::make_meta(ctx, &game.name, lfiles, llatest, Some(note.into()));
+    // 2.0.3 : pas de copie en double. Contenu identique a une copie de securite existante de cet element (empreinte globale,
+    // la plus recente d'abord) et cette copie est intacte (relue) : on la reutilise ; « Annuler » s'appuie alors sur elle.
+    // Elle est marquee « utilisee maintenant » (`used.txt`) : le nettoyage la traite comme une copie toute neuve.
+    // Jamais une copie que la regle de nettoyage supprimerait, ni pendant un « Liberer de la place » (verrou) : dans ces
+    // cas, copie neuve (une suppression en cours ne peut pas emporter la copie dont « Annuler » aura besoin).
+    if !safety_free_running(ctx) {
+        let all = safety_copies(ctx, game);
+        let doomed: Vec<PathBuf> = safety_prune_plan_used(&all, &used_map(&all), util::now_ms()).into_iter().map(|c| c.dir).collect();
+        for prev in all.into_iter().rev().filter(|p| !p.hash.is_empty() && p.hash == lmeta.global_hash && !doomed.contains(&p.dir)) {
+            if store::read_meta(&prev.dir.join("meta.json")).ok().map(|m| verify_safety(&prev.dir, &m).is_ok()).unwrap_or(false) {
+                let _ = util::write_atomic(&prev.dir.join(SAFETY_USED_FILE), util::now_ms().to_string().as_bytes());
+                if prev.dir.join("meta.json").is_file() {
+                    return Ok(prev.dir);
+                }
+            }
+        }
+    }
+    let dir = store::unique_dir(&safety_root(ctx, game), &util::timestamp(util::now_ms()));
     if let Some(p) = &ctx.progress {
         p.begin(perf::Phase::Safety, lmeta.files.len() as u64, lmeta.files.iter().map(|f| f.size).sum());
     }
@@ -650,7 +668,187 @@ fn safety_snapshot(ctx: &Ctx, game: &Game, target: &store::GameTarget, lfiles: V
         }
     })?;
     util::write_atomic(&dir.join("meta.json"), serde_json::to_string_pretty(&lmeta)?.as_bytes())?;
+    // Nettoyage automatique (regle prudente) des anciennes copies de cet element ; la nouvelle est toujours gardee.
+    let _ = prune_safety_of(ctx, &safety_root(ctx, game), util::now_ms());
     Ok(dir)
+}
+
+// ------------------------------------------------------------------ copies de securite : nettoyage (2.0.3)
+
+/// Copies de securite toujours gardees par element : les plus recentes...
+pub const SAFETY_KEEP: usize = 3;
+/// ... et tout ce qui a moins de 30 jours.
+pub const SAFETY_KEEP_DAYS: u64 = 30;
+/// Copie interrompue (sans meta.json) : nettoyee seulement apres un jour (une copie en cours n'a pas encore son meta.json).
+pub const SAFETY_STALE_MS: u64 = 86_400_000;
+
+/// Copies a supprimer selon la regle : jamais la seule copie, jamais une des 3 plus recentes, jamais une copie de moins de
+/// 30 jours. Pure.
+pub fn safety_prune_plan(copies: &[SafetyCopy], now_ms: u64) -> Vec<SafetyCopy> {
+    safety_prune_plan_used(copies, &HashMap::new(), now_ms)
+}
+
+/// Meme regle ; `used` : copie reutilisee (pas de doublon) -> date de sa derniere utilisation, qui compte comme sa date.
+pub fn safety_prune_plan_used(copies: &[SafetyCopy], used: &HashMap<PathBuf, u64>, now_ms: u64) -> Vec<SafetyCopy> {
+    if copies.len() <= 1 {
+        return vec![];
+    }
+    let eff = |c: &SafetyCopy| c.ms.max(used.get(&c.dir).copied().unwrap_or(0));
+    let mut v: Vec<&SafetyCopy> = copies.iter().collect();
+    v.sort_by(|a, b| (eff(b), &b.dir).cmp(&(eff(a), &a.dir)));
+    v.into_iter().enumerate().filter(|(i, c)| *i >= SAFETY_KEEP && now_ms.saturating_sub(eff(c)) >= SAFETY_KEEP_DAYS * 86_400_000).map(|(_, c)| c.clone()).collect()
+}
+
+/// Marque d'une copie reutilisee (date de derniere utilisation, ms).
+pub const SAFETY_USED_FILE: &str = "used.txt";
+/// Une copie utilisee il y a moins d'une heure (remise en cours, « Annuler » recent) n'est jamais supprimee, meme si un
+/// plan de nettoyage calcule avant la decidait.
+pub const SAFETY_USED_GRACE_MS: u64 = 3_600_000;
+/// Verrou de « Liberer de la place » (`<donnees>/safety/.free.lock`) : pendant qu'il est pose (moins de 10 min), aucune
+/// copie existante n'est reutilisee par une remise (copie neuve a la place).
+pub const SAFETY_FREE_LOCK: &str = ".free.lock";
+const SAFETY_FREE_LOCK_MAX_MS: u64 = 10 * 60 * 1000;
+
+fn used_ms(dir: &Path) -> Option<u64> {
+    std::fs::read_to_string(dir.join(SAFETY_USED_FILE)).ok().and_then(|t| t.trim().parse::<u64>().ok())
+}
+
+fn used_map(copies: &[SafetyCopy]) -> HashMap<PathBuf, u64> {
+    copies.iter().filter_map(|c| used_ms(&c.dir).map(|ms| (c.dir.clone(), ms))).collect()
+}
+
+fn free_lock_path(ctx: &Ctx) -> PathBuf {
+    ctx.data_dir.join("safety").join(SAFETY_FREE_LOCK)
+}
+
+/// « Liberer de la place » est-il en cours (verrou recent) ? Un verrou oublie (plantage) expire apres 10 min.
+pub fn safety_free_running(ctx: &Ctx) -> bool {
+    std::fs::read_to_string(free_lock_path(ctx)).ok().and_then(|t| t.trim().parse::<u64>().ok()).map(|at| util::now_ms().saturating_sub(at) < SAFETY_FREE_LOCK_MAX_MS).unwrap_or(false)
+}
+
+/// Copies completes d'un dossier `<donnees>/safety/<element>/` (meme lecture que `safety_copies`).
+fn safety_copies_in(root: &Path) -> Vec<SafetyCopy> {
+    let mut out = Vec::new();
+    if let Ok(rd) = std::fs::read_dir(root) {
+        for e in rd.filter_map(|e| e.ok()) {
+            let dir = e.path();
+            let Ok(m) = store::read_meta(&dir.join("meta.json")) else { continue };
+            if m.files.is_empty() || !dir.join("files").is_dir() {
+                continue;
+            }
+            out.push(SafetyCopy { ms: m.sort_ms(), files: m.files.len(), bytes: m.files.iter().map(|f| f.size).sum(), hash: m.global_hash.clone(), note: m.note.clone(), dir });
+        }
+    }
+    out.sort_by(|a, b| (a.ms, &a.dir).cmp(&(b.ms, &b.dir)));
+    out
+}
+
+/// Dossiers interrompus (sans meta.json) de plus d'un jour sous `root`.
+fn safety_stale_in(root: &Path, now_ms: u64) -> Vec<PathBuf> {
+    let mut out = Vec::new();
+    if let Ok(rd) = std::fs::read_dir(root) {
+        for e in rd.filter_map(|e| e.ok()) {
+            let dir = e.path();
+            if !dir.is_dir() || dir.join("meta.json").exists() {
+                continue;
+            }
+            let age = e.metadata().ok().and_then(|m| m.modified().ok()).and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| now_ms.saturating_sub(d.as_millis() as u64)).unwrap_or(0);
+            if age >= SAFETY_STALE_MS {
+                out.push(dir);
+            }
+        }
+    }
+    out
+}
+
+/// Supprime UNE copie de securite, avec garde-fou : seulement un dossier `<donnees>/safety/<element>/<copie>`, et jamais
+/// une copie utilisee il y a moins d'une heure (`used.txt` relu juste avant : une remise a pu la reutiliser entre le
+/// calcul du plan et la suppression).
+fn remove_safety_dir(ctx: &Ctx, dir: &Path, now_ms: u64) -> bool {
+    let base = ctx.data_dir.join("safety");
+    let ok = dir.parent().and_then(|p| p.parent()).map(|g| g == base.as_path()).unwrap_or(false) && dir.file_name().is_some();
+    if !ok || used_ms(dir).map(|u| now_ms.saturating_sub(u) < SAFETY_USED_GRACE_MS).unwrap_or(false) {
+        return false;
+    }
+    std::fs::remove_dir_all(dir).is_ok()
+}
+
+/// Applique la regle a un element. Retourne (copies supprimees, octets liberes).
+fn prune_safety_of(ctx: &Ctx, root: &Path, now_ms: u64) -> (usize, u64) {
+    let mut n = (0, 0);
+    let all = safety_copies_in(root);
+    for c in safety_prune_plan_used(&all, &used_map(&all), now_ms) {
+        let b = crate::actions::dir_size(&c.dir);
+        if remove_safety_dir(ctx, &c.dir, now_ms) {
+            n.0 += 1;
+            n.1 += b;
+        }
+    }
+    for d in safety_stale_in(root, now_ms) {
+        let b = crate::actions::dir_size(&d);
+        if remove_safety_dir(ctx, &d, now_ms) {
+            n.0 += 1;
+            n.1 += b;
+        }
+    }
+    n
+}
+
+/// Place utilisee par les copies de securite de cet appareil et ce que « Libérer de la place » supprimerait.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct SafetyUsage {
+    /// Octets reellement occupes sur le disque (dossier `safety` entier).
+    pub bytes: u64,
+    /// Copies completes, tous elements confondus.
+    pub copies: usize,
+    /// A supprimer : (dossier de l'element, copie). Copies interrompues : `files == 0`.
+    pub plan: Vec<(String, SafetyCopy)>,
+}
+
+impl SafetyUsage {
+    pub fn plan_bytes(&self) -> u64 {
+        self.plan.iter().map(|(_, c)| c.bytes).sum()
+    }
+}
+
+/// Etat des copies de securite (lecture seule).
+pub fn safety_usage(ctx: &Ctx, now_ms: u64) -> SafetyUsage {
+    let base = ctx.data_dir.join("safety");
+    let mut u = SafetyUsage { bytes: crate::actions::dir_size(&base), ..Default::default() };
+    let Ok(rd) = std::fs::read_dir(&base) else { return u };
+    let mut roots: Vec<PathBuf> = rd.filter_map(|e| e.ok()).map(|e| e.path()).filter(|p| p.is_dir()).collect();
+    roots.sort();
+    for root in roots {
+        let name = root.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
+        let all = safety_copies_in(&root);
+        u.copies += all.len();
+        for c in safety_prune_plan_used(&all, &used_map(&all), now_ms) {
+            u.plan.push((name.clone(), c));
+        }
+        for d in safety_stale_in(&root, now_ms) {
+            let bytes = crate::actions::dir_size(&d);
+            u.plan.push((name.clone(), SafetyCopy { dir: d, ms: 0, files: 0, bytes, hash: String::new(), note: None }));
+        }
+    }
+    u
+}
+
+/// « Libérer de la place » : applique la regle a tous les elements (y compris ceux qui ne sont plus proteges). Retourne
+/// (copies supprimees, octets liberes).
+pub fn safety_free(ctx: &Ctx, now_ms: u64) -> (usize, u64) {
+    let base = ctx.data_dir.join("safety");
+    let Ok(rd) = std::fs::read_dir(&base) else { return (0, 0) };
+    // Verrou : les remises en cours font une copie neuve au lieu de reutiliser une copie que ce nettoyage pourrait emporter.
+    let lock = free_lock_path(ctx);
+    let _ = util::write_atomic(&lock, util::now_ms().to_string().as_bytes());
+    let mut n = (0, 0);
+    for root in rd.filter_map(|e| e.ok()).map(|e| e.path()).filter(|p| p.is_dir()) {
+        let (a, b) = prune_safety_of(ctx, &root, now_ms);
+        n.0 += a;
+        n.1 += b;
+    }
+    let _ = std::fs::remove_file(&lock);
+    n
 }
 
 /// Dossier des copies de securite d'un element (dans le dossier de donnees LOCAL).
@@ -926,19 +1124,7 @@ pub struct SafetyCopy {
 
 /// Copies de securite completes (meta.json present, fichiers presents) d'un element, de la plus ancienne a la plus recente.
 pub fn safety_copies(ctx: &Ctx, game: &Game) -> Vec<SafetyCopy> {
-    let mut out = Vec::new();
-    if let Ok(rd) = std::fs::read_dir(safety_root(ctx, game)) {
-        for e in rd.filter_map(|e| e.ok()) {
-            let dir = e.path();
-            let Ok(m) = store::read_meta(&dir.join("meta.json")) else { continue };
-            if m.files.is_empty() || !dir.join("files").is_dir() {
-                continue;
-            }
-            out.push(SafetyCopy { ms: m.sort_ms(), files: m.files.len(), bytes: m.files.iter().map(|f| f.size).sum(), hash: m.global_hash.clone(), note: m.note.clone(), dir });
-        }
-    }
-    out.sort_by(|a, b| (a.ms, &a.dir).cmp(&(b.ms, &b.dir)));
-    out
+    safety_copies_in(&safety_root(ctx, game))
 }
 
 /// Tous les fichiers d'une copie de securite sont presents et intacts (empreinte relue) ; sinon rien ne doit etre touche.
