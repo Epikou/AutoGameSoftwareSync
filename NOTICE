@@ -27,3 +27,18 @@ this project.
 
 The application icon (floppy disk, controller and sync arrows) is original
 work of this project.
+
+Third-party code (Android build)
+--------------------------------
+android/vendor/winit is a modified copy of winit 0.30.13
+(https://github.com/rust-windowing/winit), Apache-2.0 License, Copyright (c)
+the winit contributors. Two files are modified for handhelds with a built-in
+controller, each change marked "AutoGameSoftwareSync (console portable)" in
+the source: src/platform_impl/android/keycodes.rs (controller buttons mapped
+to interface keys) and src/platform_impl/android/mod.rs (controller axes, hat
+and left stick, mapped to arrow keys). See android/vendor/winit/VENDOR-NOTE.md
+and android/vendor/winit/LICENSE.
+
+The Android app also links, unmodified, the android-activity, ndk-context,
+android_logger and jni crates (MIT / Apache-2.0), in addition to the egui,
+eframe and egui-phosphor crates used by the desktop app.

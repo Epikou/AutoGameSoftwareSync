@@ -89,6 +89,8 @@ pub struct MainHint {
 pub fn this_os() -> &'static str {
     if cfg!(windows) {
         "windows"
+    } else if cfg!(target_os = "android") {
+        "android"
     } else {
         "linux"
     }

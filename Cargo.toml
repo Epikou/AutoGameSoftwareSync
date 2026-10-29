@@ -64,10 +64,13 @@ windows-sys = { version = "0.59", features = [
     "Win32_UI_WindowsAndMessaging",
 ] }
 
+# Boites de dialogue via le portail XDG (aucune dependance GTK a l edition de liens). Android : aucun dialogue systeme
+# (voir src/rfd_shim.rs) ; la lib sert alors de moteur a l'application Android (android/).
+[target.'cfg(all(unix, not(target_os = "android")))'.dependencies]
+rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "async-std"] }
+
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
-# Boites de dialogue via le portail XDG (aucune dependance GTK a l edition de liens).
-rfd = { version = "0.15", default-features = false, features = ["xdg-portal", "async-std"] }
 # Fenetre : X11 et Wayland (WSLg, SteamOS). Notifications : D-Bus en Rust pur.
 eframe = { version = "0.31", default-features = false, features = ["default_fonts", "glow", "x11", "wayland"] }
 notify-rust = "4"

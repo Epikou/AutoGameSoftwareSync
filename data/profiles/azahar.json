@@ -1,0 +1,50 @@
+{
+    "schema":  1,
+    "id":  "azahar",
+    "name":  "Azahar saves (3DS)",
+    "category":  "emulator",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "azahar.exe",
+                                   "lime3ds.exe",
+                                   "citra-qt.exe"
+                               ],
+                      "paths":  [
+                                    "%APPDATA%\\Azahar",
+                                    "%APPDATA%\\Lime3DS",
+                                    "%APPDATA%\\Citra"
+                                ]
+                  },
+    "variables":  [
+                      {
+                          "name":  "user",
+                          "label":  "Azahar / Lime3DS / Citra user folder",
+                          "candidates":  [
+                                             "%APPDATA%\\Azahar",
+                                             "%APPDATA%\\Lime3DS",
+                                             "%APPDATA%\\Citra"
+                                         ]
+                      }
+                  ],
+    "locations":  [
+                      {
+                          "label":  "Save data (SD card)",
+                          "path":  "<user>\\sdmc\\Nintendo 3DS"
+                      },
+                      {
+                          "label":  "Save states",
+                          "path":  "<user>\\states",
+                          "default_enabled":  false,
+                          "note":  "Tied to the exact emulator version: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "The SD card tree contains console-specific folder names: another PC or console finds the saves only with the same console id (copy the user folder once)."
+                 ],
+    "notes":  "Portable builds keep the user folder next to the exe: pick the right location in More.",
+    "confidence":  "medium",
+    "verified":  "2026-10-29"
+}

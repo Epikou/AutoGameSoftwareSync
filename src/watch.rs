@@ -656,6 +656,10 @@ impl<'a> Watcher<'a> {
         if n > 0 {
             self.log.log(&format!("{} dossier(s) de travail local orphelin(s) supprime(s)", n));
         }
+        // Version de CETTE machine restee sans meta.json dans le coffre apres un arret brutal : retiree (jamais une version complete).
+        if let Some(d) = backup::cleanup_claimed(self.ctx, std::time::Duration::from_secs(600)) {
+            self.log.log(&format!("dossier de version incomplet de cette machine retire du coffre (arret brutal) : {}", d.display()));
+        }
         // Anomalies de la destination (signalees une seule fois, jamais supprimees).
         for g in self.games.clone() {
             let snap = crate::cloud::scan_dest(&self.dest, &g);

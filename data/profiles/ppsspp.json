@@ -1,0 +1,36 @@
+{
+    "schema":  1,
+    "id":  "ppsspp",
+    "name":  "PPSSPP saves",
+    "category":  "emulator",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "PPSSPPWindows64.exe",
+                                   "PPSSPPWindows.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\PPSSPP\\PSP"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "Save data",
+                          "path":  "%DOCUMENTS%\\PPSSPP\\PSP\\SAVEDATA"
+                      },
+                      {
+                          "label":  "Save states",
+                          "path":  "%DOCUMENTS%\\PPSSPP\\PSP\\PPSSPP_STATE",
+                          "default_enabled":  false,
+                          "note":  "Can be large: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "Save data is the same on PC and Android (same memory stick layout): do not play on two devices at the same time."
+                 ],
+    "notes":  "Portable installs keep the memory stick next to the exe (memstick\\PSP): pick the right location in More.",
+    "confidence":  "medium",
+    "verified":  "2026-10-29"
+}

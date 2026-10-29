@@ -11,6 +11,7 @@ pub mod cloudpoll;
 pub mod config;
 pub mod detect;
 pub mod dirwatch;
+pub mod emulators;
 pub mod gamepad;
 #[cfg(windows)]
 pub mod gamepad_sys;
@@ -46,6 +47,8 @@ pub mod procfacts;
 pub mod profiles;
 pub mod profiles_data;
 pub mod reactive;
+#[cfg(target_os = "android")]
+pub mod rfd_shim;
 #[cfg(windows)]
 pub mod registry;
 pub mod proton;

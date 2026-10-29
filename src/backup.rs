@@ -214,6 +214,9 @@ pub fn cleanup_local_tmp(ctx: &Ctx, min_age: std::time::Duration) -> usize {
     if let Ok(rd) = std::fs::read_dir(&root) {
         for e in rd.filter_map(|e| e.ok()) {
             let p = e.path();
+            if p == claimed_file(ctx) || !p.is_dir() {
+                continue; // note du dossier reserve : traitee par cleanup_claimed
+            }
             let old = e.metadata().and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).map(|d| d >= min_age).unwrap_or(false);
             if old && p.starts_with(&root) && std::fs::remove_dir_all(&p).is_ok() {
                 n += 1;
@@ -221,6 +224,34 @@ pub fn cleanup_local_tmp(ctx: &Ctx, min_age: std::time::Duration) -> usize {
         }
     }
     n
+}
+
+/// Note du dossier de version RESERVE dans le dossier partage pendant son ecriture (chemin complet, une ligne) : ecrite
+/// des que le dossier est cree, retiree une fois `meta.json` ecrit. Si le processus meurt entre les deux (arret brutal,
+/// batterie), `cleanup_claimed` retire ce dossier incomplet au demarrage suivant.
+fn claimed_file(ctx: &Ctx) -> PathBuf {
+    local_tmp_root(ctx).join("claimed.txt")
+}
+
+/// Retire, au demarrage, le dossier de version reste incomplet apres un arret brutal de CE programme (note par
+/// `claimed_file`). Conditions, toutes obligatoires : le dossier est note, il existe, il porte le nom de cette machine,
+/// il est directement sous un dossier `saves/`, il n'a PAS de `meta.json` (jamais une version complete), et il n'a pas
+/// bouge depuis `min_age` (un autre processus de la meme machine pourrait encore y ecrire). La note est retiree des
+/// qu'elle ne designe plus un dossier incomplet de cette machine. Retourne le dossier supprime.
+pub fn cleanup_claimed(ctx: &Ctx, min_age: std::time::Duration) -> Option<PathBuf> {
+    let file = claimed_file(ctx);
+    let text = std::fs::read_to_string(&file).ok()?;
+    let p = PathBuf::from(text.lines().next().unwrap_or("").trim());
+    let name = p.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
+    let mine = name.contains(&format!("-{}", util::sanitize(&ctx.machine)));
+    let under_saves = p.parent().and_then(|d| d.file_name()).map(|n| n == cloud::SAVES_DIR).unwrap_or(false);
+    let incomplete = p.is_dir() && !p.join("meta.json").exists();
+    let old = min_age.is_zero() || std::fs::metadata(&p).and_then(|m| m.modified()).ok().and_then(|t| t.elapsed().ok()).map(|d| d >= min_age).unwrap_or(false);
+    let removed = if mine && under_saves && incomplete && old && std::fs::remove_dir_all(&p).is_ok() { Some(p) } else { None };
+    if removed.is_some() || !incomplete || !mine || !under_saves {
+        let _ = std::fs::remove_file(&file);
+    }
+    removed
 }
 
 /// Cree une sauvegarde (dossier unique) a partir de `game.path`. `parent` : version de base ;
@@ -334,6 +365,7 @@ fn create_version_ex(ctx: &Ctx, game: &Game, dest: &Path, snap: &Snapshot, from:
             }
         };
         claimed = Some(final_dir.clone());
+        let _ = std::fs::write(claimed_file(ctx), final_dir.to_string_lossy().as_bytes());
         if let Some(p) = &ctx.progress {
             p.lock(); // on ecrit dans le dossier partage : plus d'annulation
             p.begin(perf::Phase::Write, meta.files.len() as u64, total_bytes);
@@ -346,6 +378,7 @@ fn create_version_ex(ctx: &Ctx, game: &Game, dest: &Path, snap: &Snapshot, from:
         }
         op.step("ecriture dans le dossier partage (copie + relecture)");
         store::write_new(&final_dir.join("meta.json"), meta_json.as_bytes())?;
+        let _ = std::fs::remove_file(claimed_file(ctx));
         Ok(())
     })();
     let _ = std::fs::remove_dir_all(&tmp); // notre dossier de travail local
@@ -355,6 +388,7 @@ fn create_version_ex(ctx: &Ctx, game: &Game, dest: &Path, snap: &Snapshot, from:
             if !d.join("meta.json").exists() && d.parent() == Some(saves.as_path()) {
                 let _ = std::fs::remove_dir_all(d);
             }
+            let _ = std::fs::remove_file(claimed_file(ctx));
         }
         return Err(e);
     }

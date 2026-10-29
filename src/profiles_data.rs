@@ -1,9 +1,11 @@
 //! Profils embarques (genere : un fichier par profil dans data/profiles/).
 pub static EMBEDDED: &[(&str, &str)] = &[
+    ("azahar.json", include_str!("../data/profiles/azahar.json")),
     ("baldurs-gate-3.json", include_str!("../data/profiles/baldurs-gate-3.json")),
     ("blender-preferences.json", include_str!("../data/profiles/blender-preferences.json")),
     ("cities-skylines.json", include_str!("../data/profiles/cities-skylines.json")),
     ("dark-souls-3.json", include_str!("../data/profiles/dark-souls-3.json")),
+    ("dolphin.json", include_str!("../data/profiles/dolphin.json")),
     ("duckstation.json", include_str!("../data/profiles/duckstation.json")),
     ("elden-ring.json", include_str!("../data/profiles/elden-ring.json")),
     ("factorio.json", include_str!("../data/profiles/factorio.json")),
@@ -16,6 +18,7 @@ pub static EMBEDDED: &[(&str, &str)] = &[
     ("path-of-exile-2.json", include_str!("../data/profiles/path-of-exile-2.json")),
     ("path-of-exile.json", include_str!("../data/profiles/path-of-exile.json")),
     ("pcsx2.json", include_str!("../data/profiles/pcsx2.json")),
+    ("ppsspp.json", include_str!("../data/profiles/ppsspp.json")),
     ("powershell-profile.json", include_str!("../data/profiles/powershell-profile.json")),
     ("project-zomboid.json", include_str!("../data/profiles/project-zomboid.json")),
     ("retroarch.json", include_str!("../data/profiles/retroarch.json")),

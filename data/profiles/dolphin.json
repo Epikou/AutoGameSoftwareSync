@@ -1,0 +1,39 @@
+{
+    "schema":  1,
+    "id":  "dolphin",
+    "name":  "Dolphin saves",
+    "category":  "emulator",
+    "version":  "1.0.0",
+    "author":  "AutoGameSoftwareSync",
+    "license":  "CC0-1.0",
+    "detection":  {
+                      "exes":  [
+                                   "Dolphin.exe"
+                               ],
+                      "paths":  [
+                                    "%DOCUMENTS%\\Dolphin Emulator"
+                                ]
+                  },
+    "locations":  [
+                      {
+                          "label":  "GameCube memory cards",
+                          "path":  "%DOCUMENTS%\\Dolphin Emulator\\GC"
+                      },
+                      {
+                          "label":  "Wii saves",
+                          "path":  "%DOCUMENTS%\\Dolphin Emulator\\Wii\\title"
+                      },
+                      {
+                          "label":  "Save states",
+                          "path":  "%DOCUMENTS%\\Dolphin Emulator\\StateSaves",
+                          "default_enabled":  false,
+                          "note":  "Large and tied to the exact Dolphin version: unticked by default."
+                      }
+                  ],
+    "warnings":  [
+                     "A GameCube memory card is one file: do not play on two devices at the same time."
+                 ],
+    "notes":  "Portable mode (portable.txt next to the exe) keeps User\\GC and User\\Wii next to the exe: pick the right location in More.",
+    "confidence":  "medium",
+    "verified":  "2026-10-29"
+}

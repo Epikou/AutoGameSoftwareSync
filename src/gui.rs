@@ -12,6 +12,9 @@ use crate::settings::{BigChoice, ThemeMode};
 use crate::vm::{self, AppModel, Confirm, GameStatus, Level, LogEntry, LogFilter, Page, ThemeProbe};
 use crate::watch::{self, InstanceLock, Logger, WatchCfg, WatchEvent, Watcher};
 use crate::{actions, backup, winutil, Ctx};
+// Android : aucune boite de dialogue systeme (voir rfd_shim.rs) ; les modules de l'interface importent `super::*`.
+#[cfg(target_os = "android")]
+use crate::rfd_shim as rfd;
 use eframe::egui::{self, Color32, RichText};
 use std::collections::HashMap;
 use std::path::PathBuf;
