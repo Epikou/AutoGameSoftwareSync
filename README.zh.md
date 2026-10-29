@@ -104,6 +104,12 @@
 
 **[下载 Playnite 扩展](https://github.com/Epikou/AutoGameSoftwareSync-Playnite/releases/latest)** · [了解更多](https://github.com/Epikou/AutoGameSoftwareSync-Playnite)
 
+## Android 掌机（预览版）
+
+适用于 Android 掌机（Retroid、AYN Odin、Ayaneo……）的 0.1.0 预览版，需要 Android 11 或更高版本，支持触屏和内置手柄：通过同一个保管库与电脑共享模拟器存档（RetroArch、PPSSPP、DuckStation、NetherSX2……）和个人文件夹。保管库是由其他应用保持同步的文件夹（推荐 Syncthing）。打开应用或点击「同步」按钮时进行同步；不在后台运行，来自其他设备的版本只有在你确认后才会恢复。尚未在真实掌机上测试：欢迎反馈。
+
+**[下载 Android 预览版（APK）](https://github.com/Epikou/AutoGameSoftwareSync/releases/tag/android-v0.1.0)** · [指南](docs/ANDROID.md)（法语）
+
 ## Linux / SteamOS
 
 同时提供 Linux 版本（x86_64）：SteamOS（Steam Deck、Legion Go S 等）、Bazzite 和 Ubuntu。请从 [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) 页面下载 `AutoGameSoftwareSync-vX.Y.Z-linux-x86_64.tar.gz`，解压后运行 `install-linux.sh`（无需管理员权限）。通过同一个保险库，副本与 Windows 版完全兼容，包括通过 Proton 运行的 Windows 游戏。安装指南（法语）：[docs/LINUX.md](docs/LINUX.md)。

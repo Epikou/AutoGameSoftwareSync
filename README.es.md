@@ -104,6 +104,12 @@ La 2.0.0 es la primera versión con actualización automática: **instálala a m
 
 **[Descargar la extensión de Playnite](https://github.com/Epikou/AutoGameSoftwareSync-Playnite/releases/latest)** · [Más información](https://github.com/Epikou/AutoGameSoftwareSync-Playnite)
 
+## Consolas portátiles Android (versión preliminar)
+
+Versión preliminar 0.1.0 para consolas portátiles Android (Retroid, AYN Odin, Ayaneo...), Android 11 o posterior, táctil y con el mando integrado: las partidas guardadas de tus emuladores (RetroArch, PPSSPP, DuckStation, NetherSX2...) y tus carpetas personales, compartidas con tu PC a través del mismo cofre. El cofre es una carpeta sincronizada por otra aplicación (se recomienda Syncthing). Se sincroniza al abrir la aplicación o con el botón Sincronizar; nada funciona en segundo plano, y una versión de otro dispositivo solo se restaura tras tu confirmación. Aún no probada en una consola real: tus comentarios son bienvenidos.
+
+**[Descargar la versión preliminar para Android (APK)](https://github.com/Epikou/AutoGameSoftwareSync/releases/tag/android-v0.1.0)** · [Guía](docs/ANDROID.md) (en francés)
+
 ## Linux / SteamOS
 
 También hay una versión para Linux (x86_64): SteamOS (Steam Deck, Legion Go S...), Bazzite y Ubuntu. Descarga `AutoGameSoftwareSync-vX.Y.Z-linux-x86_64.tar.gz` desde la página de [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), extráelo y ejecuta `install-linux.sh` (no requiere permisos de administrador). Las copias son totalmente compatibles con la versión de Windows a través del mismo cofre, incluidos los juegos de Windows ejecutados con Proton. Guía de instalación (en francés): [docs/LINUX.md](docs/LINUX.md).

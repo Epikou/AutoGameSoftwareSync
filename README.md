@@ -104,6 +104,12 @@ Using Playnite? The free extension shows on each game page its protection state,
 
 **[Download the Playnite extension](https://github.com/Epikou/AutoGameSoftwareSync-Playnite/releases/latest)** · [More about it](https://github.com/Epikou/AutoGameSoftwareSync-Playnite)
 
+## Android handhelds (preview)
+
+Preview 0.1.0 for Android handhelds (Retroid, AYN Odin, Ayaneo...), Android 11 or newer, touch and built-in controller: your emulator saves (RetroArch, PPSSPP, DuckStation, NetherSX2...) and personal folders, shared with your PC through the same vault. The vault is a folder kept in sync by another app (Syncthing recommended). Syncs when you open the app or tap Sync; nothing runs in the background, and a version from another device is only put back after you confirm. Not tested on a real handheld yet: feedback welcome.
+
+**[Download the Android preview (APK)](https://github.com/Epikou/AutoGameSoftwareSync/releases/tag/android-v0.1.0)** · [Guide](docs/ANDROID.md)
+
 ## Linux / SteamOS
 
 A Linux build (x86_64) is available too: SteamOS (Steam Deck, Legion Go S...), Bazzite and Ubuntu. Download `AutoGameSoftwareSync-vX.Y.Z-linux-x86_64.tar.gz` from the [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest) page, extract it and run `install-linux.sh` (no administrator rights needed). Copies are fully compatible with the Windows version through the same vault, including Windows games run with Proton. Installation guide (in French): [docs/LINUX.md](docs/LINUX.md).

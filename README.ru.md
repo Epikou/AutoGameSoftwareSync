@@ -104,6 +104,12 @@
 
 **[Скачать расширение для Playnite](https://github.com/Epikou/AutoGameSoftwareSync-Playnite/releases/latest)** · [Подробнее](https://github.com/Epikou/AutoGameSoftwareSync-Playnite)
 
+## Портативные консоли на Android (предварительная версия)
+
+Предварительная версия 0.1.0 для портативных консолей на Android (Retroid, AYN Odin, Ayaneo...), Android 11 или новее, сенсорный экран и встроенный геймпад: сохранения эмуляторов (RetroArch, PPSSPP, DuckStation, NetherSX2...) и личные папки, общие с ПК через тот же сейф. Сейф — это папка, синхронизируемая другим приложением (рекомендуется Syncthing). Синхронизация при открытии приложения или по кнопке «Синхронизировать»; в фоне ничего не работает, а версия с другого устройства восстанавливается только после подтверждения. На реальной консоли ещё не проверялась: отзывы приветствуются.
+
+**[Скачать предварительную версию для Android (APK)](https://github.com/Epikou/AutoGameSoftwareSync/releases/tag/android-v0.1.0)** · [Руководство](docs/ANDROID.md) (на французском)
+
 ## Linux / SteamOS
 
 Доступна и сборка для Linux (x86_64): SteamOS (Steam Deck, Legion Go S...), Bazzite и Ubuntu. Скачай `AutoGameSoftwareSync-vX.Y.Z-linux-x86_64.tar.gz` со страницы [Releases](https://github.com/Epikou/AutoGameSoftwareSync/releases/latest), распакуй архив и запусти `install-linux.sh` (права администратора не нужны). Копии полностью совместимы с версией для Windows через то же хранилище, включая игры Windows под Proton. Руководство по установке (на французском): [docs/LINUX.md](docs/LINUX.md).
